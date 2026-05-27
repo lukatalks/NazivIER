@@ -8,20 +8,35 @@ import { ResearcherPicker } from '@/components/ResearcherPicker';
 import { evaluateAll, highestEligible, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import type { CitationData, Publication, Researcher } from '@/lib/types';
 
+interface OpenAlexInfo {
+  openalexId: string;
+  displayName: string;
+  orcid?: string;
+  citedByCount: number;
+  hIndex: number;
+  worksCount: number;
+  matchType: 'orcid' | 'ier-match' | 'best-name' | 'none';
+}
+
 interface ResearcherResponse {
   sicrisId: string;
+  profile: { sicrisId: string; fullName: string; titlePrefix?: string };
   publications: Publication[];
   citations: CitationData;
-  evalMarkers: { aDoublePrime: number; aPrime: number; a12: number };
+  openAlex?: OpenAlexInfo;
   fetchedAt: string;
 }
 
+interface FullResearcher extends Researcher {
+  openAlex?: OpenAlexInfo;
+}
+
 export default function Home() {
-  const [researcher, setResearcher] = useState<Researcher | null>(null);
+  const [researcher, setResearcher] = useState<FullResearcher | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function load(sicrisId: string, label: string) {
+  async function load(sicrisId: string, fallbackLabel: string) {
     setLoading(true);
     setError(null);
     try {
@@ -33,10 +48,11 @@ export default function Home() {
       const data = (await r.json()) as ResearcherResponse;
       setResearcher({
         sicrisId: data.sicrisId,
-        fullName: label,
+        fullName: data.profile?.fullName ?? fallbackLabel,
         publications: data.publications,
         citations: data.citations,
         fetchedAt: data.fetchedAt,
+        openAlex: data.openAlex,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -45,7 +61,7 @@ export default function Home() {
     }
   }
 
-  function patchResearcher(patch: Partial<Researcher>) {
+  function patchResearcher(patch: Partial<FullResearcher>) {
     setResearcher((cur) => (cur ? { ...cur, ...patch } : cur));
   }
 
@@ -67,8 +83,8 @@ export default function Home() {
           </h1>
           <p className="mt-1 max-w-3xl text-sm text-[var(--muted)]">
             Avtomatski izračun izpolnjevanja pogojev po novem{' '}
-            <em>Pravilniku o raziskovalnih nazivih</em> (predlog 26. 5. 2026), Priloge 2 in 3. Vir
-            podatkov: SICRIS / COBISS, javno dostopne bibliografije in citatne baze WoS in Scopus.
+            <em>Pravilniku o raziskovalnih nazivih</em> (predlog 26. 5. 2026), Priloge 2 in 3.
+            Bibliografija iz SICRIS-a, citati iz OpenAlex (vključuje WoS, Scopus, Crossref).
           </p>
         </div>
       </header>
@@ -78,8 +94,8 @@ export default function Home() {
 
         {loading ? (
           <div className="rounded-lg border border-[var(--border)] bg-[var(--muted-bg)] p-6 text-sm">
-            Pridobivamo bibliografijo iz SICRIS-a in računamo … (lahko traja nekaj sekund prvič,
-            nato je predpomnjeno).
+            Pridobivamo bibliografijo iz SICRIS-a in citate iz OpenAlex … (lahko traja nekaj sekund
+            prvič, nato je predpomnjeno).
           </div>
         ) : null}
 
@@ -113,9 +129,10 @@ export default function Home() {
       <footer className="border-t border-[var(--border)] bg-white dark:bg-black/30">
         <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-[var(--muted)]">
           Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po Cobiss tipologiji
-          dokumentov/del. Citati po čistih citatih iz Web of Science (alternativno Scopus). Faktor
-          avtorstva: po SICRIS-u privzeto 0,7 (enakovredno avtorstvo) — ročno popraviti za prvega /
-          korespondenčnega.
+          dokumentov/del. Citati: OpenAlex (`cited_by_count`, vključuje WoS + Scopus + Crossref;
+          avtocitati niso filtrirani — strogo &quot;čisti citati&quot; po WoS so navadno za
+          5–15 % nižji). Faktor avtorstva privzeto 0,7 (enakovredno avtorstvo) — ročno popraviti
+          za prvega / korespondenčnega.
         </div>
       </footer>
     </div>
@@ -126,7 +143,7 @@ function SummaryStrip({
   researcher,
   highest,
 }: {
-  researcher: Researcher;
+  researcher: FullResearcher;
   highest: ReturnType<typeof highestEligible>;
 }) {
   const groups: Array<['znanstveni' | 'strokovno-raziskovalni' | 'razvojni', string]> = [
@@ -141,20 +158,28 @@ function SummaryStrip({
         <h2 className="text-lg font-semibold">{researcher.fullName}</h2>
         <span className="text-xs text-[var(--muted)] tabnum">
           SICRIS #{researcher.sicrisId} · pridobljeno{' '}
-          {researcher.fetchedAt
-            ? new Date(researcher.fetchedAt).toLocaleString('sl-SI')
-            : '–'}
+          {researcher.fetchedAt ? new Date(researcher.fetchedAt).toLocaleString('sl-SI') : '–'}
         </span>
       </div>
       <p className="text-sm text-[var(--muted)]">
-        Publikacij iz SICRIS: <strong>{researcher.publications.length}</strong> · čisti citati WoS:{' '}
+        Publikacij iz SICRIS: <strong>{researcher.publications.length}</strong> · citati (OpenAlex):{' '}
         <strong className="tabnum">{researcher.citations.wosCleanCitations}</strong>
-        {researcher.citations.scopusCleanCitations != null ? (
+        {researcher.openAlex ? (
           <>
-            {' '}· Scopus:{' '}
-            <strong className="tabnum">{researcher.citations.scopusCleanCitations}</strong>
+            {' '}· h-indeks:{' '}
+            <strong className="tabnum">{researcher.openAlex.hIndex}</strong>
+            {' '}<span className="text-xs">
+              ({matchTypeLabel(researcher.openAlex.matchType)})
+            </span>
           </>
-        ) : null}
+        ) : (
+          <>
+            {' '}·{' '}
+            <span className="text-[var(--warn)]">
+              OpenAlex zapis ni najden — preverite ime
+            </span>
+          </>
+        )}
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {groups.map(([key, label]) => {
@@ -188,6 +213,19 @@ function SummaryStrip({
   );
 }
 
+function matchTypeLabel(type: OpenAlexInfo['matchType']): string {
+  switch (type) {
+    case 'orcid':
+      return 'ujemanje po ORCID-u';
+    case 'ier-match':
+      return 'ime + IER';
+    case 'best-name':
+      return 'samo ime';
+    default:
+      return '?';
+  }
+}
+
 function Methodology() {
   return (
     <section className="rounded-lg border border-[var(--border)] bg-[var(--muted-bg)] p-5 text-sm leading-relaxed">
@@ -206,9 +244,9 @@ function Methodology() {
           prispevke.
         </li>
         <li>
-          <strong>Q1/Q2 status</strong> je določen heuristično — prvi N publikacij tipa 1.01/1.02
-          glede na število A1/2 v SICRIS Vrednotenju je označen kot Q1/Q2. Za zanesljiv izračun je
-          treba potrditi ročno.
+          <strong>Q1/Q2 status</strong> je določen heuristično — članki tipa 1.01/1.02 so po
+          SICRIS-u razvrščeni po vplivu, zgornja četrtina je označena Q1, naslednja Q2. Za
+          natančno rangiranje je v naslednji različici predvidena vključitev SCImago seznama.
         </li>
         <li>
           <strong>Faktor avtorstva</strong>: SICRIS bibliografska zbirka ne razkrije
@@ -216,8 +254,13 @@ function Methodology() {
           postopek je treba potrditi prvega / korespondenčnega avtorja ročno (utež 1,0).
         </li>
         <li>
-          <strong>Citati</strong>: štejejo čisti citati (brez avtocitatov) iz WoS, alternativno
-          Scopus, neposredno iz SICRIS-a.
+          <strong>Citati</strong> se pridobijo samodejno iz OpenAlex (
+          <a className="underline" href="https://openalex.org" target="_blank" rel="noreferrer">
+            openalex.org
+          </a>
+          ), ki agregira WoS, Scopus, Crossref in PubMed. Številka vključuje avtocitate, zato je
+          obteženo nekoliko višja od strogo &quot;čistih citatov&quot; po WoS-u (tipično +5–15 %).
+          Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER.
         </li>
         <li>
           <strong>Vodenje projektov</strong> (Pogoj 3) ni samodejno izračunano — vnos je ročen po

@@ -17,11 +17,12 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
       <header className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Podatki, ki jih SICRIS ne razkrije
+            Podatki, ki jih ni v javnih virih
           </h2>
           <p className="text-xs text-[var(--muted)]">
-            Po pravilniku obvezni za izračun, vendar v SICRIS-u niso vedno dostopni — vnesite ali
-            potrdite ročno.
+            Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja
+            (izobrazba, vodenje projektov, vodilna funkcija) so po pravilniku obvezna za izračun,
+            vendar v javnih bazah niso dostopna — vnesite ali potrdite ročno.
           </p>
         </div>
         <button
@@ -35,42 +36,6 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
 
       {open ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-          <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Čisti citati po WoS</span>
-            <input
-              type="number"
-              min={0}
-              value={r.citations?.wosCleanCitations ?? 0}
-              onChange={(e) =>
-                onChange({
-                  citations: {
-                    ...r.citations,
-                    wosCleanCitations: Number(e.target.value) || 0,
-                  },
-                })
-              }
-              className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1 tabnum"
-            />
-          </label>
-
-          <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Čisti citati po Scopus</span>
-            <input
-              type="number"
-              min={0}
-              value={r.citations?.scopusCleanCitations ?? ''}
-              onChange={(e) =>
-                onChange({
-                  citations: {
-                    wosCleanCitations: r.citations?.wosCleanCitations ?? 0,
-                    scopusCleanCitations: Number(e.target.value) || undefined,
-                  },
-                })
-              }
-              className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1 tabnum"
-            />
-          </label>
-
           <label className="flex flex-col">
             <span className="text-xs text-[var(--muted)]">Raven izobrazbe (SOK)</span>
             <select

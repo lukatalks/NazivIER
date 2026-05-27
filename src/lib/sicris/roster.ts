@@ -11,16 +11,34 @@ export interface RosterEntry {
   publicationCount?: number;
   /** Programme group code (0502-001, 0502-002, etc.) */
   programmeGroup?: string;
+  /** ORCID for direct OpenAlex lookup; falls back to name search if absent. */
+  orcid?: string;
 }
 
 export const IER_ROSTER_SEED: RosterEntry[] = [
   // Programme group leads + key researchers known from SICRIS org 656.
-  { sicrisId: '15636', fullName: 'dr. Damjan Kavaš', publicationCount: 292 },
-  { sicrisId: '15323', fullName: 'dr. Renata Slabe Erker', publicationCount: 328 },
-  { sicrisId: '24563', fullName: 'dr. Miroslav Verbič', publicationCount: 498 },
+  // ORCIDs verified via OpenAlex in May 2026.
+  {
+    sicrisId: '15636',
+    fullName: 'dr. Damjan Kavaš',
+    publicationCount: 292,
+    orcid: '0000-0003-1915-837X',
+  },
+  {
+    sicrisId: '15323',
+    fullName: 'dr. Renata Slabe Erker',
+    publicationCount: 328,
+    orcid: '0000-0003-2566-9563',
+  },
+  {
+    sicrisId: '24563',
+    fullName: 'dr. Miroslav Verbič',
+    publicationCount: 498,
+    orcid: '0000-0001-5506-0973',
+  },
   { sicrisId: '27501', fullName: 'dr. Matjaž Črnigoj', publicationCount: 209 },
   { sicrisId: '13617', fullName: 'dr. Janez Bešter', publicationCount: 150 },
-  { sicrisId: '33182', fullName: 'dr. Kaja Primc' },
+  { sicrisId: '33182', fullName: 'dr. Kaja Primc', orcid: '0000-0002-8372-3831' },
   // Programme-group leaders from the SICRIS organization detail page (656):
   // 0502-001 Skupina za mednarodno ekonomijo  — TBD
   // 0502-002 Skupina za gospodarski razvoj    — dr. Nika Murovec
