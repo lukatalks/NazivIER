@@ -55,10 +55,18 @@ function fmt(n: number, decimals = 2): string {
   });
 }
 
-/** Compute the equivalents sum and per-pub contributions for a researcher. */
+/** Compute the equivalents sum and per-pub contributions for a researcher.
+ *  Returns both the sum and per-publication breakdown (sorted descending by
+ *  contribution). Includes manual "extraAchievements" entries (PhD mentorships,
+ *  science awards, editorial-board roles, special-issue editorships) that have
+ *  no COBISS typology code — see types.ts for the rationale. Those entries
+ *  count at the bucket weight × 0.7 authorship factor (co-author/co-editor
+ *  baseline) and are not listed in the `contributions` table (they have no
+ *  publication record). They are added to the total only. */
 export function computeEquivalents(r: Researcher): {
   total: number;
   contributions: EquivalentContribution[];
+  extra: { weight10: number; weight05: number; weight03: number; subtotal: number };
 } {
   const contributions: EquivalentContribution[] = [];
   let total = 0;
@@ -75,9 +83,29 @@ export function computeEquivalents(r: Researcher): {
     });
     total += eq;
   }
-  // Sort descending by contribution so the UI shows top items first.
+
+  // Non-typology achievements (Annex 3, Pojasnila k merilom — text entries that
+  // appear in the weight table without a COBISS code). Each counts at its
+  // bucket weight × 0.7 (the conservative co-author/co-editor baseline).
+  const ex = r.extraAchievements ?? { weight10Count: 0, weight05Count: 0, weight03Count: 0 };
+  const baseline = 0.7;
+  const eqW10 = ex.weight10Count * 1.0 * baseline;
+  const eqW05 = ex.weight05Count * 0.5 * baseline;
+  const eqW03 = ex.weight03Count * 0.3 * baseline;
+  const extraSubtotal = eqW10 + eqW05 + eqW03;
+  total += extraSubtotal;
+
   contributions.sort((a, b) => b.equivalent - a.equivalent);
-  return { total, contributions };
+  return {
+    total,
+    contributions,
+    extra: {
+      weight10: eqW10,
+      weight05: eqW05,
+      weight03: eqW03,
+      subtotal: extraSubtotal,
+    },
+  };
 }
 
 function pickCitations(r: Researcher): {
@@ -96,11 +124,16 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   const c = criteriaFor(title);
   if (!c) throw new Error(`Unknown title: ${title}`);
 
-  const { total: totalEquivalents, contributions } = computeEquivalents(researcher);
+  const { total: totalEquivalents, contributions, extra } = computeEquivalents(researcher);
   const cit = pickCitations(researcher);
 
   // Pogoj 1: Objavljeni dosežki
   const pog1Pass = c.minEquivalents == null || totalEquivalents >= c.minEquivalents;
+  const extraNote =
+    extra.subtotal > 0
+      ? ` Vključuje ${fmt(extra.subtotal)} ekvivalentov ` +
+        `iz ročno vnesenih dosežkov brez tipologije (mentorstva, nagrade, uredništva).`
+      : '';
   const pog1: StandardResult = {
     name: 'Pogoj 1',
     description: 'Objavljeni dosežki',
@@ -110,7 +143,8 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
         ? `Ni zahtevan za ta naziv.`
         : `Doseženo ${fmt(totalEquivalents)} ekvivalentov ` +
           `(zahtevano ${c.minEquivalents}). ` +
-          `Vsota uteži × faktorja avtorstva za vse publikacije s tipologijo iz priloge 3.`,
+          `Vsota uteži × faktorja avtorstva za vse publikacije s tipologijo iz priloge 3.` +
+          extraNote,
   };
 
   // Pogoj 2: citati ALI vrednost projektov izven ARIS

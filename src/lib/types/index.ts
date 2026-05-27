@@ -75,8 +75,28 @@ export interface Researcher {
   leadership?: LeadershipRecord;
   /** Project value outside ARIS in FTE (Pogoj 2 alternative). */
   externalProjectsFte?: number;
+  /** Counts of achievements that count toward Pogoj 1 equivalents but have no
+   *  COBISS typology code, so they cannot come from the SICRIS bibliography
+   *  feed and must be entered manually. See Annex 3, Pojasnila k merilom (1). */
+  extraAchievements?: ExtraAchievements;
   /** Cached snapshot timestamp */
   fetchedAt?: string;
+}
+
+/** Manually-entered, non-typology achievements that contribute to equivalents.
+ *  Each is multiplied by the bucket weight (1.0 / 0.5 / 0.3) and the average
+ *  authorship factor 0.7 (researcher can flag any of them as first/sole-author
+ *  via the UI; for now we just multiply by 0.7 which matches a "co-mentor /
+ *  co-editor" type role — conservative and explicit). */
+export interface ExtraAchievements {
+  /** Weight 1.0: completed PhD mentorships + national/international science
+   *  awards (Zois, Zois recognition, Excellent in Science, intl research awards). */
+  weight10Count: number;
+  /** Weight 0.5: journal-editorial-board memberships + completed leadership of
+   *  domestic/foreign research projects/programmes (separate from project FTE). */
+  weight05Count: number;
+  /** Weight 0.3: special-issue editorships (uredništvo posebne številke). */
+  weight03Count: number;
 }
 
 export interface LeadershipRecord {

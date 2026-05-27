@@ -67,7 +67,10 @@
       "yearsInResearchSector": "Years in the research sector",
       "externalProjectsFte": "Value of non-ARIS projects (FTE)",
       "leadershipFte": "Cumulative led-projects value (FTE A)",
-      "leadershipYears": "Years in a leadership position"
+      "leadershipYears": "Years in a leadership position",
+      "weight10Count": "Weight-1.0 achievements without typology (completed PhD mentorships, Zois/international awards)",
+      "weight05Count": "Weight-0.5 achievements without typology (journal editorial board, completed leadership of research project/programme)",
+      "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)"
     }
   },
   "breakdownTitle": "Per-title breakdown",

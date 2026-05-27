@@ -120,6 +120,66 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
             />
           </label>
+
+          <label className="flex flex-col sm:col-span-2">
+            <span className="text-xs text-[var(--muted)]">{t('fields.weight10Count')}</span>
+            <input
+              type="number"
+              min={0}
+              max={500}
+              value={r.extraAchievements?.weight10Count ?? ''}
+              onChange={(e) =>
+                onChange({
+                  extraAchievements: {
+                    weight10Count: Number(e.target.value) || 0,
+                    weight05Count: r.extraAchievements?.weight05Count ?? 0,
+                    weight03Count: r.extraAchievements?.weight03Count ?? 0,
+                  },
+                })
+              }
+              className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
+            />
+          </label>
+
+          <label className="flex flex-col sm:col-span-2">
+            <span className="text-xs text-[var(--muted)]">{t('fields.weight05Count')}</span>
+            <input
+              type="number"
+              min={0}
+              max={500}
+              value={r.extraAchievements?.weight05Count ?? ''}
+              onChange={(e) =>
+                onChange({
+                  extraAchievements: {
+                    weight10Count: r.extraAchievements?.weight10Count ?? 0,
+                    weight05Count: Number(e.target.value) || 0,
+                    weight03Count: r.extraAchievements?.weight03Count ?? 0,
+                  },
+                })
+              }
+              className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
+            />
+          </label>
+
+          <label className="flex flex-col sm:col-span-2">
+            <span className="text-xs text-[var(--muted)]">{t('fields.weight03Count')}</span>
+            <input
+              type="number"
+              min={0}
+              max={500}
+              value={r.extraAchievements?.weight03Count ?? ''}
+              onChange={(e) =>
+                onChange({
+                  extraAchievements: {
+                    weight10Count: r.extraAchievements?.weight10Count ?? 0,
+                    weight05Count: r.extraAchievements?.weight05Count ?? 0,
+                    weight03Count: Number(e.target.value) || 0,
+                  },
+                })
+              }
+              className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
+            />
+          </label>
         </div>
       ) : null}
     </section>

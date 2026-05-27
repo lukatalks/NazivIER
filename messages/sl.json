@@ -67,7 +67,10 @@
       "yearsInResearchSector": "Let v raziskovalnem sektorju",
       "externalProjectsFte": "Vrednost projektov izven ARIS (FTE)",
       "leadershipFte": "Kum. vrednost vodenih projektov (FTE A)",
-      "leadershipYears": "Let v vodilni funkciji"
+      "leadershipYears": "Let v vodilni funkciji",
+      "weight10Count": "Dosežki uteži 1,0 brez tipologije (zaključena mentorstva pri doktoratu, Zoisova in mednarodne nagrade)",
+      "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
+      "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)"
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",

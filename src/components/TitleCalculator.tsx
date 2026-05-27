@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
 import { EvaluationCard } from '@/components/EvaluationCard';
@@ -94,21 +95,37 @@ export function TitleCalculator({ locale }: Props) {
       <StructuredData locale={locale} />
 
       <header className="border-b border-[var(--border)] bg-white dark:bg-black/30">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-5 sm:py-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">
-                {t('header.eyebrow')}
-              </p>
-              <h1 className="mt-1 text-xl sm:text-2xl font-semibold">{t('header.title')}</h1>
-            </div>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 sm:py-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <a
+              href="https://www.ier.si"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Inštitut za ekonomska raziskovanja"
+              className="shrink-0"
+            >
+              <Image
+                src="/brand/ier-logo.png"
+                alt="Inštitut za ekonomska raziskovanja / Institute for Economic Research"
+                width={376}
+                height={35}
+                priority
+                className="ier-logo"
+              />
+            </a>
             <LanguageSwitcher locale={locale} />
           </div>
-          <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
-            {t('header.subtitle1')}
-            <em>{t('header.subtitleEm')}</em>
-            {t('header.subtitle2')}
-          </p>
+          <div className="mt-4 sm:mt-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">
+              {t('header.eyebrow')}
+            </p>
+            <h1 className="mt-1 text-xl sm:text-2xl font-semibold">{t('header.title')}</h1>
+            <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
+              {t('header.subtitle1')}
+              <em>{t('header.subtitleEm')}</em>
+              {t('header.subtitle2')}
+            </p>
+          </div>
         </div>
       </header>
 
