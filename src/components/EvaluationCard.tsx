@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { authorshipLabel } from '@/lib/scoring/authorship';
@@ -11,26 +12,26 @@ interface Props {
   defaultExpanded?: boolean;
 }
 
-function fmt(n: number, decimals = 2): string {
-  return n.toLocaleString('sl-SI', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-}
-
 export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props) {
+  const t = useTranslations('evalCard');
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(defaultExpanded);
+
+  const numLocale = locale === 'sl' ? 'sl-SI' : 'en-GB';
+  const fmt = (n: number, decimals = 2) =>
+    n.toLocaleString(numLocale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
 
   return (
     <article
       className="rounded-lg border bg-white dark:bg-black/20"
-      style={{
-        borderColor: e.eligible ? 'var(--success)' : 'var(--border)',
-      }}
+      style={{ borderColor: e.eligible ? 'var(--success)' : 'var(--border)' }}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 p-5">
-        <div>
-          <div className="flex items-center gap-2">
+      <header className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold tabnum"
               style={{
@@ -38,34 +39,39 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
                 color: e.eligible ? 'var(--success)' : 'var(--muted)',
               }}
             >
-              {e.eligible ? '✓ Izvolljiv' : '✗ Ni izvolljiv'}
+              {e.eligible ? t('eligible') : t('ineligible')}
             </span>
             <span className="text-xs uppercase tracking-wide text-[var(--muted)]">
-              Karierna stopnja {e.stage}.
+              {t('stageLabel', { stage: e.stage })}
             </span>
           </div>
           <h3 className="mt-1 text-lg font-semibold">{e.groupLabel}</h3>
           <p className="text-sm text-[var(--muted)]">
-            Pogoji standardov: {e.standardsMet} / {e.standardsRequired} izpolnjenih · skupaj
-            ekvivalentov: <span className="tabnum">{fmt(e.totalEquivalents)}</span> · čisti citati
-            ({e.citationSource === 'none' ? 'ni podatka' : e.citationSource}):{' '}
-            <span className="tabnum">{e.citationsUsed}</span>
+            {t('standards', {
+              met: e.standardsMet,
+              required: e.standardsRequired,
+              eq: fmt(e.totalEquivalents),
+              source: e.citationSource === 'none' ? t('noData') : e.citationSource,
+              cit: e.citationsUsed,
+            })}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setExpanded((s) => !s)}
-          className="text-sm text-[var(--accent)] underline-offset-4 hover:underline"
+          className="shrink-0 text-sm text-[var(--accent)] underline-offset-4 hover:underline"
         >
-          {expanded ? 'Skrij obrazložitev' : 'Prikaži obrazložitev'}
+          {expanded ? t('hide') : t('show')}
         </button>
       </header>
 
       {expanded ? (
-        <div className="border-t border-[var(--border)] px-5 pb-5 pt-4">
+        <div className="border-t border-[var(--border)] px-4 sm:px-5 pb-5 pt-4">
           {e.blockingReasons.length > 0 ? (
             <div className="mb-4 rounded-md border border-[var(--danger)] bg-[var(--danger-bg)] px-3 py-2 text-sm">
-              <strong className="font-semibold text-[var(--danger)]">Razlogi neizvolljivosti:</strong>
+              <strong className="font-semibold text-[var(--danger)]">
+                {t('blockingReasonsTitle')}
+              </strong>
               <ul className="ml-5 list-disc">
                 {e.blockingReasons.map((r) => (
                   <li key={r}>{r}</li>
@@ -95,18 +101,18 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
           </div>
 
           <h4 className="mt-5 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Prispevek posameznih publikacij k ekvivalentom
+            {t('contributionsTitle')}
           </h4>
           <div className="mt-2 overflow-x-auto">
             <table className="w-full text-sm tabnum">
               <thead>
                 <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
-                  <th className="py-2 pr-4">Tip.</th>
-                  <th className="py-2 pr-4">Leto</th>
-                  <th className="py-2 pr-4">Naslov</th>
-                  <th className="py-2 pr-4">Utež</th>
-                  <th className="py-2 pr-4">Avtor.</th>
-                  <th className="py-2 pr-4 text-right">Ekv.</th>
+                  <th className="py-2 pr-4">{t('th.typology')}</th>
+                  <th className="py-2 pr-4">{t('th.year')}</th>
+                  <th className="py-2 pr-4">{t('th.title')}</th>
+                  <th className="py-2 pr-4">{t('th.weight')}</th>
+                  <th className="py-2 pr-4">{t('th.authorship')}</th>
+                  <th className="py-2 pr-4 text-right">{t('th.equivalent')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,7 +145,7 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
                 <tfoot>
                   <tr>
                     <td colSpan={6} className="py-2 text-xs text-[var(--muted)]">
-                      … in še {e.contributions.length - 50} publikacij (skrito zaradi dolžine).
+                      {t('moreHidden', { count: e.contributions.length - 50 })}
                     </td>
                   </tr>
                 </tfoot>

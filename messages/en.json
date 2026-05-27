@@ -1,0 +1,129 @@
+{
+  "site": {
+    "title": "NazivIER — IER researcher-title calculator",
+    "shortTitle": "NazivIER",
+    "description": "Internal tool of the Institute for Economic Research (IER, Ljubljana) for automatic calculation of researcher titles under the new rulebook, powered by SICRIS and OpenAlex.",
+    "ogDescription": "Automatic title-eligibility check under the IER researcher-titles rulebook (draft 26 May 2026). Bibliography from SICRIS, citations from OpenAlex."
+  },
+  "header": {
+    "eyebrow": "Institute for Economic Research · internal tool",
+    "title": "NazivIER — researcher-title calculator",
+    "subtitle1": "Automatic eligibility check against the new ",
+    "subtitleEm": "Rulebook on researcher titles",
+    "subtitle2": " (draft 26 May 2026), Annexes 2 and 3. Bibliography from SICRIS, citations from OpenAlex (covers WoS, Scopus, Crossref)."
+  },
+  "picker": {
+    "selectFromList": "1. Pick an IER researcher",
+    "selectFromListHint1": "Roster sourced from ",
+    "selectFromListHint2": " (",
+    "selectFromListHintCount": "{count, plural, one {# researcher} other {# researchers}}",
+    "selectFromListHint3": ").",
+    "pasteUrl": "or 2. Paste a SICRIS URL / enter an ID",
+    "pasteUrlHint1": "Numeric ID or a full ",
+    "pasteUrlHintCode": "cris.cobiss.net",
+    "pasteUrlHint2": " URL.",
+    "calculate": "Calculate",
+    "invalidInput": "Enter a valid SICRIS ID (e.g. 33182) or profile URL.",
+    "sicrisIdLabel": "SICRIS #{id}",
+    "publicationsLabel": "{count} publications"
+  },
+  "loading": "Fetching bibliography from SICRIS and citations from OpenAlex … (a few seconds on first request, cached after).",
+  "error": {
+    "label": "Data fetch error:"
+  },
+  "summary": {
+    "fetchedAt": "SICRIS #{id} · fetched {date}",
+    "publicationsFromSicris": "Publications in SICRIS",
+    "citationsOpenAlex": "citations (OpenAlex)",
+    "hIndex": "h-index",
+    "openAlexNotFound": "OpenAlex record not found — please verify the name",
+    "groups": {
+      "znanstveni": "Scientific",
+      "strokovno-raziskovalni": "Professional-research",
+      "razvojni": "Development"
+    },
+    "notEligible": "— below the sodelavec threshold —",
+    "stageStandards": "Stage {stage}. · {met}/{required} standards · equiv.: {eq}",
+    "matchType": {
+      "orcid": "matched by ORCID",
+      "ier-match": "name + IER",
+      "best-name": "name only",
+      "none": "no match"
+    }
+  },
+  "metadata": {
+    "title": "Data not exposed by public sources",
+    "subtitle": "Bibliography and citations are fetched automatically (SICRIS + OpenAlex). The fields below are required by the rulebook but not available in public databases — enter or confirm manually.",
+    "open": "Edit",
+    "close": "Close",
+    "fields": {
+      "educationLevel": "Education level (SOK)",
+      "educationOptions": {
+        "none": "–",
+        "8": "Level 8 (professional master's)",
+        "9": "Level 9 (academic master's)",
+        "10": "Level 10 (doctorate)"
+      },
+      "yearsInResearchSector": "Years in the research sector",
+      "externalProjectsFte": "Value of non-ARIS projects (FTE)",
+      "leadershipFte": "Cumulative led-projects value (FTE A)",
+      "leadershipYears": "Years in a leadership position"
+    }
+  },
+  "breakdownTitle": "Per-title breakdown",
+  "evalCard": {
+    "eligible": "✓ Eligible",
+    "ineligible": "✗ Not eligible",
+    "stageLabel": "Career stage {stage}.",
+    "standards": "Standards: {met} / {required} met · total equivalents: {eq} · citations ({source}): {cit}",
+    "show": "Show breakdown",
+    "hide": "Hide breakdown",
+    "blockingReasonsTitle": "Blocking reasons:",
+    "contributionsTitle": "Per-publication contribution to equivalents",
+    "th": {
+      "typology": "Typ.",
+      "year": "Year",
+      "title": "Title",
+      "weight": "Weight",
+      "authorship": "Auth.",
+      "equivalent": "Equiv."
+    },
+    "moreHidden": "… and {count} more publications (hidden for length).",
+    "noData": "no data"
+  },
+  "methodology": {
+    "title": "Methodology",
+    "items": {
+      "equivalent": {
+        "head": "Achievement equivalent",
+        "body": " = achievement weight × authorship factor (Rulebook, Annex 3, Notes on criteria)."
+      },
+      "weights": {
+        "head": "Weights",
+        "body": " follow Annex 3: 1.0 for Q1/Q2 articles (1A1/1A2 in COBISS), monographs, patents; 0.7 for other peer-reviewed articles; 0.5 for invited abstracts and professional monographs; 0.3 for professional articles and reports; 0.1 for popular contributions."
+      },
+      "q12": {
+        "head": "Q1/Q2 status",
+        "body": " is heuristic for now: 1.01/1.02 publications are sorted by impact via SICRIS, the top quartile is tagged Q1 and the next Q2. A SCImago ISSN lookup is planned for the next version."
+      },
+      "authorship": {
+        "head": "Authorship factor",
+        "body": ": SICRIS bibliography export does not expose the corresponding author, so default is 0.7 (equal authorship). For an actual promotion application, the corresponding author should be confirmed manually (weight 1.0)."
+      },
+      "citations": {
+        "head": "Citations",
+        "body": " are auto-fetched from OpenAlex (openalex.org), which aggregates WoS, Scopus, Crossref, and PubMed. Self-citations are included, so values are typically 5–15 % higher than strict WoS clean citations. Lookup goes by ORCID first, then by name filtered by the IER institution."
+      },
+      "leadership": {
+        "head": "Project leadership",
+        "body": " (Standard 3) is not auto-computed — entered manually using the ARIS Category-A FTE convention."
+      }
+    }
+  },
+  "footer": "Methodology per the rulebook of 26 May 2026, Annex 3. Typology per the COBISS typology of documents/works. Citations: OpenAlex (covers WoS + Scopus + Crossref). Authorship factor defaults to 0.7 (equal authorship) — set to 1.0 for first / corresponding author per publication.",
+  "languageSwitcher": {
+    "label": "Language",
+    "sl": "Slovenščina",
+    "en": "English"
+  }
+}

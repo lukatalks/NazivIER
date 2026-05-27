@@ -1,0 +1,129 @@
+{
+  "site": {
+    "title": "NazivIER — kalkulator raziskovalnih nazivov IER",
+    "shortTitle": "NazivIER",
+    "description": "Interno orodje Inštituta za ekonomska raziskovanja za samodejen izračun raziskovalnih nazivov po novem pravilniku, na podlagi podatkov iz SICRIS in OpenAlex.",
+    "ogDescription": "Avtomatski izračun pogojev za izvolitev v raziskovalni naziv po pravilniku IER (predlog 26. 5. 2026). Bibliografija iz SICRIS, citati iz OpenAlex."
+  },
+  "header": {
+    "eyebrow": "Inštitut za ekonomska raziskovanja · interno orodje",
+    "title": "NazivIER — kalkulator raziskovalnih nazivov",
+    "subtitle1": "Avtomatski izračun izpolnjevanja pogojev po novem ",
+    "subtitleEm": "Pravilniku o raziskovalnih nazivih",
+    "subtitle2": " (predlog 26. 5. 2026), Priloge 2 in 3. Bibliografija iz SICRIS-a, citati iz OpenAlex (vključuje WoS, Scopus, Crossref)."
+  },
+  "picker": {
+    "selectFromList": "1. Izberi raziskovalca z IER",
+    "selectFromListHint1": "Seznam je pridobljen z ",
+    "selectFromListHint2": " (",
+    "selectFromListHintCount": "{count, plural, =1 {# raziskovalec} few {# raziskovalci} other {# raziskovalcev}}",
+    "selectFromListHint3": ").",
+    "pasteUrl": "ali 2. Prilepi SICRIS URL / vnesi ID",
+    "pasteUrlHint1": "Sprejemamo številčni ID ali poln URL z ",
+    "pasteUrlHintCode": "cris.cobiss.net",
+    "pasteUrlHint2": ".",
+    "calculate": "Izračunaj",
+    "invalidInput": "Vnesite veljaven SICRIS ID (npr. 33182) ali URL profila.",
+    "sicrisIdLabel": "SICRIS #{id}",
+    "publicationsLabel": "{count} publikacij"
+  },
+  "loading": "Pridobivamo bibliografijo iz SICRIS-a in citate iz OpenAlex … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
+  "error": {
+    "label": "Napaka pri pridobivanju podatkov:"
+  },
+  "summary": {
+    "fetchedAt": "SICRIS #{id} · pridobljeno {date}",
+    "publicationsFromSicris": "Publikacij iz SICRIS",
+    "citationsOpenAlex": "citati (OpenAlex)",
+    "hIndex": "h-indeks",
+    "openAlexNotFound": "OpenAlex zapis ni najden — preverite ime",
+    "groups": {
+      "znanstveni": "Znanstveni",
+      "strokovno-raziskovalni": "Strokovno-raziskovalni",
+      "razvojni": "Razvojni"
+    },
+    "notEligible": "— ne dosega praga sodelavca —",
+    "stageStandards": "Stopnja {stage}. · {met}/{required} standardov · ekv.: {eq}",
+    "matchType": {
+      "orcid": "ujemanje po ORCID-u",
+      "ier-match": "ime + IER",
+      "best-name": "samo ime",
+      "none": "ni ujemanja"
+    }
+  },
+  "metadata": {
+    "title": "Podatki, ki jih ni v javnih virih",
+    "subtitle": "Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja so po pravilniku obvezna za izračun, vendar v javnih bazah niso dostopna — vnesite ali potrdite ročno.",
+    "open": "Uredi",
+    "close": "Zapri",
+    "fields": {
+      "educationLevel": "Raven izobrazbe (SOK)",
+      "educationOptions": {
+        "none": "–",
+        "8": "8. raven (mag. stroke)",
+        "9": "9. raven (mag. znanosti)",
+        "10": "10. raven (doktorat)"
+      },
+      "yearsInResearchSector": "Let v raziskovalnem sektorju",
+      "externalProjectsFte": "Vrednost projektov izven ARIS (FTE)",
+      "leadershipFte": "Kum. vrednost vodenih projektov (FTE A)",
+      "leadershipYears": "Let v vodilni funkciji"
+    }
+  },
+  "breakdownTitle": "Razčlenitev po nazivih",
+  "evalCard": {
+    "eligible": "✓ Izvolljiv",
+    "ineligible": "✗ Ni izvolljiv",
+    "stageLabel": "Karierna stopnja {stage}.",
+    "standards": "Pogoji standardov: {met} / {required} izpolnjenih · skupaj ekvivalentov: {eq} · čisti citati ({source}): {cit}",
+    "show": "Prikaži obrazložitev",
+    "hide": "Skrij obrazložitev",
+    "blockingReasonsTitle": "Razlogi neizvolljivosti:",
+    "contributionsTitle": "Prispevek posameznih publikacij k ekvivalentom",
+    "th": {
+      "typology": "Tip.",
+      "year": "Leto",
+      "title": "Naslov",
+      "weight": "Utež",
+      "authorship": "Avtor.",
+      "equivalent": "Ekv."
+    },
+    "moreHidden": "… in še {count} publikacij (skrito zaradi dolžine).",
+    "noData": "ni podatka"
+  },
+  "methodology": {
+    "title": "Metodologija",
+    "items": {
+      "equivalent": {
+        "head": "Ekvivalent dosežka",
+        "body": " = utež dosežka × faktor avtorstva (Pravilnik, Priloga 3, Pojasnila k merilom)."
+      },
+      "weights": {
+        "head": "Uteži",
+        "body": " sledijo tabeli v Prilogi 3: 1,0 za Q1/Q2 članke (1A1/1A2 v COBISS), monografije, patente; 0,7 za druge znanstvene članke; 0,5 za vabljene povzetke in strokovne monografije; 0,3 za strokovne članke in elaborate; 0,1 za poljudne prispevke."
+      },
+      "q12": {
+        "head": "Q1/Q2 status",
+        "body": " je določen heuristično — članki tipa 1.01/1.02 so po SICRIS-u razvrščeni po vplivu, zgornja četrtina je označena Q1, naslednja Q2. Za natančno rangiranje je v naslednji različici predvidena vključitev SCImago seznama."
+      },
+      "authorship": {
+        "head": "Faktor avtorstva",
+        "body": ": SICRIS bibliografska zbirka ne razkrije korespondenčnega avtorja, zato je privzeto 0,7 (enakovredno avtorstvo). Za izvolitveni postopek je treba potrditi prvega / korespondenčnega avtorja ročno (utež 1,0)."
+      },
+      "citations": {
+        "head": "Citati",
+        "body": " se pridobijo samodejno iz OpenAlex (openalex.org), ki agregira WoS, Scopus, Crossref in PubMed. Številka vključuje avtocitate, zato je nekoliko višja od strogo »čistih citatov« po WoS-u (tipično +5–15 %). Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
+      },
+      "leadership": {
+        "head": "Vodenje projektov",
+        "body": " (Pogoj 3) ni samodejno izračunano — vnos je ročen po opredelitvah ARIS o kategoriji A FTE."
+      }
+    }
+  },
+  "footer": "Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po COBISS tipologiji dokumentov/del. Citati: OpenAlex (vključuje WoS + Scopus + Crossref). Faktor avtorstva privzeto 0,7 (enakovredno avtorstvo) — ročno popraviti za prvega / korespondenčnega.",
+  "languageSwitcher": {
+    "label": "Jezik",
+    "sl": "Slovenščina",
+    "en": "English"
+  }
+}

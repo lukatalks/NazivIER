@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import type { EducationLevel, Researcher } from '@/lib/types';
@@ -10,52 +11,51 @@ interface Props {
 }
 
 export function MetadataPanel({ researcher: r, onChange }: Props) {
+  const t = useTranslations('metadata');
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-[var(--muted-bg)] p-5">
-      <header className="flex items-center justify-between">
+    <section className="rounded-lg border border-[var(--border)] bg-[var(--muted-bg)] p-4 sm:p-5">
+      <header className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Podatki, ki jih ni v javnih virih
+            {t('title')}
           </h2>
-          <p className="text-xs text-[var(--muted)]">
-            Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja
-            (izobrazba, vodenje projektov, vodilna funkcija) so po pravilniku obvezna za izračun,
-            vendar v javnih bazah niso dostopna — vnesite ali potrdite ročno.
-          </p>
+          <p className="text-xs text-[var(--muted)]">{t('subtitle')}</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen((s) => !s)}
-          className="text-sm text-[var(--accent)] underline-offset-4 hover:underline"
+          className="shrink-0 text-sm text-[var(--accent)] underline-offset-4 hover:underline"
         >
-          {open ? 'Zapri' : 'Uredi'}
+          {open ? t('close') : t('open')}
         </button>
       </header>
 
       {open ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Raven izobrazbe (SOK)</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.educationLevel')}</span>
             <select
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
               value={r.educationLevel ?? ''}
               onChange={(e) =>
                 onChange({
-                  educationLevel: (Number(e.target.value) || undefined) as EducationLevel | undefined,
+                  educationLevel: (Number(e.target.value) || undefined) as
+                    | EducationLevel
+                    | undefined,
                 })
               }
             >
-              <option value="">–</option>
-              <option value="8">8. raven (mag. stroke)</option>
-              <option value="9">9. raven (mag. znanosti)</option>
-              <option value="10">10. raven (doktorat)</option>
+              <option value="">{t('fields.educationOptions.none')}</option>
+              <option value="8">{t('fields.educationOptions.8')}</option>
+              <option value="9">{t('fields.educationOptions.9')}</option>
+              <option value="10">{t('fields.educationOptions.10')}</option>
             </select>
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Let v raziskovalnem sektorju</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.yearsInResearchSector')}</span>
             <input
               type="number"
               min={0}
@@ -69,7 +69,7 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Vrednost projektov izven ARIS (FTE)</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.externalProjectsFte')}</span>
             <input
               type="number"
               step="0.1"
@@ -83,9 +83,7 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">
-              Kum. vrednost vodenih projektov (FTE A)
-            </span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.leadershipFte')}</span>
             <input
               type="number"
               step="0.1"
@@ -105,7 +103,7 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">Let v vodilni funkciji</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.leadershipYears')}</span>
             <input
               type="number"
               min={0}
