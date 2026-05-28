@@ -7,13 +7,21 @@
 //
 // Network calls are kept in this file; parsing in ./parser.ts.
 
-import { resolveAuthor, type OpenAlexAuthor } from '@/lib/openalex/client';
+import {
+  citationsExcludingSelf,
+  computeOpenScienceStats,
+  fetchAuthorWorks,
+  resolveAuthor,
+  type OpenAlexAuthor,
+  type OpenAlexWork,
+} from '@/lib/openalex/client';
+import { quartileForIssn } from '@/lib/scimago/quartiles';
 
 import { parseBibliographyJson } from './parser';
 import { fetchProfile, type SicrisProfile } from './profile';
 import { IER_ROSTER_SEED } from './roster';
 
-import type { CitationData, Publication } from '@/lib/types';
+import type { CitationData, JournalRank, OpenScienceCompliance, Publication } from '@/lib/types';
 
 const BIBLIO_BASE = 'https://bib.cobiss.net/biblioweb';
 
@@ -28,7 +36,9 @@ type SortKey =
   | 'TI'
   | 'AC';
 
-/** Fetch the COBISS-typed bibliography list (JSON). */
+/** Fetch the COBISS-typed bibliography list (JSON). Retries on 5xx with backoff
+ *  because SICRIS occasionally returns transient 500s — happens when the nginx
+ *  front blows out its session cache. Two retries (1.5s, 4s) are enough in practice. */
 export async function fetchBibliography(
   sicrisId: string,
   opts: { fromYear?: number; toYear?: number; sort?: SortKey } = {},
@@ -39,17 +49,39 @@ export async function fetchBibliography(
 
   const url = `${BIBLIO_BASE}/authorCobissList/si/slv/cris/${sicrisId}/${sort}/${from}/${to}`;
 
-  const res = await fetch(url, {
-    headers: { 'User-Agent': UA, Accept: 'application/json' },
-    next: { revalidate: 60 * 60 * 6 },
-  });
+  const delays = [0, 1500, 4000];
+  let lastErr: Error | null = null;
 
-  if (!res.ok) {
-    throw new Error(`SICRIS bibliography fetch failed (${res.status}) for ${sicrisId}`);
+  for (const delay of delays) {
+    if (delay > 0) await new Promise((r) => setTimeout(r, delay));
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': UA, Accept: 'application/json' },
+        next: { revalidate: 60 * 60 * 6 },
+      });
+
+      if (res.status >= 500 && res.status < 600) {
+        lastErr = new Error(`SICRIS bibliography ${res.status} (transient) for ${sicrisId}`);
+        continue;
+      }
+      if (!res.ok) {
+        throw new Error(`SICRIS bibliography fetch failed (${res.status}) for ${sicrisId}`);
+      }
+
+      const text = await res.text();
+      if (!text.trim()) {
+        // Empty body — SICRIS sometimes returns 200 with nothing when overloaded.
+        lastErr = new Error(`SICRIS returned empty body for ${sicrisId}`);
+        continue;
+      }
+      const raw = JSON.parse(text) as unknown;
+      return parseBibliographyJson(raw);
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+    }
   }
 
-  const raw = (await res.json()) as unknown;
-  return parseBibliographyJson(raw);
+  throw lastErr ?? new Error(`SICRIS bibliography fetch failed for ${sicrisId}`);
 }
 
 export interface ResearcherSnapshot {
@@ -57,6 +89,14 @@ export interface ResearcherSnapshot {
   publications: Publication[];
   citations: CitationData;
   openAlex?: OpenAlexAuthor;
+  openScienceCompliance?: OpenScienceCompliance;
+  /** Diagnostics for the UI: how citations were computed. */
+  citationDiagnostics?: {
+    rawTotal: number;
+    selfExcluded: number;
+    clean: number;
+    method: 'openalex-self-excluded' | 'openalex-raw';
+  };
 }
 
 /** All-in-one fetch used by the API route. */
@@ -72,16 +112,44 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     orcid: rosterEntry?.orcid,
   });
 
-  // Heuristic Q1/Q2 tagging: SICRIS bibliography JSON is pre-sorted by
-  // typology then citations desc, so for 1.01/1.02 we approximate
-  // top quartile -> Q1, next quartile -> Q2. Users can override per pub.
-  const tagged = tagJournalRanksHeuristic(publications);
+  // OpenAlex per-work data drives:
+  //   (a) Q1/Q2 quartile tagging via SCImago ISSN lookup
+  //   (b) Open Science compliance under Article 11(6)
+  //   (c) Self-citation exclusion (Article 13 — "čisti citati")
+  let works: OpenAlexWork[] = [];
+  if (author?.openalexId) {
+    try {
+      works = await fetchAuthorWorks(author.openalexId, 200);
+    } catch {
+      works = [];
+    }
+  }
+
+  const tagged = tagJournalRanks(publications, works);
+
+  // Compute Open Science compliance from author works (post-2024 OA ratio).
+  const osStats = works.length > 0 ? computeOpenScienceStats(works) : undefined;
+
+  // Self-citation-excluded total. Falls back to raw cited_by_count if the
+  // per-work pass fails.
+  let rawTotal = author?.citedByCount ?? 0;
+  let selfExcluded = 0;
+  let cleanTotal = rawTotal;
+  let method: 'openalex-self-excluded' | 'openalex-raw' = 'openalex-raw';
+  if (author?.openalexId && works.length > 0) {
+    try {
+      const r = await citationsExcludingSelf(works, author.openalexId);
+      rawTotal = r.total;
+      selfExcluded = r.self;
+      cleanTotal = r.clean;
+      method = 'openalex-self-excluded';
+    } catch {
+      /* fall through to raw count */
+    }
+  }
 
   const citations: CitationData = {
-    // We map OpenAlex's lifetime cited_by_count to the WoS-clean slot because
-    // the rulebook compares against a single citation threshold. OpenAlex includes
-    // self-citations, so the value tends to be 5–15 % higher than strict WoS-clean.
-    wosCleanCitations: author?.citedByCount ?? 0,
+    wosCleanCitations: cleanTotal,
   };
 
   return {
@@ -89,19 +157,65 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     publications: tagged,
     citations,
     openAlex: author ?? undefined,
+    openScienceCompliance: osStats,
+    citationDiagnostics: {
+      rawTotal,
+      selfExcluded,
+      clean: cleanTotal,
+      method,
+    },
   };
 }
 
-function tagJournalRanksHeuristic(publications: Publication[]): Publication[] {
-  const q12Candidates = publications.filter((p) => p.typology === '1.01' || p.typology === '1.02');
-  const q1Cutoff = Math.ceil(q12Candidates.length * 0.25);
-  const q2Cutoff = Math.ceil(q12Candidates.length * 0.5);
+/** Tag journal rank using SCImago ISSN lookup when an OpenAlex work matches
+ *  the SICRIS publication by title; falls back to the legacy heuristic when
+ *  no OpenAlex source ISSN is available. */
+function tagJournalRanks(publications: Publication[], works: OpenAlexWork[]): Publication[] {
+  // Build title → ISSN map from OpenAlex works.
+  const issnByTitle = new Map<string, string>();
+  for (const w of works) {
+    if (w.sourceIssn && w.title) {
+      issnByTitle.set(normalize(w.title), w.sourceIssn);
+    }
+  }
 
-  q12Candidates.forEach((p, idx) => {
+  let scimagoTagged = 0;
+  publications.forEach((p) => {
+    if (p.typology !== '1.01' && p.typology !== '1.02') return;
+    const issn = issnByTitle.get(normalize(p.title));
+    if (!issn) return;
+    const q = quartileForIssn(issn);
+    if (q) {
+      p.journalRank = q;
+      scimagoTagged++;
+    }
+  });
+
+  // For 1.01/1.02 publications still missing a rank, fall back to the
+  // top-quartile-by-sort heuristic so the calculator stays useful.
+  const untagged = publications.filter(
+    (p) => (p.typology === '1.01' || p.typology === '1.02') && !p.journalRank,
+  );
+  const q1Cutoff = Math.ceil(untagged.length * 0.25);
+  const q2Cutoff = Math.ceil(untagged.length * 0.5);
+  untagged.forEach((p, idx) => {
     if (idx < q1Cutoff) p.journalRank = 'Q1';
     else if (idx < q2Cutoff) p.journalRank = 'Q2';
     else p.journalRank = 'indexed-other';
   });
 
+  // Surface count via a non-enumerable hint? Not needed — we set journalRank.
+  void scimagoTagged;
   return publications;
 }
+
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+// Backward-compat export for any caller still importing the heuristic helper.
+export type { JournalRank };

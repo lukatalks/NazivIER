@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
     "next": "16.2.6",
     "next-intl": "^4.12.0",
     "node-html-parser": "^7.1.0",

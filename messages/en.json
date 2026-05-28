@@ -34,9 +34,11 @@
   "summary": {
     "fetchedAt": "SICRIS #{id} · fetched {date}",
     "publicationsFromSicris": "Publications in SICRIS",
-    "citationsOpenAlex": "citations (OpenAlex)",
+    "citationsOpenAlex": "clean citations",
     "hIndex": "h-index",
     "openAlexNotFound": "OpenAlex record not found — please verify the name",
+    "selfCitationsExcluded": "{self} self-citations excluded from {raw}",
+    "openScience": "open access {ratio}% ({count} post-2023 works)",
     "groups": {
       "znanstveni": "Scientific",
       "strokovno-raziskovalni": "Professional-research",
@@ -70,7 +72,9 @@
       "leadershipYears": "Years in a leadership position",
       "weight10Count": "Weight-1.0 achievements without typology (completed PhD mentorships, Zois/international awards)",
       "weight05Count": "Weight-0.5 achievements without typology (journal editorial board, completed leadership of research project/programme)",
-      "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)"
+      "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)",
+      "reelectionLabel": "Re-election (Article 22, paragraph 2)",
+      "reelectionHelp": "Tick if this is a re-election to the same title — the rulebook then requires at least half of every numeric threshold since the previous election."
     }
   },
   "breakdownTitle": "Per-title breakdown",
@@ -92,7 +96,11 @@
       "equivalent": "Equiv."
     },
     "moreHidden": "… and {count} more publications (hidden for length).",
-    "noData": "no data"
+    "noData": "no data",
+    "reelectionBadge": "Re-election (thresholds halved)",
+    "reelectionTooltip": "Article 22(2): on re-election to the same title the candidate must meet at least half of each first-election threshold.",
+    "earlyPromotionBadge": "Eligible for early promotion",
+    "openScienceFailBadge": "Open-Science requirement (11/6) not met"
   },
   "methodology": {
     "title": "Methodology",
@@ -107,19 +115,31 @@
       },
       "q12": {
         "head": "Q1/Q2 status",
-        "body": " is heuristic for now: 1.01/1.02 publications are sorted by impact via SICRIS, the top quartile is tagged Q1 and the next Q2. A SCImago ISSN lookup is planned for the next version."
+        "body": " is determined primarily via an embedded SCImago JR snapshot keyed by journal ISSN-L (economics, finance and adjacent journals). When the ISSN is not in the snapshot, we fall back to a heuristic: 1.01/1.02 publications are ranked by impact, the top quartile is tagged Q1, the next Q2."
       },
       "authorship": {
         "head": "Authorship factor",
         "body": ": SICRIS bibliography export does not expose the corresponding author, so default is 0.7 (equal authorship). For an actual promotion application, the corresponding author should be confirmed manually (weight 1.0)."
       },
       "citations": {
-        "head": "Citations",
-        "body": " are auto-fetched from OpenAlex (openalex.org), which aggregates WoS, Scopus, Crossref, and PubMed. Self-citations are included, so values are typically 5–15 % higher than strict WoS clean citations. Lookup goes by ORCID first, then by name filtered by the IER institution."
+        "head": "Clean citations",
+        "body": " are auto-fetched from OpenAlex (openalex.org — aggregates WoS, Scopus, Crossref, PubMed). Self-citations are excluded: for each of the author's works we count how many citing works share the same author ID (authorships.author.id match) and subtract that from the total. Lookup goes by ORCID first, then by name filtered to the IER institution."
       },
       "leadership": {
         "head": "Project leadership",
         "body": " (Standard 3) is not auto-computed — entered manually using the ARIS Category-A FTE convention."
+      },
+      "openScience": {
+        "head": "Open Science (Article 11, paragraph 6)",
+        "body": ": scientific publications produced after Ordinance 59/23 (2024 and later) must be made available open-access in an institutional or thematic repository. We derive the status from OpenAlex (open_access.is_oa)."
+      },
+      "earlyPromotion": {
+        "head": "Early promotion (Article 14, paragraph 5)",
+        "body": ": we flag candidates who exceed the minimum thresholds by ≥ 50 % AND meet the years-in-research-sector floor (≥ 10 yrs for stage III, ≥ 15 yrs for stage IV). Shown as a badge on each title card."
+      },
+      "reelection": {
+        "head": "Re-election (Article 22, paragraph 2)",
+        "body": ": when you tick »re-election« in the meta panel, every numeric threshold is halved — the rulebook requires at least half of the first-election values."
       }
     }
   },

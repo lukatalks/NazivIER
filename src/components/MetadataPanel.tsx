@@ -180,6 +180,21 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
             />
           </label>
+
+          <label className="flex flex-col sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+              {t('fields.reelectionLabel')}
+            </span>
+            <span className="mt-1 inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={!!r.isReelection}
+                onChange={(e) => onChange({ isReelection: e.target.checked })}
+                className="h-4 w-4 rounded border-[var(--border)]"
+              />
+              {t('fields.reelectionHelp')}
+            </span>
+          </label>
         </div>
       ) : null}
     </section>

@@ -73,16 +73,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Logo: hide white-grey areas via blend mode in dark mode so the
-   bilingual IER wordmark stays legible on the dark navbar background. */
+/* Legacy logo class — kept for the older inline single-file render. The new
+   header uses two separate images (light + dark) so no filter trick is
+   needed; see TitleCalculator header. */
 .ier-logo {
-  height: 32px;
+  height: 48px;
   width: auto;
-}
-
-@media (prefers-color-scheme: dark) {
-  .ier-logo {
-    /* invert the dark text to keep contrast; preserves the red "IER" mark */
-    filter: invert(1) hue-rotate(180deg) saturate(1.2);
-  }
 }

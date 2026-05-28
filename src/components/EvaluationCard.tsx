@@ -55,6 +55,35 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
               cit: e.citationsUsed,
             })}
           </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {e.isReelection ? (
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{ background: 'var(--muted-bg)', color: 'var(--accent)' }}
+                title={t('reelectionTooltip')}
+              >
+                {t('reelectionBadge')}
+              </span>
+            ) : null}
+            {e.earlyPromotionEligible ? (
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{ background: 'var(--success-bg)', color: 'var(--success)' }}
+                title={e.earlyPromotionEvidence}
+              >
+                {t('earlyPromotionBadge')}
+              </span>
+            ) : null}
+            {!e.openSciencePassed ? (
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{ background: 'var(--warn-bg)', color: 'var(--warn)' }}
+                title={e.openScienceEvidence}
+              >
+                {t('openScienceFailBadge')}
+              </span>
+            ) : null}
+          </div>
         </div>
         <button
           type="button"

@@ -46,6 +46,18 @@ export interface TitleEvaluation {
   citationsUsed: number;
   citationSource: 'WoS' | 'Scopus' | 'none';
   blockingReasons: string[];
+  /** Per Article 14(5): candidate qualifies for EARLY promotion when they
+   *  exceed the minimum thresholds by ≥50 % AND have served ≥10 years
+   *  (for III) or ≥15 years (for IV) in the research sector. */
+  earlyPromotionEligible: boolean;
+  /** Why early-promotion was/wasn't granted (human-readable). */
+  earlyPromotionEvidence: string;
+  /** Per Article 11(6): for post-2023 publications evaluated for promotion,
+   *  candidate must guarantee open access through repository deposit. */
+  openSciencePassed: boolean;
+  openScienceEvidence: string;
+  /** Re-election flag echoed for the UI. */
+  isReelection: boolean;
 }
 
 function fmt(n: number, decimals = 2): string {
@@ -119,10 +131,27 @@ function pickCitations(r: Researcher): {
   return { used: 0, source: 'none' };
 }
 
+/** Apply Article 22(2): on re-election to the same title the candidate must
+ *  meet at least HALF of the values required at the first election. We model
+ *  this by halving every numeric threshold; everything else (standardsRequired,
+ *  minEducation) stays. */
+function applyReelection(c: TitleCriteria): TitleCriteria {
+  const half = (n: number | null) => (n == null ? n : n / 2);
+  return {
+    ...c,
+    minEquivalents: half(c.minEquivalents),
+    minCitations: half(c.minCitations),
+    minExternalProjectsFte: half(c.minExternalProjectsFte),
+    minLeadershipFte: half(c.minLeadershipFte),
+    minLeadershipYears: half(c.minLeadershipYears),
+  };
+}
+
 /** Evaluate the researcher against a single title. */
 export function evaluateForTitle(researcher: Researcher, title: Title): TitleEvaluation {
-  const c = criteriaFor(title);
-  if (!c) throw new Error(`Unknown title: ${title}`);
+  const rawCriteria = criteriaFor(title);
+  if (!rawCriteria) throw new Error(`Unknown title: ${title}`);
+  const c = researcher.isReelection ? applyReelection(rawCriteria) : rawCriteria;
 
   const { total: totalEquivalents, contributions, extra } = computeEquivalents(researcher);
   const cit = pickCitations(researcher);
@@ -204,6 +233,53 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   // For "sodelavec" tier we need 1 of 3; for III/IV we need 2 of 3.
   const eligible = educationOk && standardsMet >= c.standardsRequired;
 
+  // ─── Article 14(5): early-promotion eligibility ────────────────────────
+  // Conditions:
+  //   - ≥50 % over the minimum thresholds (we measure equivalents AND
+  //     citations OR external-projects FTE)
+  //   - ≥10 yrs research sector for stage III, ≥15 yrs for stage IV
+  //   - applies only to III/IV (lower stages aren't subject to "predčasno")
+  const ys = researcher.yearsInResearchSector ?? 0;
+  const stage = rawCriteria.stage;
+  const yearsMin = stage === 'III' ? 10 : stage === 'IV' ? 15 : 0;
+  let earlyEligible = false;
+  let earlyEv = 'Ni v okviru predčasne izvolitve (samo III. in IV. karierna stopnja).';
+  if (stage === 'III' || stage === 'IV') {
+    const yearsOk = ys >= yearsMin;
+    const eqOk =
+      rawCriteria.minEquivalents != null && totalEquivalents >= rawCriteria.minEquivalents * 1.5;
+    const cit15 =
+      rawCriteria.minCitations != null && cit.used >= rawCriteria.minCitations * 1.5;
+    const fte15 =
+      rawCriteria.minExternalProjectsFte != null &&
+      (researcher.externalProjectsFte ?? 0) > rawCriteria.minExternalProjectsFte * 1.5;
+    const overshootOk = eqOk && (cit15 || fte15);
+    earlyEligible = yearsOk && overshootOk && eligible;
+    earlyEv = earlyEligible
+      ? `Upravičen do predčasne izvolitve: vsaj 50 % nad minimumom (${fmt(
+          totalEquivalents,
+        )} eq vs ${rawCriteria.minEquivalents}) in ${ys} let v raziskovalnem sektorju (zahtevano ≥ ${yearsMin}).`
+      : `Ni upravičen do predčasne izvolitve: ${
+          !yearsOk
+            ? `samo ${ys} let v raziskovalnem sektorju (zahtevano ≥ ${yearsMin})`
+            : `ne presega minimuma za 50 %`
+        }.`;
+  }
+
+  // ─── Article 11(6): Open Science check ─────────────────────────────────
+  // We pass when either no OS data is loaded OR every post-2023 evaluated
+  // publication has open access (is_oa true in OpenAlex).
+  const os = researcher.openScienceCompliance;
+  const osHasData = os && os.postOrdinanceCount > 0;
+  const osPass = !osHasData || os.fullyCompliant;
+  const osEv = !osHasData
+    ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
+    : os.fullyCompliant
+      ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
+      : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
+          os.ratio * 100,
+        )} %). Pogoj iz 11(6). člena ni v celoti izpolnjen.`;
+
   const blockingReasons: string[] = [];
   if (!educationOk)
     blockingReasons.push(
@@ -213,12 +289,16 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     blockingReasons.push(
       `Izpolnjenih ${standardsMet} od potrebnih ${c.standardsRequired} pogojev nacionalno/mednarodno primerljivih standardov.`,
     );
+  if (osHasData && !osPass)
+    blockingReasons.push(
+      `Po-2023 objave niso vse v odprtem dostopu (11. člen, 6. odstavek).`,
+    );
 
   return {
     title,
     groupLabel: c.groupLabel,
     stage: c.stage,
-    eligible,
+    eligible: eligible && osPass,
     educationOk,
     standards,
     standardsMet,
@@ -228,6 +308,11 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     citationsUsed: cit.used,
     citationSource: cit.source,
     blockingReasons,
+    earlyPromotionEligible: earlyEligible,
+    earlyPromotionEvidence: earlyEv,
+    openSciencePassed: osPass,
+    openScienceEvidence: osEv,
+    isReelection: !!researcher.isReelection,
   };
 }
 
@@ -243,14 +328,33 @@ export interface HighestPerGroup {
   razvojni?: TitleEvaluation;
 }
 
+// Highest-to-lowest order per group. After sodelavec we fall through to the
+// asistent tier so the UI can still surface "highest eligible" for someone who
+// hasn't crossed the sodelavec threshold yet.
 const GROUP_ORDER: Title[][] = [
-  ['znanstveni-svetnik', 'visji-znanstveni-sodelavec', 'znanstveni-sodelavec'],
+  [
+    'znanstveni-svetnik',
+    'visji-znanstveni-sodelavec',
+    'znanstveni-sodelavec',
+    'asistent-dr',
+    'asistent-mag',
+    'asistent',
+  ],
   [
     'strokovno-raziskovalni-svetnik',
     'visji-strokovno-raziskovalni-sodelavec',
     'strokovno-raziskovalni-sodelavec',
+    'visji-strokovno-raziskovalni-asistent',
+    'asistent-srr',
   ],
-  ['razvojni-svetnik', 'visji-razvojni-sodelavec', 'razvojni-sodelavec'],
+  [
+    'razvojni-svetnik',
+    'visji-razvojni-sodelavec',
+    'razvojni-sodelavec',
+    'samostojni-razvijalec',
+    'visji-razvijalec',
+    'razvijalec',
+  ],
 ];
 
 export function highestEligible(evaluations: TitleEvaluation[]): HighestPerGroup {

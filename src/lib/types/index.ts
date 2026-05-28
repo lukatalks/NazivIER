@@ -6,11 +6,14 @@ export type CareerStage = 'I' | 'II' | 'II-sodelavec' | 'III' | 'IV';
 export type TitleGroup = 'znanstveni' | 'strokovno-raziskovalni' | 'razvojni';
 
 export type Title =
-  // I. karierna stopnja
+  // I. karierna stopnja — asistentska
   | 'asistent'
   | 'asistent-mag'
   | 'razvijalec'
   | 'visji-razvijalec'
+  // I. karierna stopnja — strokovno-raziskovalna asistentska
+  | 'asistent-srr'
+  | 'visji-asistent-srr'
   // II. karierna stopnja - prva polovica (asistenti z doktoratom)
   | 'asistent-dr'
   | 'visji-strokovno-raziskovalni-asistent'
@@ -79,8 +82,29 @@ export interface Researcher {
    *  COBISS typology code, so they cannot come from the SICRIS bibliography
    *  feed and must be entered manually. See Annex 3, Pojasnila k merilom (1). */
   extraAchievements?: ExtraAchievements;
+  /** Re-election flag (Article 22(2)): when set, all numeric Annex-3 thresholds
+   *  are halved because the rule requires "at least half the values" since the
+   *  previous election in the same title. */
+  isReelection?: boolean;
+  /** Open Science compliance per Article 11(6). Each evaluated post-2023 publication
+   *  must be deposited in an institutional or thematic repository (open access). */
+  openScienceCompliance?: OpenScienceCompliance;
   /** Cached snapshot timestamp */
   fetchedAt?: string;
+}
+
+/** Article 11(6) Open Science: for publications evaluated for promotion that
+ *  were created after the 59/23 ordinance took effect, the candidate must
+ *  guarantee open access through institutional/thematic-repository deposit. */
+export interface OpenScienceCompliance {
+  /** Number of post-2023 publications evaluated. */
+  postOrdinanceCount: number;
+  /** How many of them are deposited (open-access detected via OpenAlex is_oa). */
+  depositedCount: number;
+  /** Compliance ratio 0–1 (depositedCount / postOrdinanceCount, or 1 if none). */
+  ratio: number;
+  /** True when every post-2023 evaluated publication has open access. */
+  fullyCompliant: boolean;
 }
 
 /** Manually-entered, non-typology achievements that contribute to equivalents.

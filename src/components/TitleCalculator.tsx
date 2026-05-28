@@ -11,7 +11,12 @@ import { ResearcherPicker } from '@/components/ResearcherPicker';
 import { StructuredData } from '@/components/StructuredData';
 import type { Locale } from '@/i18n/config';
 import { evaluateAll, highestEligible, type TitleEvaluation } from '@/lib/scoring/evaluate';
-import type { CitationData, Publication, Researcher } from '@/lib/types';
+import type {
+  CitationData,
+  OpenScienceCompliance,
+  Publication,
+  Researcher,
+} from '@/lib/types';
 
 interface OpenAlexInfo {
   openalexId: string;
@@ -23,17 +28,27 @@ interface OpenAlexInfo {
   matchType: 'orcid' | 'ier-match' | 'best-name' | 'none';
 }
 
+interface CitationDiagnostics {
+  rawTotal: number;
+  selfExcluded: number;
+  clean: number;
+  method: 'openalex-self-excluded' | 'openalex-raw';
+}
+
 interface ResearcherResponse {
   sicrisId: string;
   profile: { sicrisId: string; fullName: string; titlePrefix?: string };
   publications: Publication[];
   citations: CitationData;
   openAlex?: OpenAlexInfo;
+  openScienceCompliance?: OpenScienceCompliance;
+  citationDiagnostics?: CitationDiagnostics;
   fetchedAt: string;
 }
 
 interface FullResearcher extends Researcher {
   openAlex?: OpenAlexInfo;
+  citationDiagnostics?: CitationDiagnostics;
 }
 
 interface Props {
@@ -47,6 +62,9 @@ const METHODOLOGY_KEYS = [
   'authorship',
   'citations',
   'leadership',
+  'openScience',
+  'earlyPromotion',
+  'reelection',
 ] as const;
 
 export function TitleCalculator({ locale }: Props) {
@@ -72,6 +90,8 @@ export function TitleCalculator({ locale }: Props) {
         citations: data.citations,
         fetchedAt: data.fetchedAt,
         openAlex: data.openAlex,
+        openScienceCompliance: data.openScienceCompliance,
+        citationDiagnostics: data.citationDiagnostics,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -104,13 +124,24 @@ export function TitleCalculator({ locale }: Props) {
               aria-label="Inštitut za ekonomska raziskovanja"
               className="shrink-0"
             >
+              {/* Same source-of-truth as the impact-measurement tool: vertical
+                  IER lockup on light surfaces, horizontal banner on dark. The
+                  CSS toggles via dark: variant. */}
               <Image
-                src="/brand/ier-logo.png"
+                src="/brand/ier/ier-logo.png"
                 alt="Inštitut za ekonomska raziskovanja / Institute for Economic Research"
-                width={376}
-                height={35}
+                width={224}
+                height={97}
                 priority
-                className="ier-logo"
+                className="block dark:hidden h-12 w-auto"
+              />
+              <Image
+                src="/brand/ier/ier-logo-dark.png"
+                alt="Inštitut za ekonomska raziskovanja / Institute for Economic Research"
+                width={533}
+                height={94}
+                priority
+                className="hidden dark:block h-12 w-auto"
               />
             </a>
             <LanguageSwitcher locale={locale} />
@@ -200,6 +231,15 @@ function SummaryStrip({
         {t('publicationsFromSicris')}: <strong>{researcher.publications.length}</strong> ·{' '}
         {t('citationsOpenAlex')}:{' '}
         <strong className="tabnum">{researcher.citations.wosCleanCitations}</strong>
+        {researcher.citationDiagnostics?.method === 'openalex-self-excluded' &&
+        researcher.citationDiagnostics.selfExcluded > 0 ? (
+          <span className="text-xs">
+            {' '}({t('selfCitationsExcluded', {
+              raw: researcher.citationDiagnostics.rawTotal,
+              self: researcher.citationDiagnostics.selfExcluded,
+            })})
+          </span>
+        ) : null}
         {researcher.openAlex ? (
           <>
             {' '}· {t('hIndex')}: <strong className="tabnum">{researcher.openAlex.hIndex}</strong>{' '}
@@ -212,6 +252,24 @@ function SummaryStrip({
             {' '}· <span className="text-[var(--warn)]">{t('openAlexNotFound')}</span>
           </>
         )}
+        {researcher.openScienceCompliance &&
+        researcher.openScienceCompliance.postOrdinanceCount > 0 ? (
+          <>
+            {' '}·{' '}
+            <span
+              className={
+                researcher.openScienceCompliance.fullyCompliant
+                  ? 'text-[var(--success)]'
+                  : 'text-[var(--warn)]'
+              }
+            >
+              {t('openScience', {
+                ratio: Math.round(researcher.openScienceCompliance.ratio * 100),
+                count: researcher.openScienceCompliance.postOrdinanceCount,
+              })}
+            </span>
+          </>
+        ) : null}
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {groups.map((key) => {

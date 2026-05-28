@@ -34,9 +34,11 @@
   "summary": {
     "fetchedAt": "SICRIS #{id} · pridobljeno {date}",
     "publicationsFromSicris": "Publikacij iz SICRIS",
-    "citationsOpenAlex": "citati (OpenAlex)",
+    "citationsOpenAlex": "čisti citati",
     "hIndex": "h-indeks",
     "openAlexNotFound": "OpenAlex zapis ni najden — preverite ime",
+    "selfCitationsExcluded": "izključeno {self} avtocitatov od {raw}",
+    "openScience": "odprti dostop {ratio} % ({count} po-2023 objav)",
     "groups": {
       "znanstveni": "Znanstveni",
       "strokovno-raziskovalni": "Strokovno-raziskovalni",
@@ -70,7 +72,9 @@
       "leadershipYears": "Let v vodilni funkciji",
       "weight10Count": "Dosežki uteži 1,0 brez tipologije (zaključena mentorstva pri doktoratu, Zoisova in mednarodne nagrade)",
       "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
-      "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)"
+      "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
+      "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
+      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv — pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve."
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",
@@ -92,7 +96,11 @@
       "equivalent": "Ekv."
     },
     "moreHidden": "… in še {count} publikacij (skrito zaradi dolžine).",
-    "noData": "ni podatka"
+    "noData": "ni podatka",
+    "reelectionBadge": "Ponovna izvolitev (pragovi razpolovljeni)",
+    "reelectionTooltip": "Po 22. členu, 2. odstavku pravilnika morajo biti pri ponovni izvolitvi v isti naziv izpolnjeni vsaj polovični pragovi.",
+    "earlyPromotionBadge": "Upravičen do predčasne izvolitve",
+    "openScienceFailBadge": "Pogoj odprte znanosti (11/6) ni izpolnjen"
   },
   "methodology": {
     "title": "Metodologija",
@@ -107,19 +115,31 @@
       },
       "q12": {
         "head": "Q1/Q2 status",
-        "body": " je določen heuristično — članki tipa 1.01/1.02 so po SICRIS-u razvrščeni po vplivu, zgornja četrtina je označena Q1, naslednja Q2. Za natančno rangiranje je v naslednji različici predvidena vključitev SCImago seznama."
+        "body": " se določi prvenstveno po ujemanju ISSN z vgrajeno SCImago JR snapshot tabelo (ekonomske, finančne in sorodne revije). Kjer ISSN ni v snapshotu, pademo nazaj na hevristiko: 1.01/1.02 publikacije so razvrščene po vplivu, zgornja četrtina dobi Q1, naslednja Q2."
       },
       "authorship": {
         "head": "Faktor avtorstva",
         "body": ": SICRIS bibliografska zbirka ne razkrije korespondenčnega avtorja, zato je privzeto 0,7 (enakovredno avtorstvo). Za izvolitveni postopek je treba potrditi prvega / korespondenčnega avtorja ročno (utež 1,0)."
       },
       "citations": {
-        "head": "Citati",
-        "body": " se pridobijo samodejno iz OpenAlex (openalex.org), ki agregira WoS, Scopus, Crossref in PubMed. Številka vključuje avtocitate, zato je nekoliko višja od strogo »čistih citatov« po WoS-u (tipično +5–15 %). Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
+        "head": "Čisti citati",
+        "body": " se pridobijo iz OpenAlex (openalex.org — agregira WoS, Scopus, Crossref, PubMed). Avtocitate odštejemo: za vsako objavo preštejemo, koliko citatov prihaja od istega avtorja (avtorstva.author.id ujemanje), in jih izključimo iz skupnega seštevka. Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
       },
       "leadership": {
         "head": "Vodenje projektov",
         "body": " (Pogoj 3) ni samodejno izračunano — vnos je ročen po opredelitvah ARIS o kategoriji A FTE."
+      },
+      "openScience": {
+        "head": "Odprta znanost (11. člen, 6. odstavek)",
+        "body": ": za znanstvene objave po Uredbi 59/23 (2024 in pozneje) mora kandidat zagotoviti odprti dostop v institucionalnem ali tematskem repozitoriju. Stanje pridobimo iz OpenAlex (open_access.is_oa)."
+      },
+      "earlyPromotion": {
+        "head": "Predčasna izvolitev (14. člen, 5. odstavek)",
+        "body": ": izračunamo, ali kandidat preseže minimalne kvantitativne pragove za ≥ 50 % IN izpolnjuje pogoj let v raziskovalnem sektorju (≥ 10 let za III. stopnjo, ≥ 15 let za IV. stopnjo). Označeno z značko na vsaki kartici naziva."
+      },
+      "reelection": {
+        "head": "Ponovna izvolitev (22. člen, 2. odstavek)",
+        "body": ": če v meta-polju označite »ponovna izvolitev«, se vsi številčni pragovi razpolovijo — pravilnik zahteva izpolnitev vsaj polovice vrednosti od zadnje izvolitve."
       }
     }
   },
