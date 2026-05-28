@@ -75,10 +75,8 @@
       "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
       "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
       "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve.",
-      "simulationLabel": "Simulacija (»kaj če«)",
-      "simulationHelp": "Z naslednjima stikaloma lahko preskočite pogoja, ki ju trenutno blokira ena sama manjkajoča informacija. Surovi podatki SICRIS-a in OpenAlex se ne spremenijo – le evalvator obravnava ta dva pogoja, kot da sta izpolnjena.",
-      "simulateMaxEducation": "Predpostavi najvišjo zahtevano izobrazbo (10. SOK – doktorat) – uporabno, ko sistem napačno bere ime ali ko raven izobrazbe še ni potrjena.",
-      "simulateOpenScience": "Predpostavi, da je pogoj odprte znanosti (11. člen, 6. odstavek) izpolnjen – uporabno, ko OpenAlex še nima OA-podatkov za nove objave."
+      "additionalDepositsLabel": "Dodatna deponiranja za pogoj 11(6)",
+      "additionalDepositsHelp": "OpenAlex je zaznal {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje."
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",

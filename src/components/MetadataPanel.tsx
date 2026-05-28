@@ -196,42 +196,48 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
             </span>
           </label>
 
-          {/* "What if" simulation toggles. These never change input data – they
-              just tell the evaluator to bypass two common blockers so the user
-              can see which title the candidate would qualify for in a clean
-              scenario. */}
-          <fieldset className="sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
-            <legend className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
-              {t('fields.simulationLabel')}
-            </legend>
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              {t('fields.simulationHelp')}
-            </p>
-            <div className="mt-2 flex flex-col gap-2 text-sm">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={!!r.simulateMaxEducation}
-                  onChange={(e) =>
-                    onChange({ simulateMaxEducation: e.target.checked })
-                  }
-                  className="h-4 w-4 rounded border-[var(--border)]"
-                />
-                {t('fields.simulateMaxEducation')}
-              </label>
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={!!r.simulateOpenScience}
-                  onChange={(e) =>
-                    onChange({ simulateOpenScience: e.target.checked })
-                  }
-                  className="h-4 w-4 rounded border-[var(--border)]"
-                />
-                {t('fields.simulateOpenScience')}
-              </label>
-            </div>
-          </fieldset>
+          {/* Article 11(6) honest input: when OpenAlex finds post-2024 publications
+              that are not (yet) open access, the user can declare how many of
+              the remaining works they have already deposited (but OpenAlex has
+              not yet indexed) or commit to depositing before the application is
+              reviewed. The evaluator recomputes the OA ratio with those counts
+              and applies the rulebook's 100 % threshold honestly – nothing is
+              bypassed. */}
+          {r.openScienceCompliance &&
+          r.openScienceCompliance.postOrdinanceCount > 0 &&
+          !r.openScienceCompliance.fullyCompliant ? (
+            <label className="flex flex-col sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+                {t('fields.additionalDepositsLabel')}
+              </span>
+              <span className="text-xs text-[var(--muted)] mt-1">
+                {t('fields.additionalDepositsHelp', {
+                  missing:
+                    r.openScienceCompliance.postOrdinanceCount -
+                    r.openScienceCompliance.depositedCount,
+                  total: r.openScienceCompliance.postOrdinanceCount,
+                  deposited: r.openScienceCompliance.depositedCount,
+                })}
+              </span>
+              <input
+                type="number"
+                min={0}
+                max={
+                  r.openScienceCompliance.postOrdinanceCount -
+                  r.openScienceCompliance.depositedCount
+                }
+                step={1}
+                value={r.additionalDepositsPlanned ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    additionalDepositsPlanned:
+                      Number(e.target.value) || undefined,
+                  })
+                }
+                className="mt-2 w-32 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
+              />
+            </label>
+          ) : null}
         </div>
       ) : null}
     </section>

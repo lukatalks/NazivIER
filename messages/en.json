@@ -75,10 +75,8 @@
       "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)",
       "reelectionLabel": "Re-election (Article 22, paragraph 2)",
       "reelectionHelp": "Tick if this is a re-election to the same title – the rulebook then requires at least half of every numeric threshold since the previous election.",
-      "simulationLabel": "Simulation (»what if«)",
-      "simulationHelp": "These toggles let you bypass two conditions that are commonly blocked by a single missing data point. Raw SICRIS + OpenAlex data is untouched – only the evaluator treats those conditions as satisfied.",
-      "simulateMaxEducation": "Assume the highest required education (SOK level 10 – doctorate) – useful when name parsing misses the degree or when the level has not yet been confirmed.",
-      "simulateOpenScience": "Assume the Open-Science requirement (Article 11(6)) is met – useful when OpenAlex has not yet recorded OA status for recent works."
+      "additionalDepositsLabel": "Additional deposits for Article 11(6)",
+      "additionalDepositsHelp": "OpenAlex detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited – but OpenAlex has not yet indexed – or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state."
     }
   },
   "breakdownTitle": "Per-title breakdown",

@@ -89,15 +89,13 @@ export interface Researcher {
   /** Open Science compliance per Article 11(6). Each evaluated post-2023 publication
    *  must be deposited in an institutional or thematic repository (open access). */
   openScienceCompliance?: OpenScienceCompliance;
-  /** Simulation override – pretend the candidate has full Open-Science deposit
-   *  coverage so they are not blocked by Article 11(6) when running a "what
-   *  title would they get if the OS data were filled" scenario. */
-  simulateOpenScience?: boolean;
-  /** Simulation override – pretend the candidate has the highest education
-   *  level required (doktorat = SOK 10) so that titles are not blocked solely
-   *  by an unset / mismatched education field. Useful when the SOK level is
-   *  unknown or the auto-detection from the name failed. */
-  simulateMaxEducation?: boolean;
+  /** User-declared additional Open-Science deposits the candidate either has
+   *  already lodged (but OpenAlex has not yet picked up) or will lodge before
+   *  the application is reviewed. We add this to the deposited count and
+   *  recompute the ratio strictly per Article 11(6): the threshold is still
+   *  100 % coverage of post-2024 evaluated publications, never bypassed.
+   *  Capped to the missing count so the user can't claim more than reality. */
+  additionalDepositsPlanned?: number;
   /** Auto-inferred SOK level from the SICRIS name parser. Used as a fallback
    *  when educationLevel is not set by the user. */
   inferredEducationLevel?: EducationLevel;

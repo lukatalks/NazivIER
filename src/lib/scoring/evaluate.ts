@@ -225,21 +225,14 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   const standards: [StandardResult, StandardResult, StandardResult] = [pog1, pog2, pog3];
   const standardsMet = standards.filter((s) => s.passed).length;
 
-  // Education resolution order:
-  //   1) explicit researcher.educationLevel (user dropdown)
-  //   2) researcher.inferredEducationLevel (auto-detected from "dr."/"mag." in the
-  //      SICRIS name) – kicks in when the user has not yet touched the dropdown,
-  //      which prevents the "everyone gets the same low score" trap
-  //   3) simulation toggle "simulateMaxEducation" → SOK 10 (doktorat)
-  //   4) 0 (fail)
-  const simulated = researcher.simulateMaxEducation ? 10 : 0;
+  // Education resolution order – per rulebook the SOK level must be explicit;
+  // we never "simulate" it. We do pre-fill the dropdown from the SICRIS name
+  // parser so the user starts from a sensible default, but the test below
+  // uses the rulebook threshold against whatever value is actually in the
+  // researcher record (user override > auto-inferred from dr./mag. > 0).
   const eduLevel =
-    researcher.educationLevel ??
-    researcher.inferredEducationLevel ??
-    simulated ??
-    0;
-  const educationOk =
-    !!researcher.simulateMaxEducation || eduLevel >= c.minEducation;
+    researcher.educationLevel ?? researcher.inferredEducationLevel ?? 0;
+  const educationOk = eduLevel >= c.minEducation;
 
   // Pogoj 1 is always counted toward standards required.
   // For "sodelavec" tier we need 1 of 3; for III/IV we need 2 of 3.
@@ -279,24 +272,39 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   }
 
   // ─── Article 11(6): Open Science check ─────────────────────────────────
-  // We pass when:
-  //   - simulation toggle "simulateOpenScience" is on (what-if scenario), OR
-  //   - no OS data is loaded (nothing to check), OR
-  //   - every post-2023 evaluated publication has open access (is_oa true in
-  //     OpenAlex), per Article 11(6) implementing Uredba 59/23.
+  // The rulebook requires 100 % open-access coverage for post-Uredba 59/23
+  // publications evaluated for promotion. We never "bypass" the check – instead
+  // the user can declare additional repository deposits they have already made
+  // (but OpenAlex hasn't indexed yet) or will make before the application is
+  // reviewed. We add those to the deposited count, cap to the missing total,
+  // and recompute the ratio strictly per the rulebook.
   const os = researcher.openScienceCompliance;
-  const osHasData = os && os.postOrdinanceCount > 0;
-  const osNaturalPass = !osHasData || os.fullyCompliant;
-  const osPass = !!researcher.simulateOpenScience || osNaturalPass;
-  const osEv = researcher.simulateOpenScience
-    ? 'Simulacija: pogoj odprte znanosti je obravnavan kot izpolnjen (»kaj če« scenarij).'
-    : !osHasData
-      ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
-      : os.fullyCompliant
-        ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
-        : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
-            os.ratio * 100,
-          )} %). Pogoj iz 11(6). člena ni v celoti izpolnjen.`;
+  const osHasData = !!os && os.postOrdinanceCount > 0;
+  const missing = osHasData ? os.postOrdinanceCount - os.depositedCount : 0;
+  const declared = Math.max(
+    0,
+    Math.min(researcher.additionalDepositsPlanned ?? 0, missing),
+  );
+  const adjustedDeposited = osHasData ? os.depositedCount + declared : 0;
+  const adjustedRatio = osHasData
+    ? adjustedDeposited / os.postOrdinanceCount
+    : 1;
+  const osPass = !osHasData || adjustedRatio === 1;
+  const osEv = !osHasData
+    ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
+    : declared > 0 && osPass
+      ? `Uporabnik je deklariral ${declared} dodatnih deponiranj ` +
+        `(${os.depositedCount} že v OpenAlex + ${declared} ročno = ` +
+        `${adjustedDeposited} od ${os.postOrdinanceCount}). Pogoj iz 11(6). člena izpolnjen.`
+      : declared > 0
+        ? `${adjustedDeposited} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
+            adjustedRatio * 100,
+          )} %; vključeno ${declared} deklariranih). Pogoj 11(6) zahteva 100 %.`
+        : os.fullyCompliant
+          ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
+          : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
+              os.ratio * 100,
+            )} %). Manjka ${missing} deponiranj za izpolnitev 11(6). člena.`;
 
   const blockingReasons: string[] = [];
   if (!educationOk)
@@ -307,9 +315,11 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     blockingReasons.push(
       `Izpolnjenih ${standardsMet} od potrebnih ${c.standardsRequired} pogojev nacionalno/mednarodno primerljivih standardov.`,
     );
-  if (osHasData && !osNaturalPass && !researcher.simulateOpenScience)
+  if (osHasData && !osPass)
     blockingReasons.push(
-      `Po-2023 objave niso vse v odprtem dostopu (11. člen, 6. odstavek).`,
+      `Po-2023 objave niso vse v odprtem dostopu: manjka ${
+        os.postOrdinanceCount - adjustedDeposited
+      } deponiranj za izpolnitev 11(6). člena.`,
     );
 
   return {
