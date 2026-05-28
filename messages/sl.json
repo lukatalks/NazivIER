@@ -145,6 +145,9 @@
     "hide": "Skrij obrazložitev",
     "blockingReasonsTitle": "Razlogi neizvolljivosti:",
     "contributionsTitle": "Prispevek posameznih publikacij k ekvivalentom",
+    "contributionsSummary": "{eq} ekvivalentov sešteto iz {count, plural, =1 {# publikacije} few {# publikacij} other {# publikacij}}",
+    "showContributions": "Prikaži razčlenitev po publikacijah",
+    "hideContributions": "Skrij razčlenitev po publikacijah",
     "th": {
       "typology": "Tip.",
       "year": "Leto",

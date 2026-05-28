@@ -16,6 +16,13 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
   const t = useTranslations('evalCard');
   const locale = useLocale();
   const [expanded, setExpanded] = useState(defaultExpanded);
+  // Per-card collapse for the contributions table (v2.7.1, per Luka).
+  // The verdict (blocking reasons + Pogoj cards) stays visible when the
+  // card is expanded; only the long per-publication table is hidden behind
+  // a separate »prikaži razčlenitev« click. Keeps the card body scannable
+  // and removes the wall-of-rows feel when reviewers expand multiple
+  // titles in a group.
+  const [contribOpen, setContribOpen] = useState(false);
 
   const numLocale = locale === 'sl' ? 'sl-SI' : 'en-GB';
   const fmt = (n: number, decimals = 2) =>
@@ -129,58 +136,73 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
             ))}
           </div>
 
-          <h4 className="mt-5 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-            {t('contributionsTitle')}
-          </h4>
-          <div className="mt-2 overflow-x-auto">
-            <table className="w-full text-sm tabnum">
-              <thead>
-                <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
-                  <th className="py-2 pr-4">{t('th.typology')}</th>
-                  <th className="py-2 pr-4">{t('th.year')}</th>
-                  <th className="py-2 pr-4">{t('th.title')}</th>
-                  <th className="py-2 pr-4">{t('th.weight')}</th>
-                  <th className="py-2 pr-4">{t('th.authorship')}</th>
-                  <th className="py-2 pr-4 text-right">{t('th.equivalent')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {e.contributions.slice(0, 50).map((c) => (
-                  <tr key={c.publication.id} className="border-b border-[var(--border)]/50">
-                    <td className="py-2 pr-4 font-mono text-xs">{c.publication.typology}</td>
-                    <td className="py-2 pr-4">{c.publication.year || '–'}</td>
-                    <td className="py-2 pr-4">
-                      <div className="line-clamp-2 max-w-md">{c.publication.title}</div>
-                      {c.publication.parentTitle ? (
-                        <div className="text-xs italic text-[var(--muted)]">
-                          {c.publication.parentTitle}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td className="py-2 pr-4" title={weightBucketLabel(c.weight)}>
-                      {fmt(c.weight, 1)}
-                    </td>
-                    <td
-                      className="py-2 pr-4"
-                      title={authorshipLabel(c.publication.authorshipRole)}
-                    >
-                      {fmt(c.authorshipFactor, 1)}
-                    </td>
-                    <td className="py-2 pr-4 text-right font-medium">{fmt(c.equivalent)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              {e.contributions.length > 50 ? (
-                <tfoot>
-                  <tr>
-                    <td colSpan={6} className="py-2 text-xs text-[var(--muted)]">
-                      {t('moreHidden', { count: e.contributions.length - 50 })}
-                    </td>
-                  </tr>
-                </tfoot>
-              ) : null}
-            </table>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3">
+            <div className="text-xs text-[var(--muted)] tabnum">
+              {t('contributionsSummary', {
+                eq: fmt(e.totalEquivalents),
+                count: e.contributions.length,
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setContribOpen((s) => !s)}
+              className="text-xs text-[var(--accent)] underline-offset-2 hover:underline"
+            >
+              {contribOpen ? t('hideContributions') : t('showContributions')}
+            </button>
           </div>
+
+          {contribOpen ? (
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-sm tabnum">
+                <thead>
+                  <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
+                    <th className="py-2 pr-4">{t('th.typology')}</th>
+                    <th className="py-2 pr-4">{t('th.year')}</th>
+                    <th className="py-2 pr-4">{t('th.title')}</th>
+                    <th className="py-2 pr-4">{t('th.weight')}</th>
+                    <th className="py-2 pr-4">{t('th.authorship')}</th>
+                    <th className="py-2 pr-4 text-right">{t('th.equivalent')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {e.contributions.slice(0, 50).map((c) => (
+                    <tr key={c.publication.id} className="border-b border-[var(--border)]/50">
+                      <td className="py-2 pr-4 font-mono text-xs">{c.publication.typology}</td>
+                      <td className="py-2 pr-4">{c.publication.year || '–'}</td>
+                      <td className="py-2 pr-4">
+                        <div className="line-clamp-2 max-w-md">{c.publication.title}</div>
+                        {c.publication.parentTitle ? (
+                          <div className="text-xs italic text-[var(--muted)]">
+                            {c.publication.parentTitle}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="py-2 pr-4" title={weightBucketLabel(c.weight)}>
+                        {fmt(c.weight, 1)}
+                      </td>
+                      <td
+                        className="py-2 pr-4"
+                        title={authorshipLabel(c.publication.authorshipRole)}
+                      >
+                        {fmt(c.authorshipFactor, 1)}
+                      </td>
+                      <td className="py-2 pr-4 text-right font-medium">{fmt(c.equivalent)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                {e.contributions.length > 50 ? (
+                  <tfoot>
+                    <tr>
+                      <td colSpan={6} className="py-2 text-xs text-[var(--muted)]">
+                        {t('moreHidden', { count: e.contributions.length - 50 })}
+                      </td>
+                    </tr>
+                  </tfoot>
+                ) : null}
+              </table>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </article>

@@ -145,6 +145,9 @@
     "hide": "Hide breakdown",
     "blockingReasonsTitle": "Blocking reasons:",
     "contributionsTitle": "Per-publication contribution to equivalents",
+    "contributionsSummary": "{eq} equivalents from {count, plural, one {# publication} other {# publications}}",
+    "showContributions": "Show per-publication breakdown",
+    "hideContributions": "Hide per-publication breakdown",
     "th": {
       "typology": "Typ.",
       "year": "Year",
