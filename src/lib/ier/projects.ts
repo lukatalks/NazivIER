@@ -263,12 +263,31 @@ function nameTokens(s: string): string[] {
     .filter((t) => t.length > 1);
 }
 
+/** Decode HTML entities found in WP-rendered project titles. Handles named
+ *  entities + numeric &#NN; + hex &#xNN; codes – the IER site emits numeric
+ *  forms like &#8211; for en-dash. */
 function decodeHtml(s: string): string {
   return s
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => safeCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => safeCodePoint(parseInt(dec, 10)))
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&hellip;/g, '…')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»');
+}
+
+function safeCodePoint(n: number): string {
+  if (!Number.isFinite(n) || n < 0 || n > 0x10ffff) return '';
+  try {
+    return String.fromCodePoint(n);
+  } catch {
+    return '';
+  }
 }

@@ -300,17 +300,46 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   // (but OpenAlex hasn't indexed yet) or will make before the application is
   // reviewed. We add those to the deposited count, cap to the missing total,
   // and recompute the ratio strictly per the rulebook.
+  // Recompute Open Science compliance walking through publications so that
+  // per-pub user overrides take precedence over OpenAlex's auto-detected OA
+  // flag. Article 11(6) explicitly allows »razen kadar to onemogočajo
+  // založniške omejitve« – publications tagged 'restricted-not-possible'
+  // count as satisfied via the rulebook exemption.
+  const postOrdinancePubs = researcher.publications.filter(
+    (p) => p.year >= 2024 && /^1\./.test(p.typology),
+  );
+  let restrictedCount = 0;
+  let openCount = 0;
+  let closedCount = 0;
+  for (const p of postOrdinancePubs) {
+    const override = p.openAccessOverride;
+    const state: 'open' | 'restricted-not-possible' | 'closed' =
+      override ?? (p.openAccessAuto ? 'open' : 'closed');
+    if (state === 'open') openCount++;
+    else if (state === 'restricted-not-possible') restrictedCount++;
+    else closedCount++;
+  }
+  const recomputedTotal = postOrdinancePubs.length;
+  const recomputedSatisfied = openCount + restrictedCount;
+  // Fall back to the snapshot's OS stats when we have no walked pubs (e.g.
+  // OpenAlex didn't match anything). Keeps backwards compatibility with the
+  // earlier OS-summary-driven path.
   const os = researcher.openScienceCompliance;
-  const osHasData = !!os && os.postOrdinanceCount > 0;
-  const missing = osHasData ? os.postOrdinanceCount - os.depositedCount : 0;
+  const usingWalk = recomputedTotal > 0;
+  const osHasData = usingWalk || (!!os && os.postOrdinanceCount > 0);
+  const totalCount = usingWalk
+    ? recomputedTotal
+    : (os?.postOrdinanceCount ?? 0);
+  const satisfiedCount = usingWalk
+    ? recomputedSatisfied
+    : (os?.depositedCount ?? 0);
+  const missing = osHasData ? totalCount - satisfiedCount : 0;
   const declared = Math.max(
     0,
     Math.min(researcher.additionalDepositsPlanned ?? 0, missing),
   );
-  const adjustedDeposited = osHasData ? os.depositedCount + declared : 0;
-  const adjustedRatio = osHasData
-    ? adjustedDeposited / os.postOrdinanceCount
-    : 1;
+  const adjustedDeposited = osHasData ? satisfiedCount + declared : 0;
+  const adjustedRatio = osHasData ? adjustedDeposited / totalCount : 1;
   const strictPass = !osHasData || adjustedRatio === 1;
   // Demo mode: the rulebook is still a draft (predlog 26.05.2026); we do not
   // block eligibility on Article 11(6) until enactment. We still compute and
@@ -320,21 +349,25 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   const demoSuffix = OS_DEMO_PASS && osHasData && !strictPass
     ? ' (demo način: pogoj je obravnavan kot izpolnjen do uveljavitve pravilnika).'
     : '';
+  const restrictedNote =
+    usingWalk && restrictedCount > 0
+      ? ` Vključenih ${restrictedCount} objav z dokumentirano založniško omejitvijo (izjema iz 11(6) člena).`
+      : '';
   const osEv = !osHasData
     ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
     : declared > 0 && strictPass
       ? `Uporabnik je deklariral ${declared} dodatnih deponiranj ` +
-        `(${os.depositedCount} že v OpenAlex + ${declared} ročno = ` +
-        `${adjustedDeposited} od ${os.postOrdinanceCount}). Pogoj iz 11(6). člena izpolnjen.`
+        `(${satisfiedCount} že prijavljenih + ${declared} ročno = ` +
+        `${adjustedDeposited} od ${totalCount}). Pogoj iz 11(6). člena izpolnjen.${restrictedNote}`
       : declared > 0
-        ? `${adjustedDeposited} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
+        ? `${adjustedDeposited} od ${totalCount} po-2023 objav v odprtem dostopu (${Math.round(
             adjustedRatio * 100,
-          )} %; vključeno ${declared} deklariranih). Pogoj 11(6) zahteva 100 %.${demoSuffix}`
-        : os.fullyCompliant
-          ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
-          : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
-              os.ratio * 100,
-            )} %). Manjka ${missing} deponiranj za izpolnitev 11(6). člena.${demoSuffix}`;
+          )} %; vključeno ${declared} deklariranih). Pogoj 11(6) zahteva 100 %.${demoSuffix}${restrictedNote}`
+        : strictPass
+          ? `Vse vrednotene objave po Uredbi 59/23 (${totalCount}) izpolnjujejo pogoj.${restrictedNote}`
+          : `${satisfiedCount} od ${totalCount} po-2023 objav izpolnjuje pogoj (${Math.round(
+              adjustedRatio * 100,
+            )} %). Manjka ${missing} deponiranj za izpolnitev 11(6). člena.${demoSuffix}${restrictedNote}`;
 
   const blockingReasons: string[] = [];
   if (!educationOk)
@@ -348,7 +381,7 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   if (osHasData && !strictPass && !OS_DEMO_PASS)
     blockingReasons.push(
       `Po-2023 objave niso vse v odprtem dostopu: manjka ${
-        os.postOrdinanceCount - adjustedDeposited
+        totalCount - adjustedDeposited
       } deponiranj za izpolnitev 11(6). člena.`,
     );
 

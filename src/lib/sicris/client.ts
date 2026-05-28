@@ -259,21 +259,30 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
 }
 
 /** Tag journal rank using SCImago ISSN lookup when an OpenAlex work matches
- *  the SICRIS publication by title; falls back to the legacy heuristic when
- *  no OpenAlex source ISSN is available. */
+ *  the SICRIS publication by title; also propagates the auto-detected OA
+ *  flag so the per-pub override UI starts with an honest default. Falls
+ *  back to the legacy heuristic when no OpenAlex source ISSN is available. */
 function tagJournalRanks(publications: Publication[], works: OpenAlexWork[]): Publication[] {
-  // Build title → ISSN map from OpenAlex works.
+  // Build title → ISSN map AND title → OA map from OpenAlex works.
   const issnByTitle = new Map<string, string>();
+  const oaByTitle = new Map<string, boolean>();
   for (const w of works) {
-    if (w.sourceIssn && w.title) {
-      issnByTitle.set(normalize(w.title), w.sourceIssn);
-    }
+    if (!w.title) continue;
+    const key = normalize(w.title);
+    if (w.sourceIssn) issnByTitle.set(key, w.sourceIssn);
+    oaByTitle.set(key, w.isOa);
   }
 
   let scimagoTagged = 0;
   publications.forEach((p) => {
+    const key = normalize(p.title);
+    // Auto-detected OA flag drives the per-pub override UI default and the
+    // Article 11(6) compliance ratio when the user hasn't set an override.
+    const autoOa = oaByTitle.get(key);
+    if (typeof autoOa === 'boolean') p.openAccessAuto = autoOa;
+
     if (p.typology !== '1.01' && p.typology !== '1.02') return;
-    const issn = issnByTitle.get(normalize(p.title));
+    const issn = issnByTitle.get(key);
     if (!issn) return;
     const q = quartileForIssn(issn);
     if (q) {

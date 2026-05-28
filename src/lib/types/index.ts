@@ -37,6 +37,21 @@ export type TypologyCode = string; // e.g. '1.01', '1.02', '2.01'
 
 export type AuthorshipRole = 'first-or-corresponding' | 'equal-or-co' | 'other-coauthor';
 
+/** Per-publication Open Access status override.
+ *
+ *  Article 11(6) of the IER rulebook explicitly carves out an exemption when
+ *  publisher restrictions make open access impossible (»razen kadar to
+ *  onemogočajo založniške omejitve«). So a publication can satisfy the OS
+ *  requirement in two ways:
+ *    'open'                    – deposited in repository / publisher open
+ *    'restricted-not-possible' – publisher embargo or similar restriction
+ *  And one failing state:
+ *    'closed'                  – no open access and no documented restriction
+ *
+ *  When the user sets an override we use it instead of the OpenAlex `is_oa`
+ *  flag; the override defaults to undefined which means "trust OpenAlex". */
+export type OpenAccessStatus = 'open' | 'restricted-not-possible' | 'closed';
+
 export type JournalRank = 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'indexed-other' | 'not-indexed' | 'unknown';
 
 export interface Publication {
@@ -54,6 +69,11 @@ export interface Publication {
   authorshipRole?: AuthorshipRole;
   /** Whether indexed in SSCI/Scopus (only matters when typology is 1.01/1.02 and not Q1/Q2). */
   indexedSsciScopus?: boolean;
+  /** Auto-detected OA flag from OpenAlex `open_access.is_oa` when the work matched. */
+  openAccessAuto?: boolean;
+  /** User-declared OA status. When set, overrides openAccessAuto for the Article
+   *  11(6) compliance calculation. Accepts the three rulebook states. */
+  openAccessOverride?: OpenAccessStatus;
 }
 
 export interface CitationData {

@@ -25,7 +25,10 @@
     "calculate": "Calculate",
     "invalidInput": "Enter a valid SICRIS ID (e.g. 33182) or profile URL.",
     "sicrisIdLabel": "SICRIS #{id}",
-    "publicationsLabel": "{count} publications"
+    "publicationsLabel": "{count} publications",
+    "rosterLoading": "Loading researchers …",
+    "rosterError": "Could not load the list ({msg}). Use the field on the right to enter a SICRIS ID manually.",
+    "loadingInline": "(loading…)"
   },
   "loading": "Fetching bibliography from SICRIS, citations from SICRIS WoS + OpenAlex, and projects from ier.si … (a few seconds on first request, cached after).",
   "error": {
@@ -92,7 +95,12 @@
       "authorshipColRole": "Role",
       "authorshipRoleFirst": "First / lead / corresponding (1.0)",
       "authorshipRoleEqual": "Equal (0.7)",
-      "authorshipRoleOther": "Other co-authorship (0.3)"
+      "authorshipRoleOther": "Other co-authorship (0.3)",
+      "openAccessColHeader": "Open access (11/6)",
+      "openAccessOpen": "Open access",
+      "openAccessRestricted": "Not possible due to restrictions (exemption)",
+      "openAccessClosed": "Not open access",
+      "openAccessNotApplicable": "n/a"
     }
   },
   "breakdownTitle": "Per-title breakdown",

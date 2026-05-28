@@ -25,7 +25,10 @@
     "calculate": "Izračunaj",
     "invalidInput": "Vnesite veljaven SICRIS ID (npr. 33182) ali URL profila.",
     "sicrisIdLabel": "SICRIS #{id}",
-    "publicationsLabel": "{count} publikacij"
+    "publicationsLabel": "{count} publikacij",
+    "rosterLoading": "Nalagamo seznam raziskovalcev …",
+    "rosterError": "Seznama ni bilo mogoče naložiti ({msg}). Uporabite polje desno za ročni vnos SICRIS ID-ja.",
+    "loadingInline": "(nalagam…)"
   },
   "loading": "Pridobivamo bibliografijo iz SICRIS-a, citate iz SICRIS WoS in OpenAlex ter projekte z ier.si … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
   "error": {
@@ -92,7 +95,12 @@
       "authorshipColRole": "Vloga",
       "authorshipRoleFirst": "Prvi / vodilni / korespondenčni (1,0)",
       "authorshipRoleEqual": "Enakovredni (0,7)",
-      "authorshipRoleOther": "Ostalo avtorstvo (0,3)"
+      "authorshipRoleOther": "Ostalo avtorstvo (0,3)",
+      "openAccessColHeader": "Odprti dostop (11/6)",
+      "openAccessOpen": "Odprti dostop",
+      "openAccessRestricted": "Ni mogoč zaradi omejitev (izjema)",
+      "openAccessClosed": "Ni odprti dostop",
+      "openAccessNotApplicable": "n.r."
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",

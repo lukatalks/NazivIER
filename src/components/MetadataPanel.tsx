@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import type {
   AuthorshipRole,
   EducationLevel,
+  OpenAccessStatus,
   Publication,
   Researcher,
 } from '@/lib/types';
@@ -35,6 +36,13 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
   function setAuthorshipRole(pubId: string, role: AuthorshipRole | undefined) {
     const next = r.publications.map((p) =>
       p.id === pubId ? { ...p, authorshipRole: role } : p,
+    );
+    onChange({ publications: next });
+  }
+
+  function setOpenAccessOverride(pubId: string, status: OpenAccessStatus | undefined) {
+    const next = r.publications.map((p) =>
+      p.id === pubId ? { ...p, openAccessOverride: status } : p,
     );
     onChange({ publications: next });
   }
@@ -358,6 +366,7 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
                       <th className="py-1.5 pr-3 text-left">{t('fields.authorshipColTitle')}</th>
                       <th className="py-1.5 pr-3 text-left">{t('fields.authorshipColTyp')}</th>
                       <th className="py-1.5 pr-3 text-left">{t('fields.authorshipColRole')}</th>
+                      <th className="py-1.5 pr-3 text-left">{t('fields.openAccessColHeader')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -365,7 +374,8 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
                       <AuthorshipRow
                         key={p.id}
                         pub={p}
-                        onChange={(role) => setAuthorshipRole(p.id, role)}
+                        onChangeRole={(role) => setAuthorshipRole(p.id, role)}
+                        onChangeOa={(s) => setOpenAccessOverride(p.id, s)}
                       />
                     ))}
                   </tbody>
@@ -392,12 +402,19 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
 
 interface AuthorshipRowProps {
   pub: Publication;
-  onChange(role: AuthorshipRole | undefined): void;
+  onChangeRole(role: AuthorshipRole | undefined): void;
+  onChangeOa(status: OpenAccessStatus | undefined): void;
 }
 
-function AuthorshipRow({ pub, onChange }: AuthorshipRowProps) {
+function AuthorshipRow({ pub, onChangeRole, onChangeOa }: AuthorshipRowProps) {
   const t = useTranslations('metadata');
   const role = pub.authorshipRole;
+  // Default OA radio to the OpenAlex-detected value when no override is set,
+  // so the visible state matches reality the moment the table opens.
+  const effectiveOa: OpenAccessStatus =
+    pub.openAccessOverride ?? (pub.openAccessAuto ? 'open' : 'closed');
+  // Only post-2024 evaluated publications (1.x) participate in Article 11(6).
+  const oaApplies = pub.year >= 2024 && /^1\./.test(pub.typology);
   return (
     <tr className="border-b border-[var(--border)]/40 align-top">
       <td className="py-1.5 pr-3 tabnum">{pub.year || '–'}</td>
@@ -415,23 +432,52 @@ function AuthorshipRow({ pub, onChange }: AuthorshipRowProps) {
             current={role}
             value="first-or-corresponding"
             pubId={pub.id}
-            onChange={onChange}
+            onChange={onChangeRole}
           />
           <RoleOption
             label={t('fields.authorshipRoleEqual')}
             current={role}
             value="equal-or-co"
             pubId={pub.id}
-            onChange={onChange}
+            onChange={onChangeRole}
           />
           <RoleOption
             label={t('fields.authorshipRoleOther')}
             current={role}
             value="other-coauthor"
             pubId={pub.id}
-            onChange={onChange}
+            onChange={onChangeRole}
           />
         </div>
+      </td>
+      <td className="py-1.5 pr-3">
+        {oaApplies ? (
+          <div className="flex flex-wrap gap-3">
+            <OaOption
+              label={t('fields.openAccessOpen')}
+              current={effectiveOa}
+              value="open"
+              pubId={pub.id}
+              onChange={onChangeOa}
+            />
+            <OaOption
+              label={t('fields.openAccessRestricted')}
+              current={effectiveOa}
+              value="restricted-not-possible"
+              pubId={pub.id}
+              onChange={onChangeOa}
+            />
+            <OaOption
+              label={t('fields.openAccessClosed')}
+              current={effectiveOa}
+              value="closed"
+              pubId={pub.id}
+              onChange={onChangeOa}
+            />
+          </div>
+        ) : (
+          <span className="text-[var(--muted)] italic">{t('fields.openAccessNotApplicable')}</span>
+        )}
       </td>
     </tr>
   );
@@ -456,6 +502,29 @@ function RoleOption({ label, current, value, pubId, onChange }: RoleOptionProps)
         type="radio"
         name={`auth-${pubId}`}
         checked={checked}
+        onChange={() => onChange(value)}
+        className="h-3.5 w-3.5"
+      />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+interface OaOptionProps {
+  label: string;
+  current: OpenAccessStatus;
+  value: OpenAccessStatus;
+  pubId: string;
+  onChange(status: OpenAccessStatus | undefined): void;
+}
+
+function OaOption({ label, current, value, pubId, onChange }: OaOptionProps) {
+  return (
+    <label className="inline-flex items-center gap-1 whitespace-nowrap">
+      <input
+        type="radio"
+        name={`oa-${pubId}`}
+        checked={current === value}
         onChange={() => onChange(value)}
         className="h-3.5 w-3.5"
       />
