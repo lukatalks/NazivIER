@@ -114,6 +114,20 @@
     "title": "Demo način za pogoj odprte znanosti (11. člen, 6. odstavek):",
     "body": "Pogoj iz 11(6) pravilnika je nov in se v tej demo različici za vse raziskovalce obravnava kot izpolnjen, ker pravilnik še ni sprejet (predlog 26. 5. 2026). Resnično stanje odprtega dostopa je še vedno izračunano in prikazano na vsaki kartici naziva ter v zgornji vrstici, da kandidati vidijo, koliko deponiranj jih še loči od 100-odstotne pokritosti."
   },
+  "duplicates": {
+    "title": "Možne podvojitve v bibliografiji:",
+    "summary": "{groups, plural, =1 {# naslov} few {# naslovi} other {# naslovov}} se pojavi večkrat ({records} zapisov, skupaj ~{eq} ekvivalentov). Algoritem še vedno upošteva vsak zapis posebej – to je le opozorilo za revizorja, ne posega v izračun.",
+    "show": "Prikaži",
+    "hide": "Skrij",
+    "disclaimer": "Pravilnik (Priloga 3) sešteje vsak COBISS zapis posebej, zato je to seznam zgolj informativen. Komisija pri kakovostni presoji (12. člen) lahko presodi, ali so podvojeni zapisi resnično ločeni intelektualni prispevki (npr. konferenčni prispevek + revija, SL + EN prevod, predtisk + končna različica) ali napaka v COBISS katalogizaciji – za katalogizacijsko higieno je odgovoren COBISS knjižničar.",
+    "th": {
+      "year": "Leto",
+      "typology": "Tipologija",
+      "cobissId": "COBISS ID",
+      "weight": "Utež",
+      "equivalent": "Ekv."
+    }
+  },
   "diagnostics": {
     "versionTooltip": "Različica aplikacije (UI/orodje)",
     "algoTooltip": "Različica algoritma / pravilnika, po kateri se računa",

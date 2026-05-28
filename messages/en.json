@@ -114,6 +114,20 @@
     "title": "Demo mode for the Open-Science requirement (Article 11, paragraph 6):",
     "body": "Article 11(6) is new and in this demo it is treated as fulfilled for every researcher because the rulebook is still a draft (proposal of 26 May 2026). The true open-access status is still computed and displayed on each title card and in the summary strip so candidates can see how many deposits separate them from 100 % coverage."
   },
+  "duplicates": {
+    "title": "Possible duplicates in the bibliography:",
+    "summary": "{groups, plural, one {# title} other {# titles}} appear more than once ({records} records, ~{eq} equivalents combined). The algorithm still counts each record separately – this is a reviewer hint, not a score adjustment.",
+    "show": "Show",
+    "hide": "Hide",
+    "disclaimer": "The rulebook (Annex 3) sums every COBISS record at its own weight, so this list is informational only. During qualitative review (Article 12) the commission can decide whether duplicate records represent genuinely distinct outputs (conference paper + journal version, SL + EN translation, preprint + final) or a cataloguing issue – COBISS cataloguing hygiene is the librarian's responsibility, not the calculator's.",
+    "th": {
+      "year": "Year",
+      "typology": "Typology",
+      "cobissId": "COBISS ID",
+      "weight": "Weight",
+      "equivalent": "Equiv."
+    }
+  },
   "diagnostics": {
     "versionTooltip": "Application version (UI / tooling)",
     "algoTooltip": "Algorithm / rulebook version driving the calculation",

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
 import { DiagnosticsBlock, VersionFooter } from '@/components/Diagnostics';
+import { DuplicatesStrip } from '@/components/DuplicatesStrip';
 import { GroupedBreakdown } from '@/components/GroupedBreakdown';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { MetadataPanel } from '@/components/MetadataPanel';
@@ -209,6 +210,10 @@ export function TitleCalculator({ locale }: Props) {
                 and show stale toggles for the new researcher. */}
             <SummaryStrip researcher={researcher} locale={locale} />
             <OpenScienceDemoBanner evaluations={evaluations} />
+            <DuplicatesStrip
+              key={`dups-${researcher.sicrisId}`}
+              publications={researcher.publications}
+            />
             <MetadataPanel
               key={`meta-${researcher.sicrisId}`}
               researcher={researcher}
