@@ -72,8 +72,10 @@
       },
       "yearsInResearchSector": "Years in the research sector",
       "externalProjectsFte": "Value of non-ARIS projects (FTE)",
-      "leadershipFte": "Cumulative led-projects value (FTE A)",
-      "leadershipYears": "Years in a leadership position",
+      "leadershipFte": "Pogoj 3 (a–d): cumulative value of completed led projects (FTE A)",
+      "leadershipYears": "Pogoj 3 (e): years in an executive function",
+      "leadershipYearsHelp": "Only the five rulebook-enumerated functions count: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group (at the Institute or an equivalent institution). Project leadership years do NOT belong here.",
+      "leadershipYearsTooltip": "At least 1 / 2 / 3 years holding an executive function: director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group.",
       "weight10Count": "Weight-1.0 achievements without typology (completed PhD mentorships, Zois/international awards)",
       "weight05Count": "Weight-0.5 achievements without typology (journal editorial board, completed leadership of research project/programme)",
       "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)",
@@ -81,8 +83,9 @@
       "reelectionHelp": "Tick if this is a re-election to the same title – the rulebook then requires at least half of every numeric threshold since the previous election.",
       "additionalDepositsLabel": "Additional deposits for Article 11(6)",
       "additionalDepositsHelp": "OpenAlex detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited – but OpenAlex has not yet indexed – or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
-      "ierLeadershipLabel": "Project leadership pre-filled from ier.si",
-      "ierLeadershipHelp": "From the IER website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), which is about {years} years in a leadership role. The value feeds Pogoj 3 if the manual »Years in a leadership position« field is empty. Projects for audit:",
+      "ierLeadershipLabel": "Project leadership from ier.si (audit only — does NOT auto-fill Pogoj 3)",
+      "ierLeadershipHelp": "From the IER website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), spanning about {years} years. Projects for audit:",
+      "ierLeadershipDisclaimer": "Important: project-leadership years do NOT by themselves satisfy Pogoj 3 path (e). The rulebook requires years holding an executive function (director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group). These projects are surfaced solely as audit evidence and can support manually entered FTE values for Pogoj 3 (a–d) or Pogoj 2 (value of non-ARIS projects).",
       "ierLeadershipMore": "… and {count} more led projects.",
       "authorshipPerPubLabel": "Per-publication authorship",
       "authorshipPerPubHelp": "The SICRIS bibliography does not expose who was first, lead or corresponding author, so every entry defaults to 0.7 (equal). Tag your actual role – the evaluator recomputes the publication equivalents. This is the single biggest accuracy lever.",
@@ -187,8 +190,8 @@
         "body": ": the official number for the rulebook check is SICRIS WoS (»čisti citati po WoS« – what ARIS evaluators see – fetched with a two-step call to bib.cobiss.net/biblioweb/cit/…). We also display OpenAlex (covers WoS + Scopus + Crossref + PubMed) as the broader-coverage diagnostic, with self-citations stripped via authorships.author.id matching."
       },
       "leadership": {
-        "head": "Project leadership",
-        "body": " (Pogoj 3) is pre-filled for IER researchers from ier.si/projekti – we match the »Vodja projekta« field. Years are derived from the union of led-project intervals. FTE values are entered manually (ier.si does not publish them); years can also be manually overridden."
+        "head": "Leadership capability (Pogoj 3)",
+        "body": ": the rulebook (Annex 3) offers two alternative paths. (a–d) Cumulative value of completed led projects ≥ 1 / 5 / 10 FTE category A (by career stage) – entered manually, because ier.si does not publish FTE. (e) At least 1 / 2 / 3 years holding an executive function: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group. Years of project leadership (from ier.si/projekti) do NOT qualify for path (e); they are shown as an audit list under the metadata panel, never auto-filled."
       },
       "openScience": {
         "head": "Open Science (Article 11, paragraph 6)",

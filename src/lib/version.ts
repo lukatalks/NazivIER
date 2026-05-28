@@ -5,7 +5,7 @@
 // them separate lets reviewers distinguish UI/tooling changes from changes
 // that affect researcher pass/fail.
 
-export const APP_VERSION = '2.7.1';
+export const APP_VERSION = '2.7.2';
 export const ALGO_VERSION = '2026-05-26-draft';
 export const COMMIT_SHA =
   process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ??

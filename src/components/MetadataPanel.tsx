@@ -151,7 +151,11 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
                 })
               }
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
+              title={t('fields.leadershipYearsTooltip')}
             />
+            <span className="mt-1 text-[10px] leading-snug text-[var(--muted)]">
+              {t('fields.leadershipYearsHelp')}
+            </span>
           </label>
 
           <label className="flex flex-col sm:col-span-2">
@@ -272,10 +276,14 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
             </label>
           ) : null}
 
-          {/* IER-website leadership pre-fill notice. The evaluator already uses
-              the scraped ledYears as a fallback for Pogoj 3, but we surface it
-              here as evidence so the user knows where the number came from
-              and can override it if reality differs. */}
+          {/* IER-website leadership audit panel.
+              v2.7.2: this block is now purely informational. Project-leadership
+              years from ier.si/projekti do NOT auto-fill Pogoj 3, because
+              Pravilnik Priloga 3 path (e) counts years only for the five
+              executive functions (direktor, predsednik UO, predsednik ZS,
+              vodja programske skupine, vodja infrastrukturne skupine). We
+              still surface the project rollup so reviewers can see what the
+              candidate has led and cross-reference manually. */}
           {r.ierProjectLeadership && r.ierProjectLeadership.ledCount > 0 ? (
             <div className="sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
               <div className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
@@ -295,6 +303,9 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
                 >
                   ier.si/projekti ↗
                 </a>
+              </p>
+              <p className="text-[10px] italic text-[var(--muted)] mt-1 max-w-3xl">
+                {t('fields.ierLeadershipDisclaimer')}
               </p>
               <ul className="mt-2 ml-4 list-disc text-xs space-y-1">
                 {r.ierProjectLeadership.led.slice(0, 8).map((p) => (

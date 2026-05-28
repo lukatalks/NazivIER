@@ -217,14 +217,28 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   };
 
   // Pogoj 3: zaključeno vodenje
-  // Use manual leadership entry when present; otherwise fall back to the
-  // IER-website rollup (years derived from union of led-project intervals).
-  // FTE values are NOT on ier.si, so the FTE side stays manual-only.
+  //
+  // Pravilnik Priloga 3 opens TWO alternative paths:
+  //
+  //   (a)–(d) Kumulativna vrednost zaključenih vodenih projektov:
+  //           ≥ 1 / 5 / 10 FTE kategorije A (po karierni stopnji).
+  //   (e)     Vsaj 1 / 2 / 3 leta opravljanja VODILNE FUNKCIJE,
+  //           izčrpno naštete: direktor, predsednik upravnega odbora,
+  //           predsednik znanstvenega sveta, vodja programske skupine,
+  //           vodja infrastrukturne skupine — na Inštitutu ali enakovredni
+  //           instituciji.
+  //
+  // Pomembno (v2.7.2, popravek po opozorilu sodelavke): »leta« iz poti (e)
+  // veljajo IZKLJUČNO za zgornjih pet vodilnih funkcij. NE veljajo za leta
+  // vodenja raziskovalnih projektov. Zato `ierProjectLeadership.ledYears`
+  // (unija intervalov vodenih projektov z ier.si/projekti) NE sme samodejno
+  // polniti tega polja — vodenje projekta ≠ vodilna funkcija.
+  // IER-projektni podatki ostanejo prikazani kot revizija/dokaz pod
+  // metadata-panelom, ne pa kot avtomatska vrednost za pogoj.
+  // FTE vrednost iz poti (a)–(d) tudi ostaja ročna, ker ier.si FTE-jev
+  // ne objavlja.
   const ldFte = researcher.leadership?.cumulativeFte ?? 0;
-  const ldYears =
-    researcher.leadership?.leadershipYears ??
-    researcher.ierProjectLeadership?.ledYears ??
-    0;
+  const ldYears = researcher.leadership?.leadershipYears ?? 0;
   const pog3Pass =
     c.minLeadershipFte == null && c.minLeadershipYears == null
       ? true
@@ -237,10 +251,11 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     evidence:
       c.minLeadershipFte == null
         ? `Ni zahtevan za ta naziv.`
-        : `Kumulativna vrednost vodenih projektov: ${fmt(ldFte)} FTE ` +
-          `(zahteva ≥ ${c.minLeadershipFte} FTE) ALI ` +
-          `vodilna funkcija: ${ldYears} let ` +
-          `(zahteva ≥ ${c.minLeadershipYears} let). ` +
+        : `(a–d) Kumulativna vrednost zaključenih vodenih projektov: ` +
+          `${fmt(ldFte)} FTE (zahteva ≥ ${c.minLeadershipFte} FTE kategorije A). ` +
+          `ALI (e) leta opravljanja vodilne funkcije (direktor, predsednik UO, ` +
+          `predsednik ZS, vodja programske ali infrastrukturne skupine): ` +
+          `${ldYears} let (zahteva ≥ ${c.minLeadershipYears} let). ` +
           (pog3Pass ? '✓ izpolnjen.' : '✗ ni izpolnjen.'),
   };
 

@@ -72,8 +72,10 @@
       },
       "yearsInResearchSector": "Let v raziskovalnem sektorju",
       "externalProjectsFte": "Vrednost projektov izven ARIS (FTE)",
-      "leadershipFte": "Kum. vrednost vodenih projektov (FTE A)",
-      "leadershipYears": "Let v vodilni funkciji",
+      "leadershipFte": "Pogoj 3 (a–d): kum. vrednost zaključenih vodenih projektov (FTE A)",
+      "leadershipYears": "Pogoj 3 (e): leta opravljanja vodilne funkcije",
+      "leadershipYearsHelp": "Samo izčrpno naštete funkcije iz pravilnika: direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine, vodja infrastrukturne skupine (na Inštitutu ali enakovredni instituciji). Leta vodenja projektov sem NE sodijo.",
+      "leadershipYearsTooltip": "Vsaj 1 / 2 / 3 leta opravljanja vodilne funkcije: direktor, predsednik UO, predsednik ZS, vodja programske skupine, vodja infrastrukturne skupine.",
       "weight10Count": "Dosežki uteži 1,0 brez tipologije (zaključena mentorstva pri doktoratu, Zoisova in mednarodne nagrade)",
       "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
       "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
@@ -81,8 +83,9 @@
       "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve.",
       "additionalDepositsLabel": "Dodatna deponiranja za pogoj 11(6)",
       "additionalDepositsHelp": "OpenAlex je zaznal {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje.",
-      "ierLeadershipLabel": "Pre-izpolnjeno vodenje projektov z ier.si",
-      "ierLeadershipHelp": "Z IER spletne strani smo zaznali, da kandidat vodi {count} projektov ({external} izven čistega ARIS financiranja), kar je približno {years} let v vodilni funkciji. Vrednost se uporabi za Pogoj 3, če ročno polje za »Let v vodilni funkciji« ni nastavljeno. Spodaj so projekti za revizijo:",
+      "ierLeadershipLabel": "Vodenje projektov z ier.si (revizija, ne polni Pogoja 3 samodejno)",
+      "ierLeadershipHelp": "Z IER spletne strani smo zaznali, da kandidat vodi {count} projektov ({external} izven čistega ARIS financiranja), v razponu približno {years} let. Spodaj so projekti za revizijo:",
+      "ierLeadershipDisclaimer": "Pomembno: leta vodenja projektov sama po sebi NE izpolnijo Pogoja 3, poti (e). Pravilnik tam zahteva leta opravljanja vodilne funkcije (direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine, vodja infrastrukturne skupine). Ti projekti so prikazani izključno kot dokaz za revizijo in lahko služijo kot podlaga za ročno vnesene FTE vrednosti pri Pogoju 3 (a–d) ali za Pogoj 2 (vrednost projektov izven ARIS).",
       "ierLeadershipMore": "… in še {count} drugih vodenih projektov.",
       "authorshipPerPubLabel": "Avtorstvo za posamezno publikacijo",
       "authorshipPerPubHelp": "SICRIS bibliografija ne pove, kdo je bil prvi, vodilni ali korespondenčni avtor, zato je za vse privzeto 0,7 (enakovredni). Označite svojo dejansko vlogo – evalvator bo ponovno preračunal ekvivalente publikacij. To je tisto, kar najbolj pomembno vpliva na natančnost izračuna.",
@@ -187,8 +190,8 @@
         "body": ": uradna številka za pogoj iz pravilnika je SICRIS WoS (»čisti citati po WoS«, ki ga vidijo evalvatorji ARIS – pridobimo jo z dvostopenjskim klicem na bib.cobiss.net/biblioweb/cit/…). Hkrati prikažemo OpenAlex (vključuje WoS, Scopus, Crossref, PubMed) kot diagnostiko z širšim naborom – OpenAlex citatom odštejemo avtocitate prek ujemanja authorships.author.id."
       },
       "leadership": {
-        "head": "Vodenje projektov",
-        "body": " (Pogoj 3) se za IER raziskovalce predizpolni iz ier.si/projekti – ujemamo polje »Vodja projekta«. Število let se izračuna kot unija intervalov vodenih projektov. FTE vrednost se vnaša ročno (ier.si je ne objavlja), ravno tako lahko ročno povozite število let."
+        "head": "Sposobnost vodenja (Pogoj 3)",
+        "body": ": pravilnik (Priloga 3) ponuja dve alternativni poti. (a–d) Kumulativna vrednost zaključenih vodenih projektov ≥ 1 / 5 / 10 FTE kategorije A (po karierni stopnji) – vnaša se ročno, ker ier.si FTE vrednosti ne objavlja. (e) Vsaj 1 / 2 / 3 leta opravljanja vodilne funkcije: direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine ali vodja infrastrukturne skupine. Leta vodenja projektov (z ier.si/projekti) NE sodijo v pot (e); prikazana so kot revizijski seznam pod metapodatki, ne pa kot avtomatska vrednost."
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
