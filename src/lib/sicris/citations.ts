@@ -84,7 +84,6 @@ async function _fetchSicrisCitations(
       headers: {
         'User-Agent': UA,
         'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'text/html,application/json',
       },
       body,
       redirect: 'manual',
@@ -98,19 +97,29 @@ async function _fetchSicrisCitations(
 
   if (!location) return null;
 
-  // Step 2: GET the generated JSON. Tiny retry because COBISS occasionally needs
-  // a moment to flush the file to disk between the redirect and our GET.
+  // Step 2: GET the generated JSON. We deliberately do NOT send an Accept
+  // header – COBISS serves the generated JSON file as application/json but
+  // its RESTEasy backend 500s when we explicitly negotiate Accept (returns
+  // "RESTEASY003635: No match for accept header"). Letting the server reply
+  // with whatever content-type it picks works. Tiny retry because COBISS
+  // occasionally needs a moment to flush the file to disk between the
+  // redirect and our GET.
   const delays = [0, 800, 2500];
   let json: unknown = null;
   for (const delay of delays) {
     if (delay > 0) await new Promise((r) => setTimeout(r, delay));
     try {
       const res = await fetch(location, {
-        headers: { 'User-Agent': UA, Accept: 'application/json' },
+        headers: { 'User-Agent': UA },
       });
       if (res.ok) {
-        json = await res.json();
-        break;
+        const text = await res.text();
+        try {
+          json = JSON.parse(text);
+          break;
+        } catch {
+          /* try again */
+        }
       }
     } catch {
       /* try again */
