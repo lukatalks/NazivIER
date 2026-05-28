@@ -6,12 +6,12 @@ export type CareerStage = 'I' | 'II' | 'II-sodelavec' | 'III' | 'IV';
 export type TitleGroup = 'znanstveni' | 'strokovno-raziskovalni' | 'razvojni';
 
 export type Title =
-  // I. karierna stopnja — asistentska
+  // I. karierna stopnja – asistentska
   | 'asistent'
   | 'asistent-mag'
   | 'razvijalec'
   | 'visji-razvijalec'
-  // I. karierna stopnja — strokovno-raziskovalna asistentska
+  // I. karierna stopnja – strokovno-raziskovalna asistentska
   | 'asistent-srr'
   | 'visji-asistent-srr'
   // II. karierna stopnja - prva polovica (asistenti z doktoratom)
@@ -57,9 +57,9 @@ export interface Publication {
 }
 
 export interface CitationData {
-  /** Web of Science clean citations (čisti citati) — autocitations excluded. */
+  /** Web of Science clean citations (čisti citati) – autocitations excluded. */
   wosCleanCitations: number;
-  /** Scopus clean citations — fallback if WoS missing. */
+  /** Scopus clean citations – fallback if WoS missing. */
   scopusCleanCitations?: number;
 }
 
@@ -111,7 +111,7 @@ export interface OpenScienceCompliance {
  *  Each is multiplied by the bucket weight (1.0 / 0.5 / 0.3) and the average
  *  authorship factor 0.7 (researcher can flag any of them as first/sole-author
  *  via the UI; for now we just multiply by 0.7 which matches a "co-mentor /
- *  co-editor" type role — conservative and explicit). */
+ *  co-editor" type role – conservative and explicit). */
 export interface ExtraAchievements {
   /** Weight 1.0: completed PhD mentorships + national/international science
    *  awards (Zois, Zois recognition, Excellent in Science, intl research awards). */

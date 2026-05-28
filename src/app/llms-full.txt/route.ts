@@ -1,4 +1,4 @@
-// /llms-full.txt — full reference for LLM crawlers
+// /llms-full.txt – full reference for LLM crawlers
 // Includes the complete methodology, weight tables, threshold tables, and API contract.
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nazivier.vercel.app';
@@ -7,7 +7,7 @@ export const dynamic = 'force-static';
 export const revalidate = 86400;
 
 export function GET() {
-  const body = `# NazivIER — full reference
+  const body = `# NazivIER – full reference
 
 NazivIER is an internal web application of the Institute for Economic Research (Inštitut za ekonomska raziskovanja, IER) in Ljubljana, Slovenia. It automatically evaluates whether a researcher meets the criteria for promotion to each researcher title under the new IER rulebook on researcher titles (proposed draft of 26 May 2026). The app is open-source (https://github.com/lukatalks/NazivIER), runs at ${SITE_URL}, and is available in Slovenian and English.
 
@@ -21,7 +21,7 @@ Given a SICRIS researcher ID (e.g. 33182 for dr. Kaja Primc), the app:
 4. Multiplies by the authorship factor (default 0.7 = equal authorship; user can override per publication).
 5. Sums into total equivalents (Pogoj 1).
 6. Checks citations OR external-project FTE against the per-title threshold (Pogoj 2).
-7. Checks leadership FTE/years (Pogoj 3) — manual input.
+7. Checks leadership FTE/years (Pogoj 3) – manual input.
 8. Determines eligibility for every title from sodelavec up to svetnik in all three title groups (scientific, professional-research, development).
 9. Returns a per-criterion pass/fail breakdown with the publication-level table that fed each calculation.
 

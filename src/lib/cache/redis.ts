@@ -1,5 +1,5 @@
 // Tiny cache abstraction backed by Upstash Redis (REST) with an in-memory
-// fallback for local dev. The fallback expires entries on access — keeps memory
+// fallback for local dev. The fallback expires entries on access – keeps memory
 // bounded in long-running server processes.
 //
 // Why Upstash REST vs node-redis: REST works in every runtime Vercel ships
@@ -11,7 +11,7 @@
 //   2) Copy UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
 //   3) `vercel env add UPSTASH_REDIS_REST_URL` (prod + preview + dev)
 //      `vercel env add UPSTASH_REDIS_REST_TOKEN` (prod + preview + dev)
-//   4) `vercel --prod` to redeploy. No code change needed — this module
+//   4) `vercel --prod` to redeploy. No code change needed – this module
 //      transparently switches from in-memory to Redis when both vars are set.
 
 import { Redis } from '@upstash/redis';
@@ -36,7 +36,7 @@ function getRedis(): Redis | null {
   return redisClient;
 }
 
-/** Cache hit reason — surfaced via response headers when caller wants to know. */
+/** Cache hit reason – surfaced via response headers when caller wants to know. */
 export type CacheStatus = 'redis-hit' | 'memory-hit' | 'miss' | 'no-cache';
 
 export interface CacheResult<T> {
@@ -93,7 +93,7 @@ export async function cached<T>(
   return value;
 }
 
-/** Diagnostic for /api/health — whether Redis is hot. */
+/** Diagnostic for /api/health – whether Redis is hot. */
 export function cacheBackend(): 'upstash-redis' | 'memory-only' {
   return getRedis() ? 'upstash-redis' : 'memory-only';
 }

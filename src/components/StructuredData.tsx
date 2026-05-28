@@ -2,7 +2,7 @@
 // Lists WebApplication, Organization, and Dataset schemas so search engines
 // and LLM crawlers understand what NazivIER is. All content is static
 // (built from i18n strings + roster constants), so there is no XSS risk
-// from the inline <script> tag — JSON.stringify never produces </script>
+// from the inline <script> tag – JSON.stringify never produces </script>
 // in its output, and `<` is escaped to < below as belt-and-suspenders.
 
 import type { Locale } from '@/i18n/config';
@@ -19,8 +19,8 @@ export function StructuredData({ locale }: Props) {
 
   const name =
     locale === 'sl'
-      ? 'NazivIER — kalkulator raziskovalnih nazivov'
-      : 'NazivIER — researcher-title calculator';
+      ? 'NazivIER – kalkulator raziskovalnih nazivov'
+      : 'NazivIER – researcher-title calculator';
 
   const description =
     locale === 'sl'
@@ -91,7 +91,7 @@ export function StructuredData({ locale }: Props) {
   };
 
   // Escape `<` to < per https://benadam.me/thoughts/react-script-tags/
-  // — protects against </script> sneaking in via any future dynamic content.
+  // – protects against </script> sneaking in via any future dynamic content.
   const json = JSON.stringify(graph).replace(/</g, '\\u003c');
 
   return (

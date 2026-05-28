@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* IER brand colors derived from the official IER wordmark (ier.si) and
-   secondary palette swatch — coral/red wordmark on white. */
+   secondary palette swatch – coral/red wordmark on white. */
 
 :root {
   --background: #ffffff;
@@ -9,9 +9,9 @@
   --muted: #6b7280;
   --muted-bg: #f5f3f1;          /* warm grey, complements IER coral */
   --border: #e7e3e0;
-  --primary: #a92825;            /* IER red — primary CTA */
+  --primary: #a92825;            /* IER red – primary CTA */
   --primary-foreground: #ffffff;
-  --accent: #a92825;             /* IER red — links/eyebrow */
+  --accent: #a92825;             /* IER red – links/eyebrow */
   --accent-soft: #f5e6e2;        /* soft coral wash for tinted areas */
   --success: #047857;
   --success-bg: #ecfdf5;
@@ -73,7 +73,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Legacy logo class — kept for the older inline single-file render. The new
+/* Legacy logo class – kept for the older inline single-file render. The new
    header uses two separate images (light + dark) so no filter trick is
    needed; see TitleCalculator header. */
 .ier-logo {

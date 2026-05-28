@@ -5,7 +5,7 @@ import { scimagoCoverage } from '@/lib/scimago/quartiles';
 
 export const runtime = 'nodejs';
 
-/** Minimal health endpoint — surfaces feature flags and snapshot freshness so
+/** Minimal health endpoint – surfaces feature flags and snapshot freshness so
  *  IER can see at a glance which integrations are hot. Not for monitoring,
  *  just for human debugging. */
 export async function GET() {

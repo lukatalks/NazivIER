@@ -1,13 +1,13 @@
 {
   "site": {
-    "title": "NazivIER — kalkulator raziskovalnih nazivov IER",
+    "title": "NazivIER – kalkulator raziskovalnih nazivov IER",
     "shortTitle": "NazivIER",
     "description": "Interno orodje Inštituta za ekonomska raziskovanja za samodejen izračun raziskovalnih nazivov po novem pravilniku, na podlagi podatkov iz SICRIS in OpenAlex.",
     "ogDescription": "Avtomatski izračun pogojev za izvolitev v raziskovalni naziv po pravilniku IER (predlog 26. 5. 2026). Bibliografija iz SICRIS, citati iz OpenAlex."
   },
   "header": {
     "eyebrow": "Inštitut za ekonomska raziskovanja · interno orodje",
-    "title": "NazivIER — kalkulator raziskovalnih nazivov",
+    "title": "NazivIER – kalkulator raziskovalnih nazivov",
     "subtitle1": "Avtomatski izračun izpolnjevanja pogojev po novem ",
     "subtitleEm": "Pravilniku o raziskovalnih nazivih",
     "subtitle2": " (predlog 26. 5. 2026), Priloge 2 in 3. Bibliografija iz SICRIS-a, citati iz OpenAlex (vključuje WoS, Scopus, Crossref)."
@@ -36,7 +36,7 @@
     "publicationsFromSicris": "Publikacij iz SICRIS",
     "citationsOpenAlex": "čisti citati",
     "hIndex": "h-indeks",
-    "openAlexNotFound": "OpenAlex zapis ni najden — preverite ime",
+    "openAlexNotFound": "OpenAlex zapis ni najden – preverite ime",
     "selfCitationsExcluded": "izključeno {self} avtocitatov od {raw}",
     "openScience": "odprti dostop {ratio} % ({count} po-2023 objav)",
     "groups": {
@@ -44,7 +44,7 @@
       "strokovno-raziskovalni": "Strokovno-raziskovalni",
       "razvojni": "Razvojni"
     },
-    "notEligible": "— ne dosega praga sodelavca —",
+    "notEligible": "– ne dosega praga sodelavca –",
     "stageStandards": "Stopnja {stage}. · {met}/{required} standardov · ekv.: {eq}",
     "matchType": {
       "orcid": "ujemanje po ORCID-u",
@@ -55,7 +55,7 @@
   },
   "metadata": {
     "title": "Podatki, ki jih ni v javnih virih",
-    "subtitle": "Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja so po pravilniku obvezna za izračun, vendar v javnih bazah niso dostopna — vnesite ali potrdite ročno.",
+    "subtitle": "Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja so po pravilniku obvezna za izračun, vendar v javnih bazah niso dostopna – vnesite ali potrdite ročno.",
     "open": "Uredi",
     "close": "Zapri",
     "fields": {
@@ -74,7 +74,7 @@
       "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
       "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
       "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
-      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv — pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve."
+      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve."
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",
@@ -123,11 +123,11 @@
       },
       "citations": {
         "head": "Čisti citati",
-        "body": " se pridobijo iz OpenAlex (openalex.org — agregira WoS, Scopus, Crossref, PubMed). Avtocitate odštejemo: za vsako objavo preštejemo, koliko citatov prihaja od istega avtorja (avtorstva.author.id ujemanje), in jih izključimo iz skupnega seštevka. Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
+        "body": " se pridobijo iz OpenAlex (openalex.org – agregira WoS, Scopus, Crossref, PubMed). Avtocitate odštejemo: za vsako objavo preštejemo, koliko citatov prihaja od istega avtorja (avtorstva.author.id ujemanje), in jih izključimo iz skupnega seštevka. Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
       },
       "leadership": {
         "head": "Vodenje projektov",
-        "body": " (Pogoj 3) ni samodejno izračunano — vnos je ročen po opredelitvah ARIS o kategoriji A FTE."
+        "body": " (Pogoj 3) ni samodejno izračunano – vnos je ročen po opredelitvah ARIS o kategoriji A FTE."
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
@@ -139,11 +139,11 @@
       },
       "reelection": {
         "head": "Ponovna izvolitev (22. člen, 2. odstavek)",
-        "body": ": če v meta-polju označite »ponovna izvolitev«, se vsi številčni pragovi razpolovijo — pravilnik zahteva izpolnitev vsaj polovice vrednosti od zadnje izvolitve."
+        "body": ": če v meta-polju označite »ponovna izvolitev«, se vsi številčni pragovi razpolovijo – pravilnik zahteva izpolnitev vsaj polovice vrednosti od zadnje izvolitve."
       }
     }
   },
-  "footer": "Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po COBISS tipologiji dokumentov/del. Citati: OpenAlex (vključuje WoS + Scopus + Crossref). Faktor avtorstva privzeto 0,7 (enakovredno avtorstvo) — ročno popraviti za prvega / korespondenčnega.",
+  "footer": "Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po COBISS tipologiji dokumentov/del. Citati: OpenAlex (vključuje WoS + Scopus + Crossref). Faktor avtorstva privzeto 0,7 (enakovredno avtorstvo) – ročno popraviti za prvega / korespondenčnega.",
   "languageSwitcher": {
     "label": "Jezik",
     "sl": "Slovenščina",

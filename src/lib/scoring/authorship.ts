@@ -1,4 +1,4 @@
-// Authorship factor (faktor avtorstva) — Pravilnik IER, Priloga 3, tabela 2.
+// Authorship factor (faktor avtorstva) – Pravilnik IER, Priloga 3, tabela 2.
 //
 // 1,0  Edini avtor, prvi avtor, vodilni/korespondenčni avtor, vodja projekta,
 //      glavni mentor, glavni urednik, edini prejemnik nagrade

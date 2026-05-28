@@ -1,9 +1,9 @@
 // SICRIS / COBISS data fetchers.
 //
 // Three layers:
-//   1) bibliography JSON (works, no auth)   — typology + COBISS IDs
-//   2) profile HTML (works, no auth)        — researcher name from biblio H3
-//   3) OpenAlex (separate module)           — citations (replaces fragile SICRIS scrape)
+//   1) bibliography JSON (works, no auth)   – typology + COBISS IDs
+//   2) profile HTML (works, no auth)        – researcher name from biblio H3
+//   3) OpenAlex (separate module)           – citations (replaces fragile SICRIS scrape)
 //
 // Network calls are kept in this file; parsing in ./parser.ts.
 
@@ -37,7 +37,7 @@ type SortKey =
   | 'AC';
 
 /** Fetch the COBISS-typed bibliography list (JSON). Retries on 5xx with backoff
- *  because SICRIS occasionally returns transient 500s — happens when the nginx
+ *  because SICRIS occasionally returns transient 500s – happens when the nginx
  *  front blows out its session cache. Two retries (1.5s, 4s) are enough in practice. */
 export async function fetchBibliography(
   sicrisId: string,
@@ -70,7 +70,7 @@ export async function fetchBibliography(
 
       const text = await res.text();
       if (!text.trim()) {
-        // Empty body — SICRIS sometimes returns 200 with nothing when overloaded.
+        // Empty body – SICRIS sometimes returns 200 with nothing when overloaded.
         lastErr = new Error(`SICRIS returned empty body for ${sicrisId}`);
         continue;
       }
@@ -115,7 +115,7 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
   // OpenAlex per-work data drives:
   //   (a) Q1/Q2 quartile tagging via SCImago ISSN lookup
   //   (b) Open Science compliance under Article 11(6)
-  //   (c) Self-citation exclusion (Article 13 — "čisti citati")
+  //   (c) Self-citation exclusion (Article 13 – "čisti citati")
   let works: OpenAlexWork[] = [];
   if (author?.openalexId) {
     try {
@@ -204,7 +204,7 @@ function tagJournalRanks(publications: Publication[], works: OpenAlexWork[]): Pu
     else p.journalRank = 'indexed-other';
   });
 
-  // Surface count via a non-enumerable hint? Not needed — we set journalRank.
+  // Surface count via a non-enumerable hint? Not needed – we set journalRank.
   void scimagoTagged;
   return publications;
 }

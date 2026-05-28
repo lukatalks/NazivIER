@@ -7,7 +7,7 @@ import { type Locale, locales } from '@/i18n/config';
 
 // `runtime` must be unset when paired with generateStaticParams; the Node
 // runtime handles ImageResponse just fine on Vercel.
-export const alt = 'NazivIER — kalkulator raziskovalnih nazivov IER';
+export const alt = 'NazivIER – kalkulator raziskovalnih nazivov IER';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 

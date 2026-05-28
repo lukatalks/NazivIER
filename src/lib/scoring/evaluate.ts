@@ -71,7 +71,7 @@ function fmt(n: number, decimals = 2): string {
  *  Returns both the sum and per-publication breakdown (sorted descending by
  *  contribution). Includes manual "extraAchievements" entries (PhD mentorships,
  *  science awards, editorial-board roles, special-issue editorships) that have
- *  no COBISS typology code — see types.ts for the rationale. Those entries
+ *  no COBISS typology code – see types.ts for the rationale. Those entries
  *  count at the bucket weight × 0.7 authorship factor (co-author/co-editor
  *  baseline) and are not listed in the `contributions` table (they have no
  *  publication record). They are added to the total only. */
@@ -96,7 +96,7 @@ export function computeEquivalents(r: Researcher): {
     total += eq;
   }
 
-  // Non-typology achievements (Annex 3, Pojasnila k merilom — text entries that
+  // Non-typology achievements (Annex 3, Pojasnila k merilom – text entries that
   // appear in the weight table without a COBISS code). Each counts at its
   // bucket weight × 0.7 (the conservative co-author/co-editor baseline).
   const ex = r.extraAchievements ?? { weight10Count: 0, weight05Count: 0, weight03Count: 0 };

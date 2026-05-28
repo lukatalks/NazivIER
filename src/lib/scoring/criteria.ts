@@ -1,11 +1,11 @@
-// Per-title threshold table — Pravilnik IER, Priloga 2 in Priloga 3.
+// Per-title threshold table – Pravilnik IER, Priloga 2 in Priloga 3.
 //
 // For each "sodelavec"-and-above title we record:
 //   * minimum education level (8/9/10 SOK)
 //   * required number of national/international standards met (0/1/2)
 //   * minimum equivalents (Pogoj 1)
 //   * minimum citations OR minimum external-project FTE (Pogoj 2)
-//   * leadership requirements (Pogoj 3) — cumulative FTE OR years in leadership
+//   * leadership requirements (Pogoj 3) – cumulative FTE OR years in leadership
 
 import type { EducationLevel, Title } from '@/lib/types';
 
@@ -16,12 +16,12 @@ export interface TitleCriteria {
   minEducation: EducationLevel;
   /** Number of Annex-3 standards that must be met (0/1/2). */
   standardsRequired: 0 | 1 | 2;
-  // Pogoj 1: equivalents — null when not required
+  // Pogoj 1: equivalents – null when not required
   minEquivalents: number | null;
-  // Pogoj 2 — null when not required (e.g. titles below sodelavec)
+  // Pogoj 2 – null when not required (e.g. titles below sodelavec)
   minCitations: number | null;
   minExternalProjectsFte: number | null;
-  // Pogoj 3 — leadership thresholds, null when not required
+  // Pogoj 3 – leadership thresholds, null when not required
   minLeadershipFte: number | null;
   minLeadershipYears: number | null;
   /** Optional minimum years of service in the research sector (only set for III/IV when early promotion). */
@@ -34,8 +34,8 @@ function row(c: TitleCriteria): TitleCriteria {
 }
 
 export const TITLE_CRITERIA: TitleCriteria[] = [
-  // ─── I. karierna stopnja — ASISTENTI ─────────────────────────────
-  // Per Pravilnik Annex 2: I-stage titles have no bibliometric standards —
+  // ─── I. karierna stopnja – ASISTENTI ─────────────────────────────
+  // Per Pravilnik Annex 2: I-stage titles have no bibliometric standards –
   // only education level matters (SOK 8/9/10). Evaluator still runs the three
   // Pogoji for completeness; they're informational, not blocking.
   row({
@@ -111,8 +111,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minLeadershipYears: null,
   }),
 
-  // ─── II. karierna stopnja — ASISTENT Z DOKTORATOM ────────────────
-  // Doctorate required (SOK 10) — no bibliometric standards still per Annex 2.
+  // ─── II. karierna stopnja – ASISTENT Z DOKTORATOM ────────────────
+  // Doctorate required (SOK 10) – no bibliometric standards still per Annex 2.
   row({
     title: 'asistent-dr',
     groupLabel: 'Asistent z doktoratom',

@@ -48,7 +48,7 @@ const json = async (url: string) => {
   return res.json();
 };
 
-/** Look up an author by ORCID — most reliable. */
+/** Look up an author by ORCID – most reliable. */
 async function byOrcid(orcid: string): Promise<OpenAlexAuthor | null> {
   const clean = orcid.replace(/^https?:\/\/orcid\.org\//, '');
   try {
@@ -123,7 +123,7 @@ export async function resolveAuthor(opts: {
   });
 }
 
-/** Per-work fingerprint we need from OpenAlex — used to (a) compute Open Science
+/** Per-work fingerprint we need from OpenAlex – used to (a) compute Open Science
  *  compliance under Article 11(6) and (b) count self-citations (Article 13). */
 export interface OpenAlexWork {
   /** OpenAlex work ID, e.g. "W2741809807" (we keep the full URL too). */
@@ -133,9 +133,9 @@ export interface OpenAlexWork {
   publicationYear: number;
   isOa: boolean;
   citedByCount: number;
-  /** Authorship objects with author IDs — used for self-citation detection. */
+  /** Authorship objects with author IDs – used for self-citation detection. */
   authorIds: string[];
-  /** Source quartile placeholder — OpenAlex doesn't directly expose SCImago Q1/Q2,
+  /** Source quartile placeholder – OpenAlex doesn't directly expose SCImago Q1/Q2,
    *  so we populate this later from the SCImago snapshot. */
   sourceIssn?: string;
 }
@@ -233,7 +233,7 @@ export async function countSelfCitations(workId: string, authorId: string): Prom
   });
 }
 
-/** Total clean citations for an author — total cited_by minus self-cites
+/** Total clean citations for an author – total cited_by minus self-cites
  *  across all of the author's works. Concurrency is capped at 6 to be polite. */
 export async function citationsExcludingSelf(
   works: OpenAlexWork[],

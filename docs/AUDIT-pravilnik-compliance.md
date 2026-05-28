@@ -1,11 +1,11 @@
-# NazivIER — Audit zoper Pravilnik IER (predlog 26. 5. 2026)
+# NazivIER – Audit zoper Pravilnik IER (predlog 26. 5. 2026)
 
 Datum revizije: 2026-05-27.
 Vir resnice: `docs/pravilnik.docx` (predlog 26. 5. 2026) + `docs/Tipologija_slv.pdf` (COBISS tipologija).
 
 ---
 
-## 1. Priloga 2 — Minimalni količinski pogoji (SOK + št. standardov)
+## 1. Priloga 2 – Minimalni količinski pogoji (SOK + št. standardov)
 
 Pregled vsakega naziva: izobrazba (SOK) in zahtevano število pogojev nacionalno/mednarodno primerljivih standardov.
 
@@ -23,38 +23,38 @@ Pregled vsakega naziva: izobrazba (SOK) in zahtevano število pogojev nacionalno
 
 Vir: `src/lib/scoring/criteria.ts`. Vsi vnosi se ujemajo z Prilogo 2.
 
-## 2. Priloga 3 — Pragovi posameznih standardov
+## 2. Priloga 3 – Pragovi posameznih standardov
 
 ### Znanstveni / Strokovno-raziskovalni nazivi
 
 | Standard | Sodelavec | Višji sodelavec | Svetnik | Status |
 |---|---|---|---|---|
 | Pogoj 1 (ekvivalenti) | 3 / 3 | 10 / 10 | 18 / 18 | ✓ |
-| Pogoj 2 — citati | 10 / 10 | 100 / 100 | 200 / 200 | ✓ |
-| Pogoj 2 — ALI projekti izven ARIS > FTE | 0,5 / 0,5 | 3 / 3 | 5 / 5 | ✓ |
-| Pogoj 3 — kum. FTE A | 1 / 1 | 5 / 5 | 10 / 10 | ✓ |
-| Pogoj 3 — ALI let v vodilni funkciji | 1 / 1 | 2 / 2 | 3 / 3 | ✓ |
+| Pogoj 2 – citati | 10 / 10 | 100 / 100 | 200 / 200 | ✓ |
+| Pogoj 2 – ALI projekti izven ARIS > FTE | 0,5 / 0,5 | 3 / 3 | 5 / 5 | ✓ |
+| Pogoj 3 – kum. FTE A | 1 / 1 | 5 / 5 | 10 / 10 | ✓ |
+| Pogoj 3 – ALI let v vodilni funkciji | 1 / 1 | 2 / 2 | 3 / 3 | ✓ |
 
 ### Razvojni nazivi
 
 | Standard | Sodelavec | Višji | Svetnik | Status |
 |---|---|---|---|---|
 | Pogoj 1 (ekvivalenti) | 2 / 2 | 5 / 5 | 18 / 18 | ✓ |
-| Pogoj 2 — citati | 5 / 5 | 50 / 50 | 200 / 200 | ✓ |
-| Pogoj 2 — ALI projekti izven ARIS > FTE | 0,5 / 0,5 | 3 / 3 | 5 / 5 | ✓ |
-| Pogoj 3 — kum. FTE A | 1 / 1 | 5 / 5 | 10 / 10 | ✓ |
-| Pogoj 3 — ALI let v vodilni funkciji | 1 / 1 | 2 / 2 | 3 / 3 | ✓ |
+| Pogoj 2 – citati | 5 / 5 | 50 / 50 | 200 / 200 | ✓ |
+| Pogoj 2 – ALI projekti izven ARIS > FTE | 0,5 / 0,5 | 3 / 3 | 5 / 5 | ✓ |
+| Pogoj 3 – kum. FTE A | 1 / 1 | 5 / 5 | 10 / 10 | ✓ |
+| Pogoj 3 – ALI let v vodilni funkciji | 1 / 1 | 2 / 2 | 3 / 3 | ✓ |
 
 Operator strogo *»več kot«* (`> 0,5 FTE`) ohranjen v `evaluate.ts`:
 `(externalProjectsFte ?? 0) > c.minExternalProjectsFte`. ✓
 
-## 3. Priloga 3 — Pojasnila k merilom (uteži dosežkov)
+## 3. Priloga 3 – Pojasnila k merilom (uteži dosežkov)
 
 ### Utež 1,0
 
 | Dosežek | NazivIER | Opomba |
 |---|---|---|
-| 1.01 Izvirni znanstveni članek v Q1/Q2 (1A1/1A2 v COBISS) | ✓ (dinamično) | Q1/Q2 detekcija heuristična — top kvartil 1.01/1.02 |
+| 1.01 Izvirni znanstveni članek v Q1/Q2 (1A1/1A2 v COBISS) | ✓ (dinamično) | Q1/Q2 detekcija heuristična – top kvartil 1.01/1.02 |
 | 1.02 Pregledni znanstveni članek v Q1/Q2 | ✓ (dinamično) | enako |
 | 1.16 Samostojni znanstveni sestavek/poglavje v monografski publikaciji | ✓ | |
 | 2.01 Znanstvena monografija | ✓ | |
@@ -90,8 +90,8 @@ Operator strogo *»več kot«* (`> 0,5 FTE`) ohranjen v `evaluate.ts`:
 | 2.32 Zbornik na domači konferenci | ✓ |
 | 3.14 Predavanje na tuji univerzi | ✓ |
 | 3.16 Vabljeno predavanje na konferenci brez natisa | ✓ |
-| Član uredništva znanstvene ali strokovne revije | ✓ (ročno) — polje »Dosežki uteži 0,5 brez tipologije« |
-| Vodenje domačega ali tujega raziskovalnega projekta/programa | ✓ (ročno) — isto polje |
+| Član uredništva znanstvene ali strokovne revije | ✓ (ročno) – polje »Dosežki uteži 0,5 brez tipologije« |
+| Vodenje domačega ali tujega raziskovalnega projekta/programa | ✓ (ročno) – isto polje |
 
 ### Utež 0,3
 
@@ -111,7 +111,7 @@ Operator strogo *»več kot«* (`> 0,5 FTE`) ohranjen v `evaluate.ts`:
 | 2.23 Patentna prijava | ✓ |
 | 2.30 Zbornik strokovnih/nerecenziranih prispevkov | ✓ |
 | 2.33 Strokovni film / videoposnetek / zvočni posnetek | ✓ |
-| Uredništvo posebne številke revije ali zbornika | ✓ (ročno) — polje »Dosežki uteži 0,3 brez tipologije« |
+| Uredništvo posebne številke revije ali zbornika | ✓ (ročno) – polje »Dosežki uteži 0,3 brez tipologije« |
 
 ### Utež 0,1
 
@@ -160,7 +160,7 @@ Izobrazba je *hard gate* (stroga predpogoj), ne en izmed treh standardov. ✓
 | Ponovne izvolitve (22. člen) | »Polovica vrednosti od zadnje izvolitve« ni modelirana. | Načrtovano: vnos datuma zadnje izvolitve in tipa »ponovna izvolitev«. |
 | Predčasna izvolitev (14. člen, 5. odst.) | Polje `yearsInResearchSector` se beleži, ne uporablja v izračunu. | Načrtovan informativni opozorilnik »upravičen do predčasne izvolitve«. |
 | Odprta znanost (11. člen, 6.–8. odst.) | Ne preverja repozitorija. | Načrtovan check prek OpenAlex `is_oa`. |
-| Asistentski nazivi | Ne ocenjujemo — le sodelavec in višje. | Po dogovoru: za asistenta velja samo izobrazbeni pogoj. |
+| Asistentski nazivi | Ne ocenjujemo – le sodelavec in višje. | Po dogovoru: za asistenta velja samo izobrazbeni pogoj. |
 
 ## 8. Zaključek
 

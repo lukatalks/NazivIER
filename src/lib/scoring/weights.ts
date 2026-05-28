@@ -14,7 +14,7 @@ const STATIC_WEIGHTS: Record<TypologyCode, number> = {
   '2.01': 1.0, // Znanstvena monografija
   '2.24': 1.0, // Patent s polnim preizkusom
 
-  // Weight 0.7 (1.01/1.02 also 0.7 when not Q1/Q2 — handled dynamically below)
+  // Weight 0.7 (1.01/1.02 also 0.7 when not Q1/Q2 – handled dynamically below)
   '1.03': 0.7, // Drugi znanstveni članki
   '1.06': 0.7, // Objavljeni znanstveni prispevek na konferenci (vabljeno)
   '1.07': 0.7, // Objavljeni strokovni prispevek na konferenci (vabljeno)
