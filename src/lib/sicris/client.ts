@@ -18,7 +18,7 @@ import {
 import { quartileForIssn } from '@/lib/scimago/quartiles';
 
 import { parseBibliographyJson } from './parser';
-import { fetchProfile, type SicrisProfile } from './profile';
+import { fetchProfile, inferEducationLevel, type SicrisProfile } from './profile';
 import { IER_ROSTER_SEED } from './roster';
 
 import type {
@@ -118,10 +118,19 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
   ]);
 
   const rosterEntry = IER_ROSTER_SEED.find((r) => r.sicrisId === sicrisId);
+  // Prefer the roster's full name for the OpenAlex lookup (includes ", mag."
+  // suffix that the SICRIS biblio H3 strips); fall back to the SICRIS profile.
+  const nameForLookup = rosterEntry?.fullName ?? profile.fullName;
   const author = await resolveAuthor({
-    name: profile.fullName,
+    name: nameForLookup,
     orcid: rosterEntry?.orcid,
   });
+
+  // Re-run education inference using the richer roster name so we pick up
+  // ", mag." suffixes that the biblio H3 doesn't expose. The profile's own
+  // inferredEducationLevel still wins if it's truthy.
+  const inferredEdu =
+    profile.inferredEducationLevel ?? inferEducationLevel(nameForLookup);
 
   // OpenAlex per-work data drives:
   //   (a) Q1/Q2 quartile tagging via SCImago ISSN lookup
@@ -169,7 +178,7 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     citations,
     openAlex: author ?? undefined,
     openScienceCompliance: osStats,
-    inferredEducationLevel: profile.inferredEducationLevel,
+    inferredEducationLevel: inferredEdu,
     citationDiagnostics: {
       rawTotal,
       selfExcluded,
