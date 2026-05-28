@@ -195,6 +195,43 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
               {t('fields.reelectionHelp')}
             </span>
           </label>
+
+          {/* "What if" simulation toggles. These never change input data – they
+              just tell the evaluator to bypass two common blockers so the user
+              can see which title the candidate would qualify for in a clean
+              scenario. */}
+          <fieldset className="sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
+            <legend className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+              {t('fields.simulationLabel')}
+            </legend>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              {t('fields.simulationHelp')}
+            </p>
+            <div className="mt-2 flex flex-col gap-2 text-sm">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!r.simulateMaxEducation}
+                  onChange={(e) =>
+                    onChange({ simulateMaxEducation: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-[var(--border)]"
+                />
+                {t('fields.simulateMaxEducation')}
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!r.simulateOpenScience}
+                  onChange={(e) =>
+                    onChange({ simulateOpenScience: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-[var(--border)]"
+                />
+                {t('fields.simulateOpenScience')}
+              </label>
+            </div>
+          </fieldset>
         </div>
       ) : null}
     </section>

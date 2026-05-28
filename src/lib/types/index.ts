@@ -89,6 +89,18 @@ export interface Researcher {
   /** Open Science compliance per Article 11(6). Each evaluated post-2023 publication
    *  must be deposited in an institutional or thematic repository (open access). */
   openScienceCompliance?: OpenScienceCompliance;
+  /** Simulation override – pretend the candidate has full Open-Science deposit
+   *  coverage so they are not blocked by Article 11(6) when running a "what
+   *  title would they get if the OS data were filled" scenario. */
+  simulateOpenScience?: boolean;
+  /** Simulation override – pretend the candidate has the highest education
+   *  level required (doktorat = SOK 10) so that titles are not blocked solely
+   *  by an unset / mismatched education field. Useful when the SOK level is
+   *  unknown or the auto-detection from the name failed. */
+  simulateMaxEducation?: boolean;
+  /** Auto-inferred SOK level from the SICRIS name parser. Used as a fallback
+   *  when educationLevel is not set by the user. */
+  inferredEducationLevel?: EducationLevel;
   /** Cached snapshot timestamp */
   fetchedAt?: string;
 }

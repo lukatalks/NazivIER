@@ -21,7 +21,13 @@ import { parseBibliographyJson } from './parser';
 import { fetchProfile, type SicrisProfile } from './profile';
 import { IER_ROSTER_SEED } from './roster';
 
-import type { CitationData, JournalRank, OpenScienceCompliance, Publication } from '@/lib/types';
+import type {
+  CitationData,
+  EducationLevel,
+  JournalRank,
+  OpenScienceCompliance,
+  Publication,
+} from '@/lib/types';
 
 const BIBLIO_BASE = 'https://bib.cobiss.net/biblioweb';
 
@@ -90,6 +96,9 @@ export interface ResearcherSnapshot {
   citations: CitationData;
   openAlex?: OpenAlexAuthor;
   openScienceCompliance?: OpenScienceCompliance;
+  /** SOK level guessed from the name (dr./mag.). Surface so the UI can
+   *  preselect the dropdown and unblock the evaluation immediately. */
+  inferredEducationLevel?: EducationLevel;
   /** Diagnostics for the UI: how citations were computed. */
   citationDiagnostics?: {
     rawTotal: number;
@@ -103,7 +112,9 @@ export interface ResearcherSnapshot {
 export async function fetchResearcherSnapshot(sicrisId: string): Promise<ResearcherSnapshot> {
   const [publications, profile] = await Promise.all([
     fetchBibliography(sicrisId),
-    fetchProfile(sicrisId).catch(() => ({ sicrisId, fullName: `SICRIS #${sicrisId}` })),
+    fetchProfile(sicrisId).catch(
+      (): SicrisProfile => ({ sicrisId, fullName: `SICRIS #${sicrisId}` }),
+    ),
   ]);
 
   const rosterEntry = IER_ROSTER_SEED.find((r) => r.sicrisId === sicrisId);
@@ -158,6 +169,7 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     citations,
     openAlex: author ?? undefined,
     openScienceCompliance: osStats,
+    inferredEducationLevel: profile.inferredEducationLevel,
     citationDiagnostics: {
       rawTotal,
       selfExcluded,

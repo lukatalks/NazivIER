@@ -13,6 +13,7 @@ import type { Locale } from '@/i18n/config';
 import { evaluateAll, highestEligible, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import type {
   CitationData,
+  EducationLevel,
   OpenScienceCompliance,
   Publication,
   Researcher,
@@ -42,6 +43,7 @@ interface ResearcherResponse {
   citations: CitationData;
   openAlex?: OpenAlexInfo;
   openScienceCompliance?: OpenScienceCompliance;
+  inferredEducationLevel?: EducationLevel;
   citationDiagnostics?: CitationDiagnostics;
   fetchedAt: string;
 }
@@ -88,6 +90,10 @@ export function TitleCalculator({ locale }: Props) {
         fullName: data.profile?.fullName ?? fallbackLabel,
         publications: data.publications,
         citations: data.citations,
+        // Preselect the SOK dropdown when the name parser detected dr./mag.
+        // so the eligibility check is not blocked by an unset education field.
+        educationLevel: data.inferredEducationLevel,
+        inferredEducationLevel: data.inferredEducationLevel,
         fetchedAt: data.fetchedAt,
         openAlex: data.openAlex,
         openScienceCompliance: data.openScienceCompliance,

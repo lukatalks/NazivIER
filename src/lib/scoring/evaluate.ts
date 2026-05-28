@@ -225,9 +225,21 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   const standards: [StandardResult, StandardResult, StandardResult] = [pog1, pog2, pog3];
   const standardsMet = standards.filter((s) => s.passed).length;
 
-  // Education
-  const eduLevel = researcher.educationLevel ?? 0;
-  const educationOk = eduLevel >= c.minEducation;
+  // Education resolution order:
+  //   1) explicit researcher.educationLevel (user dropdown)
+  //   2) researcher.inferredEducationLevel (auto-detected from "dr."/"mag." in the
+  //      SICRIS name) – kicks in when the user has not yet touched the dropdown,
+  //      which prevents the "everyone gets the same low score" trap
+  //   3) simulation toggle "simulateMaxEducation" → SOK 10 (doktorat)
+  //   4) 0 (fail)
+  const simulated = researcher.simulateMaxEducation ? 10 : 0;
+  const eduLevel =
+    researcher.educationLevel ??
+    researcher.inferredEducationLevel ??
+    simulated ??
+    0;
+  const educationOk =
+    !!researcher.simulateMaxEducation || eduLevel >= c.minEducation;
 
   // Pogoj 1 is always counted toward standards required.
   // For "sodelavec" tier we need 1 of 3; for III/IV we need 2 of 3.
@@ -267,18 +279,24 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   }
 
   // ─── Article 11(6): Open Science check ─────────────────────────────────
-  // We pass when either no OS data is loaded OR every post-2023 evaluated
-  // publication has open access (is_oa true in OpenAlex).
+  // We pass when:
+  //   - simulation toggle "simulateOpenScience" is on (what-if scenario), OR
+  //   - no OS data is loaded (nothing to check), OR
+  //   - every post-2023 evaluated publication has open access (is_oa true in
+  //     OpenAlex), per Article 11(6) implementing Uredba 59/23.
   const os = researcher.openScienceCompliance;
   const osHasData = os && os.postOrdinanceCount > 0;
-  const osPass = !osHasData || os.fullyCompliant;
-  const osEv = !osHasData
-    ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
-    : os.fullyCompliant
-      ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
-      : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
-          os.ratio * 100,
-        )} %). Pogoj iz 11(6). člena ni v celoti izpolnjen.`;
+  const osNaturalPass = !osHasData || os.fullyCompliant;
+  const osPass = !!researcher.simulateOpenScience || osNaturalPass;
+  const osEv = researcher.simulateOpenScience
+    ? 'Simulacija: pogoj odprte znanosti je obravnavan kot izpolnjen (»kaj če« scenarij).'
+    : !osHasData
+      ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
+      : os.fullyCompliant
+        ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
+        : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
+            os.ratio * 100,
+          )} %). Pogoj iz 11(6). člena ni v celoti izpolnjen.`;
 
   const blockingReasons: string[] = [];
   if (!educationOk)
@@ -289,7 +307,7 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     blockingReasons.push(
       `Izpolnjenih ${standardsMet} od potrebnih ${c.standardsRequired} pogojev nacionalno/mednarodno primerljivih standardov.`,
     );
-  if (osHasData && !osPass)
+  if (osHasData && !osNaturalPass && !researcher.simulateOpenScience)
     blockingReasons.push(
       `Po-2023 objave niso vse v odprtem dostopu (11. člen, 6. odstavek).`,
     );

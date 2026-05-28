@@ -59,10 +59,24 @@ async function byOrcid(orcid: string): Promise<OpenAlexAuthor | null> {
   }
 }
 
+/** Strip academic-degree noise that breaks OpenAlex name search.
+ *  Examples: "dr. Kaja Primc" → "Kaja Primc",
+ *            "mag. Klemen Koman" → "Klemen Koman",
+ *            "Enia Bearzotti, mag." → "Enia Bearzotti",
+ *            "prof. dr. Foo Bar" → "Foo Bar". */
+export function cleanResearcherName(name: string): string {
+  return name
+    // Trailing degree suffixes: ", mag.", ", dr.", ", prof." etc.
+    .replace(/,\s*(mag|dr|prof|univ)\.[\s.]*$/i, '')
+    // Leading degree prefixes: "dr.", "mag.", "prof.", "univ. prof. dr." etc.
+    .replace(/^(?:(?:dr|mag|prof|univ)\.\s*)+/i, '')
+    .trim();
+}
+
 /** Search by name, prefer authors affiliated with IER. */
 async function byName(name: string): Promise<OpenAlexAuthor | null> {
   // Step 1: try with IER institution filter.
-  const cleanedName = name.replace(/^dr\.\s*/i, '').trim();
+  const cleanedName = cleanResearcherName(name);
   try {
     const filtered = await json(
       `${BASE}/authors?search=${encodeURIComponent(cleanedName)}` +

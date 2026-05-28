@@ -40,7 +40,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // Pogoji for completeness; they're informational, not blocking.
   row({
     title: 'asistent',
-    groupLabel: 'Asistent (znanstveni)',
+    groupLabel: 'Asistent / asistentka (znanstveni)',
     stage: 'I',
     minEducation: 8,
     standardsRequired: 0,
@@ -52,7 +52,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'asistent-mag',
-    groupLabel: 'Asistent z magisterijem znanosti',
+    groupLabel: 'Asistent z magisterijem znanosti / asistentka z magisterijem znanosti',
     stage: 'I',
     minEducation: 9,
     standardsRequired: 0,
@@ -64,7 +64,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'asistent-srr',
-    groupLabel: 'Asistent (strokovno-raziskovalni)',
+    groupLabel: 'Asistent / asistentka (strokovno-raziskovalni)',
     stage: 'I',
     minEducation: 8,
     standardsRequired: 0,
@@ -76,7 +76,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'visji-asistent-srr',
-    groupLabel: 'Višji asistent (strokovno-raziskovalni)',
+    groupLabel: 'Višji asistent / višja asistentka (strokovno-raziskovalni)',
     stage: 'I',
     minEducation: 9,
     standardsRequired: 0,
@@ -88,7 +88,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'razvijalec',
-    groupLabel: 'Razvijalec',
+    groupLabel: 'Razvijalec / razvijalka',
     stage: 'I',
     minEducation: 8,
     standardsRequired: 0,
@@ -100,7 +100,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'visji-razvijalec',
-    groupLabel: 'Višji razvijalec',
+    groupLabel: 'Višji razvijalec / višja razvijalka',
     stage: 'I',
     minEducation: 8,
     standardsRequired: 0,
@@ -115,7 +115,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // Doctorate required (SOK 10) – no bibliometric standards still per Annex 2.
   row({
     title: 'asistent-dr',
-    groupLabel: 'Asistent z doktoratom',
+    groupLabel: 'Asistent z doktoratom / asistentka z doktoratom',
     stage: 'II',
     minEducation: 10,
     standardsRequired: 0,
@@ -127,7 +127,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'visji-strokovno-raziskovalni-asistent',
-    groupLabel: 'Višji strokovno-raziskovalni asistent',
+    groupLabel: 'Višji strokovno-raziskovalni asistent / višja strokovno-raziskovalna asistentka',
     stage: 'II',
     minEducation: 10,
     standardsRequired: 0,
@@ -139,7 +139,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'samostojni-razvijalec',
-    groupLabel: 'Samostojni razvijalec',
+    groupLabel: 'Samostojni razvijalec / samostojna razvijalka',
     stage: 'II',
     minEducation: 8,
     standardsRequired: 0,
@@ -153,7 +153,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // ─── ZNANSTVENI ─── II.b sodelavec
   row({
     title: 'znanstveni-sodelavec',
-    groupLabel: 'Znanstveni sodelavec',
+    groupLabel: 'Znanstveni sodelavec / znanstvena sodelavka',
     stage: 'II',
     minEducation: 10,
     standardsRequired: 1,
@@ -166,7 +166,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // III. višji znanstveni sodelavec
   row({
     title: 'visji-znanstveni-sodelavec',
-    groupLabel: 'Višji znanstveni sodelavec',
+    groupLabel: 'Višji znanstveni sodelavec / višja znanstvena sodelavka',
     stage: 'III',
     minEducation: 10,
     standardsRequired: 2,
@@ -179,7 +179,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // IV. znanstveni svetnik
   row({
     title: 'znanstveni-svetnik',
-    groupLabel: 'Znanstveni svetnik',
+    groupLabel: 'Znanstveni svetnik / znanstvena svetnica',
     stage: 'IV',
     minEducation: 10,
     standardsRequired: 2,
@@ -193,7 +193,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // ─── STROKOVNO-RAZISKOVALNI ─── (same equivalents/citations as scientific per Annex 3)
   row({
     title: 'strokovno-raziskovalni-sodelavec',
-    groupLabel: 'Strokovno-raziskovalni sodelavec',
+    groupLabel: 'Strokovno-raziskovalni sodelavec / strokovno-raziskovalna sodelavka',
     stage: 'II',
     minEducation: 10,
     standardsRequired: 1,
@@ -205,7 +205,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'visji-strokovno-raziskovalni-sodelavec',
-    groupLabel: 'Višji strokovno-raziskovalni sodelavec',
+    groupLabel: 'Višji strokovno-raziskovalni sodelavec / višja strokovno-raziskovalna sodelavka',
     stage: 'III',
     minEducation: 10,
     standardsRequired: 2,
@@ -217,7 +217,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'strokovno-raziskovalni-svetnik',
-    groupLabel: 'Strokovno-raziskovalni svetnik',
+    groupLabel: 'Strokovno-raziskovalni svetnik / strokovno-raziskovalna svetnica',
     stage: 'IV',
     minEducation: 10,
     standardsRequired: 2,
@@ -231,7 +231,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   // ─── RAZVOJNI ───
   row({
     title: 'razvojni-sodelavec',
-    groupLabel: 'Razvojni sodelavec',
+    groupLabel: 'Razvojni sodelavec / razvojna sodelavka',
     stage: 'II',
     minEducation: 8,
     standardsRequired: 1,
@@ -243,7 +243,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'visji-razvojni-sodelavec',
-    groupLabel: 'Višji razvojni sodelavec',
+    groupLabel: 'Višji razvojni sodelavec / višja razvojna sodelavka',
     stage: 'III',
     minEducation: 8,
     standardsRequired: 2,
@@ -255,7 +255,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
   }),
   row({
     title: 'razvojni-svetnik',
-    groupLabel: 'Razvojni svetnik',
+    groupLabel: 'Razvojni svetnik / razvojna svetnica',
     stage: 'IV',
     minEducation: 9,
     standardsRequired: 2,

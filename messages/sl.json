@@ -74,7 +74,11 @@
       "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
       "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
       "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
-      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve."
+      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve.",
+      "simulationLabel": "Simulacija (»kaj če«)",
+      "simulationHelp": "Z naslednjima stikaloma lahko preskočite pogoja, ki ju trenutno blokira ena sama manjkajoča informacija. Surovi podatki SICRIS-a in OpenAlex se ne spremenijo – le evalvator obravnava ta dva pogoja, kot da sta izpolnjena.",
+      "simulateMaxEducation": "Predpostavi najvišjo zahtevano izobrazbo (10. SOK – doktorat) – uporabno, ko sistem napačno bere ime ali ko raven izobrazbe še ni potrjena.",
+      "simulateOpenScience": "Predpostavi, da je pogoj odprte znanosti (11. člen, 6. odstavek) izpolnjen – uporabno, ko OpenAlex še nima OA-podatkov za nove objave."
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",
@@ -131,7 +135,7 @@
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
-        "body": ": za znanstvene objave po Uredbi 59/23 (2024 in pozneje) mora kandidat zagotoviti odprti dostop v institucionalnem ali tematskem repozitoriju. Stanje pridobimo iz OpenAlex (open_access.is_oa)."
+        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 26. 5. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Za znanstvene objave po uveljavitvi te uredbe (2024 in pozneje) mora kandidat zagotoviti odprti dostop v institucionalnem ali tematskem repozitoriju, razen kjer to onemogočajo založniške omejitve. Stanje pridobimo iz OpenAlex (open_access.is_oa)."
       },
       "earlyPromotion": {
         "head": "Predčasna izvolitev (14. člen, 5. odstavek)",
