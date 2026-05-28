@@ -2,6 +2,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { Metadata, Viewport } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import { type Locale, locales } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
@@ -103,6 +104,7 @@ export default async function LocaleLayout({
     <html lang={locale} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
