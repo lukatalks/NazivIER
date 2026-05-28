@@ -201,10 +201,23 @@ export function TitleCalculator({ locale }: Props) {
 
         {researcher ? (
           <>
+            {/* `key={researcher.sicrisId}` on the per-researcher subtrees
+                forces React to unmount + remount when the user picks a
+                different researcher. Without it, MetadataPanel's open
+                state and GroupedBreakdown's opened group (+ each
+                EvaluationCard's expansion) would persist across the swap
+                and show stale toggles for the new researcher. */}
             <SummaryStrip researcher={researcher} locale={locale} />
             <OpenScienceDemoBanner evaluations={evaluations} />
-            <MetadataPanel researcher={researcher} onChange={patchResearcher} />
-            <GroupedBreakdown evaluations={evaluations} />
+            <MetadataPanel
+              key={`meta-${researcher.sicrisId}`}
+              researcher={researcher}
+              onChange={patchResearcher}
+            />
+            <GroupedBreakdown
+              key={`breakdown-${researcher.sicrisId}`}
+              evaluations={evaluations}
+            />
             <Methodology />
           </>
         ) : null}
