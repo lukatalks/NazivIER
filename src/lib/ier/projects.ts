@@ -65,7 +65,9 @@ export interface IerProject {
 
 /** Fetch and parse all projects currently visible on the IER website. */
 export async function fetchIerProjects(): Promise<IerProject[]> {
-  return cached('ier:projects:current', TTL_SEC, async () => {
+  // Cache key suffixed with parser revision; bump when the parser changes so
+  // earlier (raw-entity) snapshots don't survive a deploy.
+  return cached('ier:projects:current:v2', TTL_SEC, async () => {
     try {
       const res = await fetch(PROJECTS_URL, {
         headers: { 'User-Agent': UA, Accept: 'text/html' },
