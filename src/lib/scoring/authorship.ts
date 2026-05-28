@@ -1,9 +1,14 @@
 // Authorship factor (faktor avtorstva) – Pravilnik IER, Priloga 3, tabela 2.
 //
-// 1,0  Edini avtor, prvi avtor, vodilni/korespondenčni avtor, vodja projekta,
-//      glavni mentor, glavni urednik, edini prejemnik nagrade
-// 0,7  Enakovredno avtorstvo, nagrada z več nagrajenci, somentor, sourednik
-// 0,3  Ostala soavtorstva
+// 1,0  Prvi avtor, vodilni avtor, korespondenčni avtor (single author of
+//      record, project leader, principal mentor, sole award recipient).
+// 0,7  Enakovredno avtorstvo (equal authorship, co-mentor, co-editor, joint
+//      award).
+// 0,3  Ostalo avtorstvo (other co-authorship).
+//
+// Label wording aligns with the supervisor's 2026-05-28 review note:
+// "prvi, vodilni, korespondencni (1.0); enakovredni (0.7); ostalo avtorstvo
+// (0.3)".
 
 import type { AuthorshipRole } from '@/lib/types';
 
@@ -25,11 +30,11 @@ export function authorshipFactor(role?: AuthorshipRole): number {
 export function authorshipLabel(role?: AuthorshipRole): string {
   switch (role) {
     case 'first-or-corresponding':
-      return 'Prvi / korespondenčni';
+      return 'Prvi / vodilni / korespondenčni';
     case 'equal-or-co':
-      return 'Enakovredno avtorstvo';
+      return 'Enakovredni';
     case 'other-coauthor':
-      return 'Ostalo soavtorstvo';
+      return 'Ostalo avtorstvo';
     default:
       return 'Privzeto (enakovredno)';
   }

@@ -7,6 +7,7 @@
 //
 // Network calls are kept in this file; parsing in ./parser.ts.
 
+import { fetchIerProjects, projectsForResearcher } from '@/lib/ier/projects';
 import {
   citationsExcludingSelf,
   computeOpenScienceStats,
@@ -17,6 +18,7 @@ import {
 } from '@/lib/openalex/client';
 import { quartileForIssn } from '@/lib/scimago/quartiles';
 
+import { fetchSicrisCitations, type SicrisCitationSummary } from './citations';
 import { parseBibliographyJson } from './parser';
 import { fetchProfile, inferEducationLevel, type SicrisProfile } from './profile';
 import { IER_ROSTER_SEED } from './roster';
@@ -24,6 +26,7 @@ import { IER_ROSTER_SEED } from './roster';
 import type {
   CitationData,
   EducationLevel,
+  IerProjectLeadershipSummary,
   JournalRank,
   OpenScienceCompliance,
   Publication,
@@ -104,17 +107,29 @@ export interface ResearcherSnapshot {
     rawTotal: number;
     selfExcluded: number;
     clean: number;
-    method: 'openalex-self-excluded' | 'openalex-raw';
+    method:
+      | 'openalex-self-excluded'
+      | 'openalex-raw'
+      | 'sicris-wos'
+      | 'sicris-wos+openalex';
+    /** Did the SICRIS scrape succeed? */
+    sicrisFetched: boolean;
   };
+  /** Auto-scraped IER project leadership for Pogoj 3. */
+  ierProjectLeadership?: IerProjectLeadershipSummary;
 }
 
 /** All-in-one fetch used by the API route. */
 export async function fetchResearcherSnapshot(sicrisId: string): Promise<ResearcherSnapshot> {
-  const [publications, profile] = await Promise.all([
+  // Run the three independent SICRIS/COBISS/IER calls in parallel. Each one
+  // tolerates failure on its own and we fall back to sensible defaults below.
+  const [publications, profile, sicrisCit, ierProjects] = await Promise.all([
     fetchBibliography(sicrisId),
     fetchProfile(sicrisId).catch(
       (): SicrisProfile => ({ sicrisId, fullName: `SICRIS #${sicrisId}` }),
     ),
+    fetchSicrisCitations(sicrisId, 'W').catch(() => null as SicrisCitationSummary | null),
+    fetchIerProjects().catch(() => []),
   ]);
 
   const rosterEntry = IER_ROSTER_SEED.find((r) => r.sicrisId === sicrisId);
@@ -154,23 +169,82 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
   // per-work pass fails.
   let rawTotal = author?.citedByCount ?? 0;
   let selfExcluded = 0;
-  let cleanTotal = rawTotal;
-  let method: 'openalex-self-excluded' | 'openalex-raw' = 'openalex-raw';
+  let openAlexClean = rawTotal;
+  let oaMethod: 'openalex-self-excluded' | 'openalex-raw' = 'openalex-raw';
   if (author?.openalexId && works.length > 0) {
     try {
       const r = await citationsExcludingSelf(works, author.openalexId);
       rawTotal = r.total;
       selfExcluded = r.self;
-      cleanTotal = r.clean;
-      method = 'openalex-self-excluded';
+      openAlexClean = r.clean;
+      oaMethod = 'openalex-self-excluded';
     } catch {
       /* fall through to raw count */
     }
   }
 
+  // SICRIS-sourced WoS clean citations. When the scrape succeeds, this is the
+  // figure ARIS evaluators would quote, so we promote it to the primary
+  // `wosCleanCitations` slot. OpenAlex stays available as a broader-coverage
+  // diagnostic alongside.
+  const sicrisWos = sicrisCit?.cleanCitations;
+  const usingSicris = typeof sicrisWos === 'number' && sicrisCit !== null;
+  const primaryCit = usingSicris ? (sicrisWos as number) : openAlexClean;
+  const primarySource: NonNullable<CitationData['primarySource']> = usingSicris
+    ? 'sicris-wos'
+    : openAlexClean > 0
+      ? 'openalex'
+      : 'none';
+  const diagnosticsMethod: ResearcherSnapshot['citationDiagnostics'] = usingSicris
+    ? {
+        rawTotal,
+        selfExcluded,
+        clean: primaryCit,
+        method:
+          oaMethod === 'openalex-self-excluded'
+            ? 'sicris-wos+openalex'
+            : 'sicris-wos',
+        sicrisFetched: true,
+      }
+    : {
+        rawTotal,
+        selfExcluded,
+        clean: openAlexClean,
+        method: oaMethod,
+        sicrisFetched: false,
+      };
+
   const citations: CitationData = {
-    wosCleanCitations: cleanTotal,
+    wosCleanCitations: primaryCit,
+    sicrisWosCleanCitations: sicrisWos,
+    sicrisHIndexWos: sicrisCit?.hIndex,
+    openAlexCleanCitations: openAlexClean,
+    openAlexHIndex: author?.hIndex,
+    primarySource,
   };
+
+  // Project leadership rollup from the IER website.
+  const projectRollup =
+    ierProjects.length > 0
+      ? projectsForResearcher(ierProjects, nameForLookup)
+      : null;
+  const projectSummary: IerProjectLeadershipSummary | undefined = projectRollup
+    ? {
+        ledCount: projectRollup.ledCount,
+        ledYears: projectRollup.ledYears,
+        ledExternalCount: projectRollup.ledExternalCount,
+        led: projectRollup.led.map((p) => ({
+          title: p.title,
+          funder: p.funder,
+          code: p.code,
+          startDate: p.startDate,
+          endDate: p.endDate,
+          projectType: p.projectType,
+          url: p.url,
+        })),
+        sourceUrl: projectRollup.sourceUrl,
+      }
+    : undefined;
 
   return {
     profile,
@@ -179,12 +253,8 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     openAlex: author ?? undefined,
     openScienceCompliance: osStats,
     inferredEducationLevel: inferredEdu,
-    citationDiagnostics: {
-      rawTotal,
-      selfExcluded,
-      clean: cleanTotal,
-      method,
-    },
+    citationDiagnostics: diagnosticsMethod,
+    ierProjectLeadership: projectSummary,
   };
 }
 

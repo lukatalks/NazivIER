@@ -1,3 +1,5 @@
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -103,6 +105,11 @@ export default async function LocaleLayout({
     <html lang={locale} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        {/* Vercel-side analytics + page insights – no PII, sampled by Vercel,
+            collects only path + UA. Activated automatically on Vercel; in
+            local dev these components no-op. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

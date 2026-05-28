@@ -57,10 +57,23 @@ export interface Publication {
 }
 
 export interface CitationData {
-  /** Web of Science clean citations (čisti citati) – autocitations excluded. */
+  /** Primary citation number used for the rulebook Pogoj 2 check. Prefers
+   *  SICRIS "čisti citati po WoS" (the figure ARIS reviewers see) when the
+   *  SICRIS scrape succeeds; falls back to OpenAlex (broader-coverage,
+   *  self-citation-stripped) when SICRIS is unavailable. */
   wosCleanCitations: number;
   /** Scopus clean citations – fallback if WoS missing. */
   scopusCleanCitations?: number;
+  /** SICRIS-sourced figures (what an ARIS/IER reviewer would quote). */
+  sicrisWosCleanCitations?: number;
+  sicrisScopusCleanCitations?: number;
+  sicrisHIndexWos?: number;
+  sicrisHIndexScopus?: number;
+  /** OpenAlex-sourced figures (broader coverage diagnostic). */
+  openAlexCleanCitations?: number;
+  openAlexHIndex?: number;
+  /** Which source is currently driving the rulebook citation check. */
+  primarySource?: 'sicris-wos' | 'openalex' | 'manual' | 'none';
 }
 
 export interface Researcher {
@@ -99,8 +112,34 @@ export interface Researcher {
   /** Auto-inferred SOK level from the SICRIS name parser. Used as a fallback
    *  when educationLevel is not set by the user. */
   inferredEducationLevel?: EducationLevel;
+  /** Auto-scraped IER leadership rollup. When present and the user hasn't
+   *  manually overridden `leadership`, the evaluator uses these counts so
+   *  Pogoj 3 reflects the institute's own record without retyping. */
+  ierProjectLeadership?: IerProjectLeadershipSummary;
   /** Cached snapshot timestamp */
   fetchedAt?: string;
+}
+
+/** Lightweight snapshot of the researcher's leadership footprint on
+ *  https://www.ier.si/projekti/ – used to pre-fill Pogoj 3 evidence. */
+export interface IerProjectLeadershipSummary {
+  ledCount: number;
+  /** Decimal years derived from the union of led-project intervals. */
+  ledYears: number;
+  /** Count of led projects whose Naročnik isn't ARIS – informs Pogoj 2
+   *  "vrednost projektov izven ARIS" evidence (FTE values still manual). */
+  ledExternalCount: number;
+  /** Brief project summaries surfaced in the UI as evidence. */
+  led: Array<{
+    title: string;
+    funder?: string;
+    code?: string;
+    startDate?: string;
+    endDate?: string;
+    projectType: string;
+    url: string;
+  }>;
+  sourceUrl: string;
 }
 
 /** Article 11(6) Open Science: for publications evaluated for promotion that

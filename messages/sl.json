@@ -10,7 +10,7 @@
     "title": "NazivIER – kalkulator raziskovalnih nazivov",
     "subtitle1": "Avtomatski izračun izpolnjevanja pogojev po novem ",
     "subtitleEm": "Pravilniku o raziskovalnih nazivih",
-    "subtitle2": " (predlog 26. 5. 2026), Priloge 2 in 3. Bibliografija iz SICRIS-a, citati iz OpenAlex (vključuje WoS, Scopus, Crossref)."
+    "subtitle2": " (predlog 26. 5. 2026), Priloge 2 in 3. Bibliografija iz SICRIS-a, citati iz SICRIS WoS in OpenAlex (vključuje WoS, Scopus, Crossref)."
   },
   "picker": {
     "selectFromList": "1. Izberi raziskovalca z IER",
@@ -27,14 +27,15 @@
     "sicrisIdLabel": "SICRIS #{id}",
     "publicationsLabel": "{count} publikacij"
   },
-  "loading": "Pridobivamo bibliografijo iz SICRIS-a in citate iz OpenAlex … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
+  "loading": "Pridobivamo bibliografijo iz SICRIS-a, citate iz SICRIS WoS in OpenAlex ter projekte z ier.si … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
   "error": {
     "label": "Napaka pri pridobivanju podatkov:"
   },
   "summary": {
     "fetchedAt": "SICRIS #{id} · pridobljeno {date}",
     "publicationsFromSicris": "Publikacij iz SICRIS",
-    "citationsOpenAlex": "čisti citati",
+    "citationsOpenAlex": "OpenAlex (širši nabor)",
+    "citationsSicrisWos": "SICRIS WoS (uradno)",
     "hIndex": "h-indeks",
     "openAlexNotFound": "OpenAlex zapis ni najden – preverite ime",
     "selfCitationsExcluded": "izključeno {self} avtocitatov od {raw}",
@@ -55,7 +56,7 @@
   },
   "metadata": {
     "title": "Podatki, ki jih ni v javnih virih",
-    "subtitle": "Bibliografijo in citate pridobimo samodejno (SICRIS + OpenAlex). Spodnja polja so po pravilniku obvezna za izračun, vendar v javnih bazah niso dostopna – vnesite ali potrdite ročno.",
+    "subtitle": "Bibliografijo, citate in projekte pridobimo samodejno (SICRIS, OpenAlex, ier.si). Spodnja polja so po pravilniku obvezna za izračun, vendar v javnih bazah niso vedno dostopna – vnesite ali potrdite ročno.",
     "open": "Uredi",
     "close": "Zapri",
     "fields": {
@@ -76,10 +77,43 @@
       "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
       "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve.",
       "additionalDepositsLabel": "Dodatna deponiranja za pogoj 11(6)",
-      "additionalDepositsHelp": "OpenAlex je zaznal {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje."
+      "additionalDepositsHelp": "OpenAlex je zaznal {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje.",
+      "ierLeadershipLabel": "Pre-izpolnjeno vodenje projektov z ier.si",
+      "ierLeadershipHelp": "Z IER spletne strani smo zaznali, da kandidat vodi {count} projektov ({external} izven čistega ARIS financiranja), kar je približno {years} let v vodilni funkciji. Vrednost se uporabi za Pogoj 3, če ročno polje za »Let v vodilni funkciji« ni nastavljeno. Spodaj so projekti za revizijo:",
+      "ierLeadershipMore": "… in še {count} drugih vodenih projektov.",
+      "authorshipPerPubLabel": "Avtorstvo za posamezno publikacijo",
+      "authorshipPerPubHelp": "SICRIS bibliografija ne pove, kdo je bil prvi, vodilni ali korespondenčni avtor, zato je za vse privzeto 0,7 (enakovredni). Označite svojo dejansko vlogo – evalvator bo ponovno preračunal ekvivalente publikacij. To je tisto, kar najbolj pomembno vpliva na natančnost izračuna.",
+      "authorshipShowAll": "Prikaži vse publikacije",
+      "authorshipShowEvaluated": "Samo vrednotene (1.x / 2.x)",
+      "authorshipShowMore": "Pokaži dodatnih 25 ({remaining} preostalih)",
+      "authorshipColYear": "Leto",
+      "authorshipColTitle": "Naslov",
+      "authorshipColTyp": "Tip.",
+      "authorshipColRole": "Vloga",
+      "authorshipRoleFirst": "Prvi / vodilni / korespondenčni (1,0)",
+      "authorshipRoleEqual": "Enakovredni (0,7)",
+      "authorshipRoleOther": "Ostalo avtorstvo (0,3)"
     }
   },
   "breakdownTitle": "Razčlenitev po nazivih",
+  "breakdownGroups": {
+    "showTitles": "{count, plural, =1 {# naziv} few {# nazivi} other {# nazivov}} v skupini",
+    "hideTitles": "Skrij nazive v skupini",
+    "openHint": "Klikni za prikaz {count, plural, =1 {# naziva} other {# nazivov}}",
+    "allTitles": "Vsi nazivi"
+  },
+  "osDemo": {
+    "title": "Demo način za pogoj odprte znanosti (11. člen, 6. odstavek):",
+    "body": "Pogoj iz 11(6) pravilnika je nov in se v tej demo različici za vse raziskovalce obravnava kot izpolnjen, ker pravilnik še ni sprejet (predlog 26. 5. 2026). Resnično stanje odprtega dostopa je še vedno izračunano in prikazano na vsaki kartici naziva ter v zgornji vrstici, da kandidati vidijo, koliko deponiranj jih še loči od 100-odstotne pokritosti."
+  },
+  "diagnostics": {
+    "versionTooltip": "Različica aplikacije (UI/orodje)",
+    "algoTooltip": "Različica algoritma / pravilnika, po kateri se računa",
+    "detailsSummary": "Tehnične podrobnosti za prijavo napake",
+    "detailsHelp": "Kopirajte spodnji blok in ga priložite prijavi napake. Vključuje različico, ID raziskovalca, čas in podrobnosti napake. Brez osebnih podatkov.",
+    "copy": "Kopiraj v odložišče",
+    "copied": "Kopirano!"
+  },
   "evalCard": {
     "eligible": "✓ Izvolljiv",
     "ineligible": "✗ Ni izvolljiv",
@@ -121,19 +155,19 @@
       },
       "authorship": {
         "head": "Faktor avtorstva",
-        "body": ": SICRIS bibliografska zbirka ne razkrije korespondenčnega avtorja, zato je privzeto 0,7 (enakovredno avtorstvo). Za izvolitveni postopek je treba potrditi prvega / korespondenčnega avtorja ročno (utež 1,0)."
+        "body": ": SICRIS bibliografska zbirka ne razkrije korespondenčnega avtorja, zato je privzeto 0,7 (enakovredni). Možnosti so prvi/vodilni/korespondenčni (1,0), enakovredni (0,7) in ostalo avtorstvo (0,3). Za vsako publikacijo lahko vlogo ročno popravite v panelu zgoraj."
       },
       "citations": {
         "head": "Čisti citati",
-        "body": " se pridobijo iz OpenAlex (openalex.org – agregira WoS, Scopus, Crossref, PubMed). Avtocitate odštejemo: za vsako objavo preštejemo, koliko citatov prihaja od istega avtorja (avtorstva.author.id ujemanje), in jih izključimo iz skupnega seštevka. Iskanje gre prvenstveno po ORCID-u, sicer po imenu z institucionalnim filtrom za IER."
+        "body": ": uradna številka za pogoj iz pravilnika je SICRIS WoS (»čisti citati po WoS«, ki ga vidijo evalvatorji ARIS – pridobimo jo z dvostopenjskim klicem na bib.cobiss.net/biblioweb/cit/…). Hkrati prikažemo OpenAlex (vključuje WoS, Scopus, Crossref, PubMed) kot diagnostiko z širšim naborom – OpenAlex citatom odštejemo avtocitate prek ujemanja authorships.author.id."
       },
       "leadership": {
         "head": "Vodenje projektov",
-        "body": " (Pogoj 3) ni samodejno izračunano – vnos je ročen po opredelitvah ARIS o kategoriji A FTE."
+        "body": " (Pogoj 3) se za IER raziskovalce predizpolni iz ier.si/projekti – ujemamo polje »Vodja projekta«. Število let se izračuna kot unija intervalov vodenih projektov. FTE vrednost se vnaša ročno (ier.si je ne objavlja), ravno tako lahko ročno povozite število let."
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
-        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 26. 5. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Za znanstvene objave po uveljavitvi te uredbe (2024 in pozneje) mora kandidat zagotoviti odprti dostop v institucionalnem ali tematskem repozitoriju, razen kjer to onemogočajo založniške omejitve. Stanje pridobimo iz OpenAlex (open_access.is_oa)."
+        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 26. 5. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). V tej demo različici ga zato obravnavamo kot izpolnjen za vse raziskovalce – dokler pravilnik ni sprejet, ne želimo blokirati izvolljivosti. Resnično stanje odprtega dostopa pa še vedno izračunamo iz OpenAlex (open_access.is_oa) in ga vidno prikažemo, da kandidati vidijo, koliko deponiranj jih še loči od 100-odstotne pokritosti."
       },
       "earlyPromotion": {
         "head": "Predčasna izvolitev (14. člen, 5. odstavek)",
@@ -145,7 +179,7 @@
       }
     }
   },
-  "footer": "Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po COBISS tipologiji dokumentov/del. Citati: OpenAlex (vključuje WoS + Scopus + Crossref). Faktor avtorstva privzeto 0,7 (enakovredno avtorstvo) – ročno popraviti za prvega / korespondenčnega.",
+  "footer": "Metodologija po pravilniku z dne 26. 5. 2026, Priloga 3. Tipologija po COBISS tipologiji dokumentov/del. Citati: SICRIS WoS (uradno) + OpenAlex (širši nabor). Faktor avtorstva privzeto 0,7 (enakovredni) – ročno popraviti za prvega / vodilnega / korespondenčnega.",
   "languageSwitcher": {
     "label": "Jezik",
     "sl": "Slovenščina",

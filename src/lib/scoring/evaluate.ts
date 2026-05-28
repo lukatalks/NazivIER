@@ -8,6 +8,16 @@ import { weightFor } from './weights';
 
 import type { Publication, Researcher, Title } from '@/lib/types';
 
+/** Demo-mode flag for the Open-Science check.
+ *
+ *  Rationale: the IER rulebook is still a proposal (predlog 26.05.2026); its
+ *  Article 11(6) Open-Science clause is not yet enacted. Until enactment we
+ *  display the candidate's true OA ratio (so they can plan), but we do not
+ *  block eligibility on it. Once the rulebook is adopted set OS_DEMO_PASS=false
+ *  (or remove the env var) and the evaluator will enforce 100 % OA strictly. */
+const OS_DEMO_PASS =
+  (process.env.OS_DEMO_PASS ?? 'true').toLowerCase() !== 'false';
+
 export interface EquivalentContribution {
   publication: Publication;
   weight: number;
@@ -56,6 +66,12 @@ export interface TitleEvaluation {
    *  candidate must guarantee open access through repository deposit. */
   openSciencePassed: boolean;
   openScienceEvidence: string;
+  /** True when Article 11(6) is being treated as fulfilled because the
+   *  rulebook is still in proposal form (OS_DEMO_PASS env var). */
+  openScienceDemoMode: boolean;
+  /** Real (strict) Open Science outcome – useful for the UI to surface the
+   *  honest ratio while demo mode keeps eligibility unblocked. */
+  openScienceStrictlyPassed: boolean;
   /** Re-election flag echoed for the UI. */
   isReelection: boolean;
 }
@@ -201,8 +217,14 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   };
 
   // Pogoj 3: zaključeno vodenje
+  // Use manual leadership entry when present; otherwise fall back to the
+  // IER-website rollup (years derived from union of led-project intervals).
+  // FTE values are NOT on ier.si, so the FTE side stays manual-only.
   const ldFte = researcher.leadership?.cumulativeFte ?? 0;
-  const ldYears = researcher.leadership?.leadershipYears ?? 0;
+  const ldYears =
+    researcher.leadership?.leadershipYears ??
+    researcher.ierProjectLeadership?.ledYears ??
+    0;
   const pog3Pass =
     c.minLeadershipFte == null && c.minLeadershipYears == null
       ? true
@@ -289,22 +311,30 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   const adjustedRatio = osHasData
     ? adjustedDeposited / os.postOrdinanceCount
     : 1;
-  const osPass = !osHasData || adjustedRatio === 1;
+  const strictPass = !osHasData || adjustedRatio === 1;
+  // Demo mode: the rulebook is still a draft (predlog 26.05.2026); we do not
+  // block eligibility on Article 11(6) until enactment. We still compute and
+  // display the candidate's real OA ratio so they know how far along they are.
+  // Strict enforcement returns the moment OS_DEMO_PASS env var is set to false.
+  const osPass = OS_DEMO_PASS ? true : strictPass;
+  const demoSuffix = OS_DEMO_PASS && osHasData && !strictPass
+    ? ' (demo način: pogoj je obravnavan kot izpolnjen do uveljavitve pravilnika).'
+    : '';
   const osEv = !osHasData
     ? 'Ni podatkov o odprtem dostopu (Open Science preverjanje preskočeno).'
-    : declared > 0 && osPass
+    : declared > 0 && strictPass
       ? `Uporabnik je deklariral ${declared} dodatnih deponiranj ` +
         `(${os.depositedCount} že v OpenAlex + ${declared} ročno = ` +
         `${adjustedDeposited} od ${os.postOrdinanceCount}). Pogoj iz 11(6). člena izpolnjen.`
       : declared > 0
         ? `${adjustedDeposited} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
             adjustedRatio * 100,
-          )} %; vključeno ${declared} deklariranih). Pogoj 11(6) zahteva 100 %.`
+          )} %; vključeno ${declared} deklariranih). Pogoj 11(6) zahteva 100 %.${demoSuffix}`
         : os.fullyCompliant
           ? `Vse vrednotene objave po Uredbi 59/23 (${os.postOrdinanceCount}) so v odprtem dostopu.`
           : `${os.depositedCount} od ${os.postOrdinanceCount} po-2023 objav v odprtem dostopu (${Math.round(
               os.ratio * 100,
-            )} %). Manjka ${missing} deponiranj za izpolnitev 11(6). člena.`;
+            )} %). Manjka ${missing} deponiranj za izpolnitev 11(6). člena.${demoSuffix}`;
 
   const blockingReasons: string[] = [];
   if (!educationOk)
@@ -315,7 +345,7 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     blockingReasons.push(
       `Izpolnjenih ${standardsMet} od potrebnih ${c.standardsRequired} pogojev nacionalno/mednarodno primerljivih standardov.`,
     );
-  if (osHasData && !osPass)
+  if (osHasData && !strictPass && !OS_DEMO_PASS)
     blockingReasons.push(
       `Po-2023 objave niso vse v odprtem dostopu: manjka ${
         os.postOrdinanceCount - adjustedDeposited
@@ -340,6 +370,8 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     earlyPromotionEvidence: earlyEv,
     openSciencePassed: osPass,
     openScienceEvidence: osEv,
+    openScienceDemoMode: OS_DEMO_PASS,
+    openScienceStrictlyPassed: strictPass,
     isReelection: !!researcher.isReelection,
   };
 }

@@ -10,7 +10,7 @@
     "title": "NazivIER – researcher-title calculator",
     "subtitle1": "Automatic eligibility check against the new ",
     "subtitleEm": "Rulebook on researcher titles",
-    "subtitle2": " (draft 26 May 2026), Annexes 2 and 3. Bibliography from SICRIS, citations from OpenAlex (covers WoS, Scopus, Crossref)."
+    "subtitle2": " (draft 26 May 2026), Annexes 2 and 3. Bibliography from SICRIS, citations from SICRIS WoS plus OpenAlex (covers WoS, Scopus, Crossref)."
   },
   "picker": {
     "selectFromList": "1. Pick an IER researcher",
@@ -27,14 +27,15 @@
     "sicrisIdLabel": "SICRIS #{id}",
     "publicationsLabel": "{count} publications"
   },
-  "loading": "Fetching bibliography from SICRIS and citations from OpenAlex … (a few seconds on first request, cached after).",
+  "loading": "Fetching bibliography from SICRIS, citations from SICRIS WoS + OpenAlex, and projects from ier.si … (a few seconds on first request, cached after).",
   "error": {
     "label": "Data fetch error:"
   },
   "summary": {
     "fetchedAt": "SICRIS #{id} · fetched {date}",
     "publicationsFromSicris": "Publications in SICRIS",
-    "citationsOpenAlex": "clean citations",
+    "citationsOpenAlex": "OpenAlex (broader coverage)",
+    "citationsSicrisWos": "SICRIS WoS (official)",
     "hIndex": "h-index",
     "openAlexNotFound": "OpenAlex record not found – please verify the name",
     "selfCitationsExcluded": "{self} self-citations excluded from {raw}",
@@ -55,7 +56,7 @@
   },
   "metadata": {
     "title": "Data not exposed by public sources",
-    "subtitle": "Bibliography and citations are fetched automatically (SICRIS + OpenAlex). The fields below are required by the rulebook but not available in public databases – enter or confirm manually.",
+    "subtitle": "Bibliography, citations and projects are fetched automatically (SICRIS, OpenAlex, ier.si). The fields below are required by the rulebook but not always available in public databases – enter or confirm manually.",
     "open": "Edit",
     "close": "Close",
     "fields": {
@@ -76,10 +77,43 @@
       "reelectionLabel": "Re-election (Article 22, paragraph 2)",
       "reelectionHelp": "Tick if this is a re-election to the same title – the rulebook then requires at least half of every numeric threshold since the previous election.",
       "additionalDepositsLabel": "Additional deposits for Article 11(6)",
-      "additionalDepositsHelp": "OpenAlex detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited – but OpenAlex has not yet indexed – or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state."
+      "additionalDepositsHelp": "OpenAlex detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited – but OpenAlex has not yet indexed – or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
+      "ierLeadershipLabel": "Project leadership pre-filled from ier.si",
+      "ierLeadershipHelp": "From the IER website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), which is about {years} years in a leadership role. The value feeds Pogoj 3 if the manual »Years in a leadership position« field is empty. Projects for audit:",
+      "ierLeadershipMore": "… and {count} more led projects.",
+      "authorshipPerPubLabel": "Per-publication authorship",
+      "authorshipPerPubHelp": "The SICRIS bibliography does not expose who was first, lead or corresponding author, so every entry defaults to 0.7 (equal). Tag your actual role – the evaluator recomputes the publication equivalents. This is the single biggest accuracy lever.",
+      "authorshipShowAll": "Show all publications",
+      "authorshipShowEvaluated": "Evaluated only (1.x / 2.x)",
+      "authorshipShowMore": "Show 25 more ({remaining} remaining)",
+      "authorshipColYear": "Year",
+      "authorshipColTitle": "Title",
+      "authorshipColTyp": "Typ.",
+      "authorshipColRole": "Role",
+      "authorshipRoleFirst": "First / lead / corresponding (1.0)",
+      "authorshipRoleEqual": "Equal (0.7)",
+      "authorshipRoleOther": "Other co-authorship (0.3)"
     }
   },
   "breakdownTitle": "Per-title breakdown",
+  "breakdownGroups": {
+    "showTitles": "{count, plural, one {# title} other {# titles}} in group",
+    "hideTitles": "Hide titles in group",
+    "openHint": "Click to see {count, plural, one {# title} other {# titles}}",
+    "allTitles": "All titles"
+  },
+  "osDemo": {
+    "title": "Demo mode for the Open-Science requirement (Article 11, paragraph 6):",
+    "body": "Article 11(6) is new and in this demo it is treated as fulfilled for every researcher because the rulebook is still a draft (proposal of 26 May 2026). The true open-access status is still computed and displayed on each title card and in the summary strip so candidates can see how many deposits separate them from 100 % coverage."
+  },
+  "diagnostics": {
+    "versionTooltip": "Application version (UI / tooling)",
+    "algoTooltip": "Algorithm / rulebook version driving the calculation",
+    "detailsSummary": "Technical details for a bug report",
+    "detailsHelp": "Copy the block below and include it in a bug report. It contains the version, researcher ID, timestamp and error details. No personal data.",
+    "copy": "Copy to clipboard",
+    "copied": "Copied!"
+  },
   "evalCard": {
     "eligible": "✓ Eligible",
     "ineligible": "✗ Not eligible",
@@ -121,19 +155,19 @@
       },
       "authorship": {
         "head": "Authorship factor",
-        "body": ": SICRIS bibliography export does not expose the corresponding author, so default is 0.7 (equal authorship). For an actual promotion application, the corresponding author should be confirmed manually (weight 1.0)."
+        "body": ": SICRIS bibliography export does not expose the corresponding author, so default is 0.7 (equal). Options are first/lead/corresponding (1.0), equal (0.7) and other co-authorship (0.3). The per-publication role can be overridden in the panel above."
       },
       "citations": {
         "head": "Clean citations",
-        "body": " are auto-fetched from OpenAlex (openalex.org – aggregates WoS, Scopus, Crossref, PubMed). Self-citations are excluded: for each of the author's works we count how many citing works share the same author ID (authorships.author.id match) and subtract that from the total. Lookup goes by ORCID first, then by name filtered to the IER institution."
+        "body": ": the official number for the rulebook check is SICRIS WoS (»čisti citati po WoS« – what ARIS evaluators see – fetched with a two-step call to bib.cobiss.net/biblioweb/cit/…). We also display OpenAlex (covers WoS + Scopus + Crossref + PubMed) as the broader-coverage diagnostic, with self-citations stripped via authorships.author.id matching."
       },
       "leadership": {
         "head": "Project leadership",
-        "body": " (Standard 3) is not auto-computed – entered manually using the ARIS Category-A FTE convention."
+        "body": " (Pogoj 3) is pre-filled for IER researchers from ier.si/projekti – we match the »Vodja projekta« field. Years are derived from the union of led-project intervals. FTE values are entered manually (ier.si does not publish them); years can also be manually overridden."
       },
       "openScience": {
         "head": "Open Science (Article 11, paragraph 6)",
-        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 26 May 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). For scientific publications produced after the ordinance took effect (2024 onwards), the candidate must guarantee open access via deposit in an institutional or thematic repository, except where publisher restrictions prevent it. Status is read from OpenAlex (open_access.is_oa)."
+        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 26 May 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed (OpenAlex `open_access.is_oa`) and displayed so candidates see how far they are from 100 % coverage."
       },
       "earlyPromotion": {
         "head": "Early promotion (Article 14, paragraph 5)",
@@ -145,7 +179,7 @@
       }
     }
   },
-  "footer": "Methodology per the rulebook of 26 May 2026, Annex 3. Typology per the COBISS typology of documents/works. Citations: OpenAlex (covers WoS + Scopus + Crossref). Authorship factor defaults to 0.7 (equal authorship) – set to 1.0 for first / corresponding author per publication.",
+  "footer": "Methodology per the rulebook of 26 May 2026, Annex 3. Typology per the COBISS typology of documents/works. Citations: SICRIS WoS (official) + OpenAlex (broader coverage). Authorship factor defaults to 0.7 (equal) – set to 1.0 per publication for first / lead / corresponding author.",
   "languageSwitcher": {
     "label": "Language",
     "sl": "Slovenščina",

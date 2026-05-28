@@ -4,16 +4,18 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
-import { EvaluationCard } from '@/components/EvaluationCard';
+import { DiagnosticsBlock, VersionFooter } from '@/components/Diagnostics';
+import { GroupedBreakdown } from '@/components/GroupedBreakdown';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { MetadataPanel } from '@/components/MetadataPanel';
 import { ResearcherPicker } from '@/components/ResearcherPicker';
 import { StructuredData } from '@/components/StructuredData';
 import type { Locale } from '@/i18n/config';
-import { evaluateAll, highestEligible, type TitleEvaluation } from '@/lib/scoring/evaluate';
+import { evaluateAll, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import type {
   CitationData,
   EducationLevel,
+  IerProjectLeadershipSummary,
   OpenScienceCompliance,
   Publication,
   Researcher,
@@ -33,7 +35,12 @@ interface CitationDiagnostics {
   rawTotal: number;
   selfExcluded: number;
   clean: number;
-  method: 'openalex-self-excluded' | 'openalex-raw';
+  method:
+    | 'openalex-self-excluded'
+    | 'openalex-raw'
+    | 'sicris-wos'
+    | 'sicris-wos+openalex';
+  sicrisFetched?: boolean;
 }
 
 interface ResearcherResponse {
@@ -45,6 +52,7 @@ interface ResearcherResponse {
   openScienceCompliance?: OpenScienceCompliance;
   inferredEducationLevel?: EducationLevel;
   citationDiagnostics?: CitationDiagnostics;
+  ierProjectLeadership?: IerProjectLeadershipSummary;
   fetchedAt: string;
 }
 
@@ -74,10 +82,12 @@ export function TitleCalculator({ locale }: Props) {
   const [researcher, setResearcher] = useState<FullResearcher | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastSicrisId, setLastSicrisId] = useState<string | null>(null);
 
   async function load(sicrisId: string, fallbackLabel: string) {
     setLoading(true);
     setError(null);
+    setLastSicrisId(sicrisId);
     try {
       const r = await fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`);
       if (!r.ok) {
@@ -98,6 +108,7 @@ export function TitleCalculator({ locale }: Props) {
         openAlex: data.openAlex,
         openScienceCompliance: data.openScienceCompliance,
         citationDiagnostics: data.citationDiagnostics,
+        ierProjectLeadership: data.ierProjectLeadership,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -114,7 +125,6 @@ export function TitleCalculator({ locale }: Props) {
     () => (researcher ? evaluateAll(researcher) : []),
     [researcher],
   );
-  const highest = useMemo(() => highestEligible(evaluations), [evaluations]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -178,21 +188,23 @@ export function TitleCalculator({ locale }: Props) {
         {error ? (
           <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger-bg)] p-4 text-sm">
             <strong className="font-semibold">{t('error.label')}</strong> {error}
+            <DiagnosticsBlock
+              error={error}
+              sicrisId={lastSicrisId}
+              extra={{
+                hasResearcher: !!researcher,
+                cacheBackendHint: 'see /api/health',
+              }}
+            />
           </div>
         ) : null}
 
         {researcher ? (
           <>
-            <SummaryStrip researcher={researcher} highest={highest} locale={locale} />
+            <SummaryStrip researcher={researcher} locale={locale} />
+            <OpenScienceDemoBanner evaluations={evaluations} />
             <MetadataPanel researcher={researcher} onChange={patchResearcher} />
-            <section>
-              <h2 className="mb-3 text-lg font-semibold">{t('breakdownTitle')}</h2>
-              <div className="grid gap-4">
-                {evaluations.map((e) => (
-                  <EvaluationCard key={e.title} evaluation={e} defaultExpanded={e.eligible} />
-                ))}
-              </div>
-            </section>
+            <GroupedBreakdown evaluations={evaluations} />
             <Methodology />
           </>
         ) : null}
@@ -201,6 +213,7 @@ export function TitleCalculator({ locale }: Props) {
       <footer className="border-t border-[var(--border)] bg-white dark:bg-black/30">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 text-xs text-[var(--muted)]">
           {t('footer')}
+          <VersionFooter />
         </div>
       </footer>
     </div>
@@ -209,15 +222,12 @@ export function TitleCalculator({ locale }: Props) {
 
 function SummaryStrip({
   researcher,
-  highest,
   locale,
 }: {
   researcher: FullResearcher;
-  highest: ReturnType<typeof highestEligible>;
   locale: Locale;
 }) {
   const t = useTranslations('summary');
-  const groups = ['znanstveni', 'strokovno-raziskovalni', 'razvojni'] as const;
   const dateLocale = locale === 'sl' ? 'sl-SI' : 'en-GB';
 
   return (
@@ -234,17 +244,40 @@ function SummaryStrip({
         </span>
       </div>
       <p className="text-sm text-[var(--muted)]">
-        {t('publicationsFromSicris')}: <strong>{researcher.publications.length}</strong> ·{' '}
-        {t('citationsOpenAlex')}:{' '}
-        <strong className="tabnum">{researcher.citations.wosCleanCitations}</strong>
-        {researcher.citationDiagnostics?.method === 'openalex-self-excluded' &&
-        researcher.citationDiagnostics.selfExcluded > 0 ? (
-          <span className="text-xs">
-            {' '}({t('selfCitationsExcluded', {
-              raw: researcher.citationDiagnostics.rawTotal,
-              self: researcher.citationDiagnostics.selfExcluded,
-            })})
-          </span>
+        {t('publicationsFromSicris')}: <strong>{researcher.publications.length}</strong>
+        {/* SICRIS WoS (rulebook-official) + OpenAlex (broader-coverage) shown
+            side by side. SICRIS leads because that's what ARIS evaluators see;
+            OpenAlex shows the broader-aggregate as a sanity check. */}
+        {typeof researcher.citations.sicrisWosCleanCitations === 'number' ? (
+          <>
+            {' '}· {t('citationsSicrisWos')}:{' '}
+            <strong className="tabnum">
+              {researcher.citations.sicrisWosCleanCitations}
+            </strong>
+            {typeof researcher.citations.sicrisHIndexWos === 'number' &&
+            researcher.citations.sicrisHIndexWos > 0 ? (
+              <span className="text-xs">
+                {' '}(h={researcher.citations.sicrisHIndexWos})
+              </span>
+            ) : null}
+          </>
+        ) : null}
+        {typeof researcher.citations.openAlexCleanCitations === 'number' ? (
+          <>
+            {' '}· {t('citationsOpenAlex')}:{' '}
+            <strong className="tabnum">
+              {researcher.citations.openAlexCleanCitations}
+            </strong>
+            {researcher.citationDiagnostics &&
+            researcher.citationDiagnostics.selfExcluded > 0 ? (
+              <span className="text-xs">
+                {' '}({t('selfCitationsExcluded', {
+                  raw: researcher.citationDiagnostics.rawTotal,
+                  self: researcher.citationDiagnostics.selfExcluded,
+                })})
+              </span>
+            ) : null}
+          </>
         ) : null}
         {researcher.openAlex ? (
           <>
@@ -277,42 +310,25 @@ function SummaryStrip({
           </>
         ) : null}
       </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {groups.map((key) => {
-          const top = highest[key];
-          const eq = top
-            ? top.totalEquivalents.toLocaleString(dateLocale, { maximumFractionDigits: 2 })
-            : '';
-          return (
-            <div
-              key={key}
-              className="rounded-md border p-3"
-              style={{
-                borderColor: top ? 'var(--success)' : 'var(--border)',
-                background: top ? 'var(--success-bg)' : 'var(--muted-bg)',
-              }}
-            >
-              <div className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-                {t(`groups.${key}` as 'groups.znanstveni')}
-              </div>
-              <div className="mt-1 text-base font-semibold">
-                {top ? top.groupLabel : t('notEligible')}
-              </div>
-              {top ? (
-                <div className="text-xs text-[var(--muted)]">
-                  {t('stageStandards', {
-                    stage: top.stage,
-                    met: top.standardsMet,
-                    required: top.standardsRequired,
-                    eq,
-                  })}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
+      {/* Group cards moved to <GroupedBreakdown /> so they are interactive
+          and expand to the per-title details on click (supervisor request
+          2026-05-28). The SummaryStrip now stays minimal: name + headline
+          metadata. */}
     </section>
+  );
+}
+
+/** Banner shown when the Open-Science (11/6) check is currently in demo-pass
+ *  mode. Always shows the real OA ratio so the researcher can plan ahead. */
+function OpenScienceDemoBanner({ evaluations }: { evaluations: TitleEvaluation[] }) {
+  const t = useTranslations('osDemo');
+  if (evaluations.length === 0) return null;
+  const ev = evaluations[0];
+  if (!ev.openScienceDemoMode) return null;
+  return (
+    <div className="rounded-md border border-[var(--warn)] bg-[var(--warn-bg)] px-3 py-2 text-xs leading-relaxed">
+      <strong className="font-semibold">{t('title')}</strong> {t('body')}
+    </div>
   );
 }
 
