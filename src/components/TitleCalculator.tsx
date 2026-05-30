@@ -7,6 +7,10 @@ import { useMemo, useState } from 'react';
 import { DiagnosticsBlock, VersionFooter } from '@/components/Diagnostics';
 import { DuplicatesStrip } from '@/components/DuplicatesStrip';
 import { GroupedBreakdown } from '@/components/GroupedBreakdown';
+import {
+  KajaCalibrationPanel,
+  KajaUnlockButton,
+} from '@/components/KajaCalibrationPanel';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { MetadataPanel } from '@/components/MetadataPanel';
 import { ResearcherPicker } from '@/components/ResearcherPicker';
@@ -210,6 +214,11 @@ export function TitleCalculator({ locale }: Props) {
                 and show stale toggles for the new researcher. */}
             <SummaryStrip researcher={researcher} locale={locale} />
             <OpenScienceDemoBanner evaluations={evaluations} />
+            <KajaCalibrationPanel
+              key={`kaja-${researcher.sicrisId}`}
+              researcher={researcher}
+              rulebookTotal={getRulebookTotal(evaluations)}
+            />
             <DuplicatesStrip
               key={`dups-${researcher.sicrisId}`}
               publications={researcher.publications}
@@ -251,7 +260,10 @@ function SummaryStrip({
   return (
     <section className="rounded-lg border border-[var(--border)] bg-white dark:bg-black/20 p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold">{researcher.fullName}</h2>
+        <h2 className="flex items-center text-lg font-semibold">
+          <span>{researcher.fullName}</span>
+          <KajaUnlockButton />
+        </h2>
         <span className="text-xs text-[var(--muted)] tabnum">
           {t('fetchedAt', {
             id: researcher.sicrisId,
@@ -348,6 +360,21 @@ function OpenScienceDemoBanner({ evaluations }: { evaluations: TitleEvaluation[]
       <strong className="font-semibold">{t('title')}</strong> {t('body')}
     </div>
   );
+}
+
+/** Pick the rulebook Σ to display next to the calibration Σ.
+ *
+ *  Heuristic: prefer the highest-stage eligible title in the znanstveni group;
+ *  fall back to whichever evaluation has the maximum totalEquivalents. The
+ *  number is the same Pogoj-1 figure shown inside that title's card – the
+ *  panel just surfaces it once for direct side-by-side comparison. */
+function getRulebookTotal(evaluations: TitleEvaluation[]): number {
+  if (evaluations.length === 0) return 0;
+  let best = 0;
+  for (const e of evaluations) {
+    if (e.totalEquivalents > best) best = e.totalEquivalents;
+  }
+  return best;
 }
 
 function Methodology() {
