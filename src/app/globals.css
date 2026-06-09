@@ -80,3 +80,81 @@ body {
   height: 48px;
   width: auto;
 }
+
+/* ─── Print-friendly report (v2.9) ──────────────────────────────────────
+   When the researcher clicks »Natisni / shrani v PDF«, window.print() runs
+   and the browser applies these rules. Goal: produce a clean, static report
+   PDF containing the full evaluation, regardless of which collapsibles
+   were open on screen.
+
+   - Hide every interactive surface the researcher does not need on paper.
+   - Force-open every <details> element so the breakdown is visible.
+   - Drop borders / shadows / colored backgrounds that waste toner.
+   - Compact margins so the report fits ~A4. */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+  }
+
+  /* Anything tagged .print:hidden in JSX disappears in print. Tailwind's
+     print: variant already maps to display: none here. We re-state it
+     explicitly for the toolbar buttons and language switcher. */
+  .print\:hidden,
+  header nav,
+  .lang-switcher,
+  button {
+    display: none !important;
+  }
+
+  /* The researcher picker is irrelevant on paper. */
+  section[aria-label="picker"] {
+    display: none !important;
+  }
+
+  /* Auto-expand every collapsible so the printed page is comprehensive. */
+  details {
+    display: block !important;
+  }
+  details > summary {
+    list-style: none;
+    cursor: default;
+    font-weight: 600;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  details:not([open]) > summary {
+    margin-bottom: 0.5em;
+  }
+  details:not([open]) > *:not(summary) {
+    display: block !important;
+  }
+
+  /* Drop heavy visual chrome that turns into ink in print. */
+  .rounded-lg,
+  .rounded-md,
+  .border,
+  [class*="bg-"] {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep evaluation cards from splitting awkwardly across pages. */
+  section,
+  article {
+    break-inside: avoid;
+  }
+
+  /* Hyperlinks: show the target URL inline so the printed PDF is reproducible. */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555;
+  }
+  a[href^="#"]::after,
+  a[href^="mailto:"]::after {
+    content: "";
+  }
+}

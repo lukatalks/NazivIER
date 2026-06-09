@@ -2,10 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DiagnosticsBlock, VersionFooter } from '@/components/Diagnostics';
 import { DuplicatesStrip } from '@/components/DuplicatesStrip';
+import { ExportToolbar } from '@/components/ExportToolbar';
 import { GroupedBreakdown } from '@/components/GroupedBreakdown';
 import {
   KajaCalibrationPanel,
@@ -16,6 +17,12 @@ import { MetadataPanel } from '@/components/MetadataPanel';
 import { ResearcherPicker } from '@/components/ResearcherPicker';
 import { StructuredData } from '@/components/StructuredData';
 import type { Locale } from '@/i18n/config';
+import {
+  applyPersistedInputs,
+  extractPersistableInputs,
+  loadPersistedInputs,
+  savePersistedInputs,
+} from '@/lib/persistence/researcherStorage';
 import { evaluateAll, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import type {
   CitationData,
@@ -100,7 +107,7 @@ export function TitleCalculator({ locale }: Props) {
         throw new Error(body.error ?? `HTTP ${r.status}`);
       }
       const data = (await r.json()) as ResearcherResponse;
-      setResearcher({
+      const fresh: FullResearcher = {
         sicrisId: data.sicrisId,
         fullName: data.profile?.fullName ?? fallbackLabel,
         publications: data.publications,
@@ -114,13 +121,33 @@ export function TitleCalculator({ locale }: Props) {
         openScienceCompliance: data.openScienceCompliance,
         citationDiagnostics: data.citationDiagnostics,
         ierProjectLeadership: data.ierProjectLeadership,
-      });
+      };
+      // v2.9: re-apply any persisted manual inputs for this SICRIS ID.
+      // Fresh fetch always wins for bibliography/citations; persisted blob only
+      // overlays scalar fields (EUR amounts, years, education override) and
+      // per-publication authorship + OA overrides keyed by publication.id.
+      const persisted = loadPersistedInputs(data.sicrisId);
+      setResearcher(persisted ? applyPersistedInputs(fresh, persisted) : fresh);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   }
+
+  // Debounce persistence writes so a slider drag or fast typing doesn't hammer
+  // localStorage. 350 ms feels instant to the user but coalesces bursts.
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!researcher) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      savePersistedInputs(researcher.sicrisId, extractPersistableInputs(researcher));
+    }, 350);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [researcher]);
 
   function patchResearcher(patch: Partial<FullResearcher>) {
     setResearcher((cur) => (cur ? { ...cur, ...patch } : cur));
@@ -213,6 +240,12 @@ export function TitleCalculator({ locale }: Props) {
                 EvaluationCard's expansion) would persist across the swap
                 and show stale toggles for the new researcher. */}
             <SummaryStrip researcher={researcher} locale={locale} />
+            <ExportToolbar
+              key={`export-${researcher.sicrisId}`}
+              researcher={researcher}
+              evaluations={evaluations}
+              onResearcherChange={setResearcher}
+            />
             <OpenScienceDemoBanner evaluations={evaluations} />
             <KajaCalibrationPanel
               key={`kaja-${researcher.sicrisId}`}
