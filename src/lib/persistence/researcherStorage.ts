@@ -1,6 +1,6 @@
 // Local persistence layer for per-researcher manual inputs.
 //
-// Purpose: researcher fills in education level, FTE amounts, work years,
+// Purpose: researcher fills in education level, EUR amounts, work years,
 // per-publication authorship + OA overrides. Without persistence, every
 // refresh/close-tab loses all of this (hours of work for prolific researchers).
 //
@@ -11,8 +11,8 @@
 // What is persisted:
 //   * researcher.educationLevel (user override, not the inferred one)
 //   * researcher.yearsInResearchSector
-//   * researcher.externalProjectsValueFte
-//   * researcher.leadership.{cumulativeValueFte, leadershipYears}
+//   * researcher.externalProjectsValueEur
+//   * researcher.leadership.{cumulativeValueEur, leadershipYears}
 //   * researcher.extraAchievements.{weight10Count, weight05Count, weight03Count}
 //   * researcher.isReelection
 //   * researcher.additionalDepositsPlanned
@@ -49,7 +49,7 @@ export interface PersistedResearcherInputs {
   savedAt: string; // ISO timestamp
   educationLevel?: EducationLevel;
   yearsInResearchSector?: number;
-  externalProjectsValueFte?: number;
+  externalProjectsValueEur?: number;
   leadership?: LeadershipRecord;
   extraAchievements?: ExtraAchievements;
   isReelection?: boolean;
@@ -140,7 +140,7 @@ export function extractPersistableInputs(
   return {
     educationLevel: r.educationLevel,
     yearsInResearchSector: r.yearsInResearchSector,
-    externalProjectsValueFte: r.externalProjectsValueFte,
+    externalProjectsValueEur: r.externalProjectsValueEur,
     leadership: r.leadership,
     extraAchievements: r.extraAchievements,
     isReelection: r.isReelection,
@@ -180,8 +180,8 @@ export function applyPersistedInputs<R extends Researcher>(
     ...(persisted.yearsInResearchSector !== undefined
       ? { yearsInResearchSector: persisted.yearsInResearchSector }
       : {}),
-    ...(persisted.externalProjectsValueFte !== undefined
-      ? { externalProjectsValueFte: persisted.externalProjectsValueFte }
+    ...(persisted.externalProjectsValueEur !== undefined
+      ? { externalProjectsValueEur: persisted.externalProjectsValueEur }
       : {}),
     ...(persisted.leadership !== undefined ? { leadership: persisted.leadership } : {}),
     ...(persisted.extraAchievements !== undefined

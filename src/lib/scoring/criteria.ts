@@ -1,26 +1,17 @@
-// Per-title threshold table — Pravilnik IER (predlog 05.06.2026, v2.2),
+// Per-title threshold table – Pravilnik IER (predlog 05.06.2026, v2.2),
 // Priloga 2 in Priloga 3.
 //
 // For each "sodelavec"-and-above title we record:
 //   * minimum education level (8/9/10 SOK)
 //   * required number of national/international standards met (0/1/2)
 //   * minimum equivalents (Pogoj 1)
-//   * minimum citations OR minimum external-project value in FTE (Pogoj 2)
-//   * leadership thresholds (Pogoj 3) — cumulative FTE value OR years in
-//     »vodilna funkcija«
+//   * minimum citations OR minimum external-project value in EUR (Pogoj 2)
+//   * leadership requirements (Pogoj 3) – cumulative EUR value OR years in leadership
 //
-// v3.0.0 revision (2026-06-09) — source-of-truth re-read of pravilnik.docx:
-//   * Pogoj 1 znanstveni: 3 / 10 / 18 ekvivalentov (was wrongly 5 / 20 / 40)
-//   * Pogoj 1 razvojni: 2 / 5 / 18 ekvivalentov (was wrongly 5 / 15 / 35)
-//   * Pogoj 2 znanstveni citations: 10 / 100 / 200 (was wrongly 10 / 200 / 400)
-//   * Pogoj 2 razvojni citations: 5 / 50 / 200 (unchanged in pravilnik)
-//   * Pogoj 2 alt + Pogoj 3 reverted from EUR to FTE (pravilnik never said
-//     EUR — earlier v2.8 change-set was based on a misread).
-//     Pogoj 2 alt FTE: 0,5 / 3 / 5; Pogoj 3 FTE: 1 / 5 / 10.
-//   * `minYearsInResearchSector` set to null for ALL titles. Pravilnik Priloga 2
-//     does NOT contain a »delovna doba« column. The 10/15 years requirement
-//     comes from Article 14(5) and applies ONLY to early/predčasna izvolitev
-//     (handled inside evaluate.ts), not to baseline eligibility.
+// v2.2 changes (05.06.2026, per email Kaja Primc):
+//   * Pogoj 2 and Pogoj 3 switched from FTE to EUR values.
+//   * Pogoj 1 thresholds bumped (znanstveni: 5/20/40; razvojni: 5/15/35).
+//   * Pogoj 2 citation thresholds for III/IV bumped (znanstveni: 200/400).
 
 import type { EducationLevel, Title } from '@/lib/types';
 
@@ -31,27 +22,25 @@ export interface TitleCriteria {
   minEducation: EducationLevel;
   /** Number of Annex-3 standards that must be met (0/1/2). */
   standardsRequired: 0 | 1 | 2;
-  // Pogoj 1: equivalents — null when not required
+  // Pogoj 1: equivalents – null when not required
   minEquivalents: number | null;
-  // Pogoj 2 — null when not required (e.g. titles below sodelavec)
+  // Pogoj 2 – null when not required (e.g. titles below sodelavec)
   minCitations: number | null;
-  /** Minimum cumulative value (FTE) of projects outside ARIS where candidate
-   *  had a leading role. Pravilnik Priloga 3, Pogoj 2, ALI-veja:
-   *  znanstveni/strokovno-raziskovalni 0,5 / 3 / 5 FTE;
-   *  razvojni 0,5 / 3 / 5 FTE. */
-  minExternalProjectsValueFte: number | null;
-  // Pogoj 3 — leadership thresholds, null when not required
-  /** Minimum cumulative value (FTE) of led/coordinated projects + work
-   *  packages (paths a–d). Pravilnik: znanstveni 1 / 5 / 10 FTE;
-   *  razvojni 1 / 5 / 10 FTE (kategorija A v vrednosti, ki je veljala
-   *  v letu, ko je bil projekt pridobljen). */
-  minLeadershipValueFte: number | null;
-  /** Years in »vodilna funkcija« (path e): direktor, predsednik UO,
-   *  predsednik ZS, vodja programske / infrastrukturne skupine. */
+  /** Minimum cumulative value (EUR) of projects outside ARIS where candidate
+   *  had a leading role. Per v2.2: znanstveni/strokovno-raziskovalni paths
+   *  20k/150k/300k EUR; razvojni same thresholds but interpreted as funding
+   *  outside ARIS budget where candidate had leading role at the Institute. */
+  minExternalProjectsValueEur: number | null;
+  // Pogoj 3 – leadership thresholds, null when not required
+  /** Minimum cumulative value (EUR) of led/coordinated projects + work
+   *  packages. Per v2.2 paths (a)–(d): 50k/250k/500k EUR. */
+  minLeadershipValueEur: number | null;
   minLeadershipYears: number | null;
-  /** Minimum years of service in the research sector. Always null in v3.0.0
-   *  — this is NOT a Priloga 2 baseline requirement. The 10/15-let figure
-   *  from Article 14(5) is used solely inside the early-promotion gate. */
+  /** Minimum years of service in the research sector (Priloga 2 »Delovna doba«).
+   *  Per Pravilnik v2.2 (05.06.2026), Priloga 2, this is a HARD requirement
+   *  for stages III (10 let) and IV (15 let) across all three groups
+   *  (znanstveni, strokovno-raziskovalni, razvojni). Not just for early
+   *  promotion. Null = no requirement (I and II stages). */
   minYearsInResearchSector: number | null;
 }
 
@@ -61,8 +50,8 @@ function row(c: TitleCriteria): TitleCriteria {
 }
 
 export const TITLE_CRITERIA: TitleCriteria[] = [
-  // ─── I. karierna stopnja — ASISTENTI ─────────────────────────────
-  // Per Pravilnik Annex 2: I-stage titles have no bibliometric standards —
+  // ─── I. karierna stopnja – ASISTENTI ─────────────────────────────
+  // Per Pravilnik Annex 2: I-stage titles have no bibliometric standards –
   // only education level matters (SOK 8/9/10). Evaluator still runs the three
   // Pogoji for completeness; they're informational, not blocking.
   row({
@@ -73,8 +62,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -86,8 +75,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -99,8 +88,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -112,8 +101,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -125,8 +114,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -138,14 +127,14 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
 
-  // ─── II. karierna stopnja — ASISTENT Z DOKTORATOM ────────────────
-  // Doctorate required (SOK 10) — no bibliometric standards still per Annex 2.
+  // ─── II. karierna stopnja – ASISTENT Z DOKTORATOM ────────────────
+  // Doctorate required (SOK 10) – no bibliometric standards still per Annex 2.
   row({
     title: 'asistent-dr',
     groupLabel: 'Asistent z doktoratom / asistentka z doktoratom',
@@ -154,8 +143,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -167,8 +156,8 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
@@ -180,56 +169,58 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     standardsRequired: 0,
     minEquivalents: null,
     minCitations: null,
-    minExternalProjectsValueFte: null,
-    minLeadershipValueFte: null,
+    minExternalProjectsValueEur: null,
+    minLeadershipValueEur: null,
     minLeadershipYears: null,
     minYearsInResearchSector: null,
   }),
 
   // ─── ZNANSTVENI ─── II.b sodelavec
-  // Pravilnik: 3 ekvivalenti, 10 citatov ALI 0,5 FTE, 1 FTE ALI 1 leto.
+  // v2.2: equivalents 3→5, projects 20.000 EUR, leadership 50.000 EUR / 1 year.
   row({
     title: 'znanstveni-sodelavec',
     groupLabel: 'Znanstveni sodelavec / znanstvena sodelavka',
     stage: 'II',
     minEducation: 10,
     standardsRequired: 1,
-    minEquivalents: 3,
+    minEquivalents: 5,
     minCitations: 10,
-    minExternalProjectsValueFte: 0.5,
-    minLeadershipValueFte: 1,
+    minExternalProjectsValueEur: 20_000,
+    minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
     minYearsInResearchSector: null,
   }),
   // III. višji znanstveni sodelavec
-  // Pravilnik: 10 ekvivalentov, 100 citatov ALI 3 FTE, 5 FTE ALI 2 leti.
+  // v2.2: equivalents 10→20, citations 100→200, projects 150.000 EUR,
+  // leadership 250.000 EUR / 2 years.
   row({
     title: 'visji-znanstveni-sodelavec',
     groupLabel: 'Višji znanstveni sodelavec / višja znanstvena sodelavka',
     stage: 'III',
     minEducation: 10,
     standardsRequired: 2,
-    minEquivalents: 10,
-    minCitations: 100,
-    minExternalProjectsValueFte: 3,
-    minLeadershipValueFte: 5,
+    minEquivalents: 20,
+    minCitations: 200,
+    minExternalProjectsValueEur: 150_000,
+    minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 10,
   }),
   // IV. znanstveni svetnik
-  // Pravilnik: 18 ekvivalentov, 200 citatov ALI 5 FTE, 10 FTE ALI 3 leta.
+  // v2.2: equivalents 18→40, citations 200→400, projects 300.000 EUR,
+  // leadership 500.000 EUR / 3 years.
   row({
     title: 'znanstveni-svetnik',
     groupLabel: 'Znanstveni svetnik / znanstvena svetnica',
     stage: 'IV',
     minEducation: 10,
     standardsRequired: 2,
-    minEquivalents: 18,
-    minCitations: 200,
-    minExternalProjectsValueFte: 5,
-    minLeadershipValueFte: 10,
+    minEquivalents: 40,
+    minCitations: 400,
+    minExternalProjectsValueEur: 300_000,
+    minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 15,
   }),
 
   // ─── STROKOVNO-RAZISKOVALNI ─── (same Annex-3 numbers as znanstveni)
@@ -239,10 +230,10 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     stage: 'II',
     minEducation: 10,
     standardsRequired: 1,
-    minEquivalents: 3,
+    minEquivalents: 5,
     minCitations: 10,
-    minExternalProjectsValueFte: 0.5,
-    minLeadershipValueFte: 1,
+    minExternalProjectsValueEur: 20_000,
+    minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
     minYearsInResearchSector: null,
   }),
@@ -252,12 +243,12 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     stage: 'III',
     minEducation: 10,
     standardsRequired: 2,
-    minEquivalents: 10,
-    minCitations: 100,
-    minExternalProjectsValueFte: 3,
-    minLeadershipValueFte: 5,
+    minEquivalents: 20,
+    minCitations: 200,
+    minExternalProjectsValueEur: 150_000,
+    minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 10,
   }),
   row({
     title: 'strokovno-raziskovalni-svetnik',
@@ -265,28 +256,27 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     stage: 'IV',
     minEducation: 10,
     standardsRequired: 2,
-    minEquivalents: 18,
-    minCitations: 200,
-    minExternalProjectsValueFte: 5,
-    minLeadershipValueFte: 10,
+    minEquivalents: 40,
+    minCitations: 400,
+    minExternalProjectsValueEur: 300_000,
+    minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 15,
   }),
 
   // ─── RAZVOJNI ───
-  // Pravilnik: Pogoj 1 = 2 / 5 / 18; citations 5 / 50 / 200;
-  // Pogoj 2 FTE alt same as znanstveni (0,5 / 3 / 5); Pogoj 3 FTE same
-  // (1 / 5 / 10) and years 1 / 2 / 3.
+  // v2.2: razvojni Pogoj 1 = 5 / 15 / 35; citations 5 / 50 / 200;
+  // project EUR same as znanstveni; leadership EUR same.
   row({
     title: 'razvojni-sodelavec',
     groupLabel: 'Razvojni sodelavec / razvojna sodelavka',
     stage: 'II',
     minEducation: 8,
     standardsRequired: 1,
-    minEquivalents: 2,
+    minEquivalents: 5,
     minCitations: 5,
-    minExternalProjectsValueFte: 0.5,
-    minLeadershipValueFte: 1,
+    minExternalProjectsValueEur: 20_000,
+    minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
     minYearsInResearchSector: null,
   }),
@@ -296,12 +286,12 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     stage: 'III',
     minEducation: 8,
     standardsRequired: 2,
-    minEquivalents: 5,
+    minEquivalents: 15,
     minCitations: 50,
-    minExternalProjectsValueFte: 3,
-    minLeadershipValueFte: 5,
+    minExternalProjectsValueEur: 150_000,
+    minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 10,
   }),
   row({
     title: 'razvojni-svetnik',
@@ -309,12 +299,12 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     stage: 'IV',
     minEducation: 9,
     standardsRequired: 2,
-    minEquivalents: 18,
+    minEquivalents: 35,
     minCitations: 200,
-    minExternalProjectsValueFte: 5,
-    minLeadershipValueFte: 10,
+    minExternalProjectsValueEur: 300_000,
+    minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
-    minYearsInResearchSector: null,
+    minYearsInResearchSector: 15,
   }),
 ];
 

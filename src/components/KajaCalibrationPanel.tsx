@@ -366,7 +366,7 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
         <Limits items={[t('limit_authorship'), t('limit_senior'), t('limit_q12')]} />
       </Section>
 
-      {/* ── Pogoj 2: citations / project value FTE ── */}
+      {/* ── Pogoj 2: citations / project value EUR ── */}
       <Section title={t('sec2Title')} subtitle={t('sec2Subtitle')}>
         <ControlRow label={t('citationSourceLabel')}>
           <select
@@ -383,19 +383,19 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
         </ControlRow>
 
         <NumberInput
-          label={t('externalProjectsValueFteLabel')}
-          value={config.externalProjectsValueFteOverride ?? ''}
-          placeholder={fmt(researcher.externalProjectsValueFte ?? 0)}
-          step={0.1}
+          label={t('externalProjectsValueEurLabel')}
+          value={config.externalProjectsValueEurOverride ?? ''}
+          placeholder={fmt(researcher.externalProjectsValueEur ?? 0)}
+          step={1000}
           onChange={(v) =>
-            patch({ externalProjectsValueFteOverride: v === '' ? null : Number(v) })
+            patch({ externalProjectsValueEurOverride: v === '' ? null : Number(v) })
           }
         />
 
         <dl className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
           <Row k={t('citationsUsed')} v={result.citationsUsed} />
           <Row k={t('citationSourceLabelDisplay')} v={result.citationSourceLabel} />
-          <Row k={t('externalProjectsValueFteUsed')} v={fmtFte(result.externalProjectsValueFte)} />
+          <Row k={t('externalProjectsValueEurUsed')} v={fmtEur(result.externalProjectsValueEur)} />
         </dl>
 
         <Methodology>{t('sec2Method')}</Methodology>
@@ -406,12 +406,12 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
       <Section title={t('sec3Title')} subtitle={t('sec3Subtitle')}>
         <div className="grid gap-2 sm:grid-cols-2">
           <NumberInput
-            label={t('leadershipValueFteLabel')}
-            value={config.leadershipValueFteOverride ?? ''}
-            placeholder={fmt(researcher.leadership?.cumulativeValueFte ?? 0)}
-            step={0.1}
+            label={t('leadershipValueEurLabel')}
+            value={config.leadershipValueEurOverride ?? ''}
+            placeholder={fmt(researcher.leadership?.cumulativeValueEur ?? 0)}
+            step={1000}
             onChange={(v) =>
-              patch({ leadershipValueFteOverride: v === '' ? null : Number(v) })
+              patch({ leadershipValueEurOverride: v === '' ? null : Number(v) })
             }
           />
           <NumberInput
@@ -482,8 +482,8 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
               <th className="px-2 py-1 font-semibold">{t('thTitle')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinEq')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinCit')}</th>
-              <th className="px-2 py-1 font-semibold">{t('thMinProjFte')}</th>
-              <th className="px-2 py-1 font-semibold">{t('thMinLdFte')}</th>
+              <th className="px-2 py-1 font-semibold">{t('thMinProjEur')}</th>
+              <th className="px-2 py-1 font-semibold">{t('thMinLdEur')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinLdYr')}</th>
               <th className="px-2 py-1 font-semibold">{t('thStds')}</th>
               <th className="px-2 py-1 font-semibold">{t('thVerdict')}</th>
@@ -505,15 +505,15 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
                     {row.minCitations == null ? '—' : Math.round(row.minCitations)}
                   </td>
                   <td className="px-2 py-1">
-                    {row.minExternalProjectsValueFte == null
+                    {row.minExternalProjectsValueEur == null
                       ? '—'
-                      : fmtFte(row.minExternalProjectsValueFte)}
+                      : fmtEur(row.minExternalProjectsValueEur)}
                   </td>
                   <td className="px-2 py-1">
                     <Pass on={row.pog3Pass} />
-                    {row.minLeadershipValueFte == null
+                    {row.minLeadershipValueEur == null
                       ? '—'
-                      : fmtFte(row.minLeadershipValueFte)}
+                      : fmtEur(row.minLeadershipValueEur)}
                   </td>
                   <td className="px-2 py-1">
                     {row.minLeadershipYears == null
@@ -556,11 +556,12 @@ function fmt(n: number): string {
   return n.toLocaleString('sl-SI', { maximumFractionDigits: 2 });
 }
 
-function fmtFte(n: number): string {
-  return `${n.toLocaleString('sl-SI', {
-    minimumFractionDigits: n % 1 === 0 ? 0 : 1,
-    maximumFractionDigits: 2,
-  })} FTE`;
+function fmtEur(n: number): string {
+  return new Intl.NumberFormat('sl-SI', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 function configsEqual(a: SimulationConfig, b: SimulationConfig): boolean {

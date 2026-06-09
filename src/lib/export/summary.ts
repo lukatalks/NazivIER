@@ -17,12 +17,13 @@ function fmt(n: number, d = 2): string {
   });
 }
 
-function fmtFte(n: number | undefined | null): string {
+function fmtEur(n: number | undefined | null): string {
   if (n == null) return '/';
-  return `${n.toLocaleString('sl-SI', {
-    minimumFractionDigits: n % 1 === 0 ? 0 : 1,
-    maximumFractionDigits: 2,
-  })} FTE`;
+  return new Intl.NumberFormat('sl-SI', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 const VERDICT = (eligible: boolean) => (eligible ? '✓ IZVOLLJIV' : '✗ ni izvolljiv');
@@ -58,10 +59,10 @@ export function buildMarkdownSummary(
   lines.push(`- Raven izobrazbe (SOK): **${researcher.educationLevel ?? '–'}**`);
   lines.push(`- Let v raziskovalnem sektorju: **${researcher.yearsInResearchSector ?? '–'}**`);
   lines.push(
-    `- Vrednost projektov izven ARIS, vodja (Pogoj 2): **${fmtFte(researcher.externalProjectsValueFte)}**`,
+    `- Vrednost projektov izven ARIS, vodja (Pogoj 2): **${fmtEur(researcher.externalProjectsValueEur)}**`,
   );
   lines.push(
-    `- Kumulativna vrednost vodenih projektov (Pogoj 3, a-d): **${fmtFte(researcher.leadership?.cumulativeValueFte)}**`,
+    `- Kumulativna vrednost vodenih projektov (Pogoj 3, a-d): **${fmtEur(researcher.leadership?.cumulativeValueEur)}**`,
   );
   lines.push(
     `- Leta vodilne funkcije (Pogoj 3, e): **${researcher.leadership?.leadershipYears ?? '–'}**`,
@@ -172,7 +173,7 @@ export function buildMarkdownSummary(
     `_Generirano avtomatsko z orodjem NazivIER (nazivier.vercel.app). ` +
       `Algoritem sledi Pravilniku IER (predlog 05. 6. 2026, v2.2), Prilogi 2 in 3. ` +
       `Faktor avtorstva je za vsako publikacijo ročno potrjen, ` +
-      `FTE vrednosti so vnesene s strani raziskovalca. ` +
+      `EUR vrednosti so vnesene s strani raziskovalca. ` +
       `Pravilniško razsodbo poda komisija; ta dokument je tehnična podlaga._`,
   );
   return lines.join('\n');

@@ -105,44 +105,44 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">{t('fields.externalProjectsValueFte')}</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.externalProjectsValueEur')}</span>
             <input
               type="number"
-              step="0.1"
+              step="1000"
               min={0}
-              value={r.externalProjectsValueFte ?? ''}
+              value={r.externalProjectsValueEur ?? ''}
               onChange={(e) =>
-                onChange({ externalProjectsValueFte: Number(e.target.value) || undefined })
+                onChange({ externalProjectsValueEur: Number(e.target.value) || undefined })
               }
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
-              placeholder="FTE (npr. 0,5)"
+              placeholder="EUR"
             />
             <span className="mt-1 text-[10px] leading-snug text-[var(--muted)]">
-              {t('fields.externalProjectsValueFteHelp')}
+              {t('fields.externalProjectsValueEurHelp')}
             </span>
           </label>
 
           <label className="flex flex-col">
-            <span className="text-xs text-[var(--muted)]">{t('fields.leadershipValueFte')}</span>
+            <span className="text-xs text-[var(--muted)]">{t('fields.leadershipValueEur')}</span>
             <input
               type="number"
-              step="0.1"
+              step="1000"
               min={0}
-              value={r.leadership?.cumulativeValueFte ?? ''}
+              value={r.leadership?.cumulativeValueEur ?? ''}
               onChange={(e) =>
                 onChange({
                   leadership: {
                     ...r.leadership,
-                    cumulativeValueFte: Number(e.target.value) || 0,
+                    cumulativeValueEur: Number(e.target.value) || 0,
                     leadershipYears: r.leadership?.leadershipYears ?? 0,
                   },
                 })
               }
               className="mt-1 rounded-md border border-[var(--border)] bg-white dark:bg-black/30 px-2 py-1"
-              placeholder="FTE (npr. 0,5)"
+              placeholder="EUR"
             />
             <span className="mt-1 text-[10px] leading-snug text-[var(--muted)]">
-              {t('fields.leadershipValueFteHelp')}
+              {t('fields.leadershipValueEurHelp')}
             </span>
           </label>
 
@@ -156,7 +156,7 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
               onChange={(e) =>
                 onChange({
                   leadership: {
-                    cumulativeValueFte: r.leadership?.cumulativeValueFte ?? 0,
+                    cumulativeValueEur: r.leadership?.cumulativeValueEur ?? 0,
                     leadershipYears: Number(e.target.value) || 0,
                   },
                 })
