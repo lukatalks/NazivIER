@@ -109,8 +109,11 @@ export interface Researcher {
   citations: CitationData;
   /** Leadership achievements (Pogoj 3 in Annex 3). */
   leadership?: LeadershipRecord;
-  /** Project value outside ARIS in FTE (Pogoj 2 alternative). */
-  externalProjectsFte?: number;
+  /** Project value outside ARIS in EUR (Pogoj 2 alternative).
+   *  Per Pravilnik v2.2 (05.06.2026): cumulative value of projects outside
+   *  ARIS where candidate had leading role (vodja projekta / vodilna vloga),
+   *  in EUR. Replaces former FTE-based metric. */
+  externalProjectsValueEur?: number;
   /** Counts of achievements that count toward Pogoj 1 equivalents but have no
    *  COBISS typology code, so they cannot come from the SICRIS bibliography
    *  feed and must be entered manually. See Annex 3, Pojasnila k merilom (1). */
@@ -193,8 +196,12 @@ export interface ExtraAchievements {
 }
 
 export interface LeadershipRecord {
-  /** Cumulative FTE A-category value of led/coordinated projects/work packages. */
-  cumulativeFte: number;
+  /** Cumulative EUR value of led/coordinated projects or work packages.
+   *  Per Pravilnik v2.2 (05.06.2026), Priloga 3, Pogoj 3, paths (a)–(d):
+   *  sum of total project values (for the Institute AND other partners) on
+   *  projects where the candidate had a leading role at PROJECT level (not
+   *  only at Institute level). Replaces former FTE-based metric. */
+  cumulativeValueEur: number;
   /** Years in leadership function (director, chair, programme head, infra-group head). */
   leadershipYears: number;
   details?: string;

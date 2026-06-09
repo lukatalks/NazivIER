@@ -150,17 +150,29 @@ function pickCitations(r: Researcher): {
 /** Apply Article 22(2): on re-election to the same title the candidate must
  *  meet at least HALF of the values required at the first election. We model
  *  this by halving every numeric threshold; everything else (standardsRequired,
- *  minEducation) stays. */
+ *  minEducation) stays. The v2.2 rulebook also requires »napredek ≥ 20 % razlike
+ *  v ≥2 pogojih« between current and next-higher naziv – this is a manual
+ *  judgment that requires comparing to a previous evaluation snapshot, so it
+ *  is currently surfaced to the reviewer as text guidance rather than
+ *  enforced numerically. */
 function applyReelection(c: TitleCriteria): TitleCriteria {
   const half = (n: number | null) => (n == null ? n : n / 2);
   return {
     ...c,
     minEquivalents: half(c.minEquivalents),
     minCitations: half(c.minCitations),
-    minExternalProjectsFte: half(c.minExternalProjectsFte),
-    minLeadershipFte: half(c.minLeadershipFte),
+    minExternalProjectsValueEur: half(c.minExternalProjectsValueEur),
+    minLeadershipValueEur: half(c.minLeadershipValueEur),
     minLeadershipYears: half(c.minLeadershipYears),
   };
+}
+
+function fmtEur(n: number): string {
+  return new Intl.NumberFormat('sl-SI', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 /** Evaluate the researcher against a single title. */
@@ -192,15 +204,18 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
           extraNote,
   };
 
-  // Pogoj 2: citati ALI vrednost projektov izven ARIS
+  // Pogoj 2: citati ALI kumulativna vrednost projektov izven ARIS (v EUR)
+  // Per Pravilnik v2.2 (05.06.2026): switched from FTE to EUR. Threshold uses
+  // »najmanj« → ≥ (inclusive).
   const citPass = c.minCitations != null && cit.used >= c.minCitations;
-  const ftePass =
-    c.minExternalProjectsFte != null &&
-    (researcher.externalProjectsFte ?? 0) > c.minExternalProjectsFte;
+  const extProjValue = researcher.externalProjectsValueEur ?? 0;
+  const projValuePass =
+    c.minExternalProjectsValueEur != null &&
+    extProjValue >= c.minExternalProjectsValueEur;
   const pog2Pass =
-    c.minCitations == null && c.minExternalProjectsFte == null
+    c.minCitations == null && c.minExternalProjectsValueEur == null
       ? true
-      : citPass || ftePass;
+      : citPass || projValuePass;
   const pog2: StandardResult = {
     name: 'Pogoj 2',
     description: 'Relevantnost dosežkov ali vodenih projektov',
@@ -208,51 +223,54 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     evidence:
       c.minCitations == null
         ? `Ni zahtevan za ta naziv.`
-        : `Citati (${cit.source === 'none' ? 'ni podatka' : cit.source}): ` +
+        : `Čisti citati (${cit.source === 'none' ? 'ni podatka' : cit.source}): ` +
           `${cit.used} (zahteva ≥ ${c.minCitations}). ` +
-          `ALI vrednost projektov izven ARIS: ` +
-          `${fmt(researcher.externalProjectsFte ?? 0)} FTE ` +
-          `(zahteva > ${c.minExternalProjectsFte} FTE). ` +
+          `ALI kumulativna vrednost projektov izven ARIS, ` +
+          `pri katerih je kandidat nastopal kot vodja: ` +
+          `${fmtEur(extProjValue)} ` +
+          `(zahteva ≥ ${fmtEur(c.minExternalProjectsValueEur ?? 0)}). ` +
           (pog2Pass ? '✓ izpolnjen.' : '✗ ni izpolnjen.'),
   };
 
   // Pogoj 3: zaključeno vodenje
   //
-  // Pravilnik Priloga 3 opens TWO alternative paths:
+  // Pravilnik v2.2 (05.06.2026), Priloga 3, opens TWO alternative paths:
   //
-  //   (a)–(d) Kumulativna vrednost zaključenih vodenih projektov:
-  //           ≥ 1 / 5 / 10 FTE kategorije A (po karierni stopnji).
+  //   (a)–(d) Kumulativna VREDNOST V EUR zaključenih vodenih projektov ali
+  //           delovnih sklopov: ≥ 50.000 / 250.000 / 500.000 EUR (po stopnji).
+  //           Seštevek celotnih sredstev (za Inštitut + ostale partnerje) na
+  //           projektih, pri katerih je kandidat imel vodilno vlogo na ravni
+  //           projekta (ne zgolj na ravni Inštituta).
   //   (e)     Vsaj 1 / 2 / 3 leta opravljanja VODILNE FUNKCIJE,
   //           izčrpno naštete: direktor, predsednik upravnega odbora,
   //           predsednik znanstvenega sveta, vodja programske skupine,
   //           vodja infrastrukturne skupine — na Inštitutu ali enakovredni
   //           instituciji.
   //
+  // v2.2 change: switched from FTE to EUR for paths (a)–(d).
+  //
   // Pomembno (v2.7.2, popravek po opozorilu sodelavke): »leta« iz poti (e)
   // veljajo IZKLJUČNO za zgornjih pet vodilnih funkcij. NE veljajo za leta
   // vodenja raziskovalnih projektov. Zato `ierProjectLeadership.ledYears`
   // (unija intervalov vodenih projektov z ier.si/projekti) NE sme samodejno
   // polniti tega polja — vodenje projekta ≠ vodilna funkcija.
-  // IER-projektni podatki ostanejo prikazani kot revizija/dokaz pod
-  // metadata-panelom, ne pa kot avtomatska vrednost za pogoj.
-  // FTE vrednost iz poti (a)–(d) tudi ostaja ročna, ker ier.si FTE-jev
-  // ne objavlja.
-  const ldFte = researcher.leadership?.cumulativeFte ?? 0;
+  const ldValueEur = researcher.leadership?.cumulativeValueEur ?? 0;
   const ldYears = researcher.leadership?.leadershipYears ?? 0;
   const pog3Pass =
-    c.minLeadershipFte == null && c.minLeadershipYears == null
+    c.minLeadershipValueEur == null && c.minLeadershipYears == null
       ? true
-      : (c.minLeadershipFte != null && ldFte >= c.minLeadershipFte) ||
+      : (c.minLeadershipValueEur != null && ldValueEur >= c.minLeadershipValueEur) ||
         (c.minLeadershipYears != null && ldYears >= c.minLeadershipYears);
   const pog3: StandardResult = {
     name: 'Pogoj 3',
     description: 'Sposobnost vodenja',
     passed: pog3Pass,
     evidence:
-      c.minLeadershipFte == null
+      c.minLeadershipValueEur == null
         ? `Ni zahtevan za ta naziv.`
-        : `(a–d) Kumulativna vrednost zaključenih vodenih projektov: ` +
-          `${fmt(ldFte)} FTE (zahteva ≥ ${c.minLeadershipFte} FTE kategorije A). ` +
+        : `(a–d) Kumulativna vrednost zaključenih vodenih projektov ali ` +
+          `delovnih sklopov: ${fmtEur(ldValueEur)} ` +
+          `(zahteva ≥ ${fmtEur(c.minLeadershipValueEur ?? 0)}). ` +
           `ALI (e) leta opravljanja vodilne funkcije (direktor, predsednik UO, ` +
           `predsednik ZS, vodja programske ali infrastrukturne skupine): ` +
           `${ldYears} let (zahteva ≥ ${c.minLeadershipYears} let). ` +
@@ -292,10 +310,11 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
       rawCriteria.minEquivalents != null && totalEquivalents >= rawCriteria.minEquivalents * 1.5;
     const cit15 =
       rawCriteria.minCitations != null && cit.used >= rawCriteria.minCitations * 1.5;
-    const fte15 =
-      rawCriteria.minExternalProjectsFte != null &&
-      (researcher.externalProjectsFte ?? 0) > rawCriteria.minExternalProjectsFte * 1.5;
-    const overshootOk = eqOk && (cit15 || fte15);
+    const proj15 =
+      rawCriteria.minExternalProjectsValueEur != null &&
+      (researcher.externalProjectsValueEur ?? 0) >=
+        rawCriteria.minExternalProjectsValueEur * 1.5;
+    const overshootOk = eqOk && (cit15 || proj15);
     earlyEligible = yearsOk && overshootOk && eligible;
     earlyEv = earlyEligible
       ? `Upravičen do predčasne izvolitve: vsaj 50 % nad minimumom (${fmt(

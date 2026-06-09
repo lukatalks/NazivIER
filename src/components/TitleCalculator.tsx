@@ -292,35 +292,26 @@ function SummaryStrip({
             ) : null}
           </>
         ) : null}
-        {typeof researcher.citations.openAlexCleanCitations === 'number' ? (
+        {/* v2.8: OpenAlex citation/h-index display removed from public UI per
+            Kaja's 05.06.2026 request — »ni splošno uporabljen v pravilnikih«.
+            OpenAlex remains used silently in the backend for Article 11(6)
+            Open-Access detection only. SICRIS Scopus citations shown instead
+            as the secondary signal next to WoS. */}
+        {typeof researcher.citations.sicrisScopusCleanCitations === 'number' &&
+        researcher.citations.sicrisScopusCleanCitations > 0 ? (
           <>
-            {' '}· {t('citationsOpenAlex')}:{' '}
+            {' '}· {t('citationsSicrisScopus')}:{' '}
             <strong className="tabnum">
-              {researcher.citations.openAlexCleanCitations}
+              {researcher.citations.sicrisScopusCleanCitations}
             </strong>
-            {researcher.citationDiagnostics &&
-            researcher.citationDiagnostics.selfExcluded > 0 ? (
+            {typeof researcher.citations.sicrisHIndexScopus === 'number' &&
+            researcher.citations.sicrisHIndexScopus > 0 ? (
               <span className="text-xs">
-                {' '}({t('selfCitationsExcluded', {
-                  raw: researcher.citationDiagnostics.rawTotal,
-                  self: researcher.citationDiagnostics.selfExcluded,
-                })})
+                {' '}(h={researcher.citations.sicrisHIndexScopus})
               </span>
             ) : null}
           </>
         ) : null}
-        {researcher.openAlex ? (
-          <>
-            {' '}· {t('hIndex')}: <strong className="tabnum">{researcher.openAlex.hIndex}</strong>{' '}
-            <span className="text-xs">
-              ({t(`matchType.${researcher.openAlex.matchType}` as 'matchType.orcid')})
-            </span>
-          </>
-        ) : (
-          <>
-            {' '}· <span className="text-[var(--warn)]">{t('openAlexNotFound')}</span>
-          </>
-        )}
         {researcher.openScienceCompliance &&
         researcher.openScienceCompliance.postOrdinanceCount > 0 ? (
           <>

@@ -2,15 +2,15 @@
   "site": {
     "title": "NazivIER – IER researcher-title calculator",
     "shortTitle": "NazivIER",
-    "description": "Internal tool of the Institute for Economic Research (IER, Ljubljana) for automatic calculation of researcher titles under the new rulebook, powered by SICRIS and OpenAlex.",
-    "ogDescription": "Automatic title-eligibility check under the IER researcher-titles rulebook (draft 26 May 2026). Bibliography from SICRIS, citations from OpenAlex."
+    "description": "Internal tool of the Institute for Economic Research (IER, Ljubljana) for automatic calculation of researcher titles under the new rulebook, powered by SICRIS.",
+    "ogDescription": "Automatic title-eligibility check under the IER researcher-titles rulebook (draft 5 Jun 2026, v2.2). Bibliography and clean citations from SICRIS (WoS / Scopus)."
   },
   "header": {
     "eyebrow": "Institute for Economic Research · internal tool",
     "title": "NazivIER – researcher-title calculator",
     "subtitle1": "Automatic eligibility check against the new ",
     "subtitleEm": "Rulebook on researcher titles",
-    "subtitle2": " (draft 26 May 2026), Annexes 2 and 3. Bibliography from SICRIS, citations from SICRIS WoS plus OpenAlex (covers WoS, Scopus, Crossref)."
+    "subtitle2": " (draft 5 Jun 2026, v2.2), Annexes 2 and 3. Bibliography and clean citations from SICRIS (WoS or Scopus). Authorship factor entered manually per publication."
   },
   "picker": {
     "selectFromList": "1. Pick an IER researcher",
@@ -30,18 +30,16 @@
     "rosterError": "Could not load the list ({msg}). Use the field on the right to enter a SICRIS ID manually.",
     "loadingInline": "(loading…)"
   },
-  "loading": "Fetching bibliography from SICRIS, citations from SICRIS WoS + OpenAlex, and projects from ier.si … (a few seconds on first request, cached after).",
+  "loading": "Fetching bibliography and clean citations from SICRIS, and projects from ier.si … (a few seconds on first request, cached after).",
   "error": {
     "label": "Data fetch error:"
   },
   "summary": {
     "fetchedAt": "SICRIS #{id} · fetched {date}",
     "publicationsFromSicris": "Publications in SICRIS",
-    "citationsOpenAlex": "OpenAlex (broader coverage)",
     "citationsSicrisWos": "SICRIS WoS (official)",
+    "citationsSicrisScopus": "SICRIS Scopus",
     "hIndex": "h-index",
-    "openAlexNotFound": "OpenAlex record not found – please verify the name",
-    "selfCitationsExcluded": "{self} self-citations excluded from {raw}",
     "openScience": "open access {ratio}% ({count} post-2023 works)",
     "groups": {
       "znanstveni": "Scientific",
@@ -59,7 +57,7 @@
   },
   "metadata": {
     "title": "Data not exposed by public sources",
-    "subtitle": "Bibliography, citations and projects are fetched automatically (SICRIS, OpenAlex, ier.si). The fields below are required by the rulebook but not always available in public databases – enter or confirm manually.",
+    "subtitle": "Bibliography, clean citations and projects are fetched automatically from SICRIS and ier.si. Important: the authorship factor (first/lead/corresponding, equal, other) must be confirmed manually per publication — without it the computed equivalents are only a rough estimate.",
     "open": "Edit",
     "close": "Close",
     "fields": {
@@ -71,8 +69,10 @@
         "10": "Level 10 (doctorate)"
       },
       "yearsInResearchSector": "Years in the research sector",
-      "externalProjectsFte": "Value of non-ARIS projects (FTE)",
-      "leadershipFte": "Pogoj 3 (a–d): cumulative value of completed led projects (FTE A)",
+      "externalProjectsValueEur": "Pogoj 2: cumulative value of non-ARIS projects led by candidate (EUR)",
+      "externalProjectsValueEurHelp": "Sum of total funding for projects outside ARIS where the candidate acted as project leader. Per-title thresholds: 20,000 / 150,000 / 300,000 EUR (sodelavec / višji / svetnik).",
+      "leadershipValueEur": "Pogoj 3 (a–d): cumulative value of led projects or work packages (EUR)",
+      "leadershipValueEurHelp": "Sum of total funding (for the Institute + other partners) on projects or work packages where the candidate had a leading role at project level. Per-title thresholds: 50,000 / 250,000 / 500,000 EUR.",
       "leadershipYears": "Pogoj 3 (e): years in an executive function",
       "leadershipYearsHelp": "Only the five rulebook-enumerated functions count: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group (at the Institute or an equivalent institution). Project leadership years do NOT belong here.",
       "leadershipYearsTooltip": "At least 1 / 2 / 3 years holding an executive function: director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group.",
@@ -82,13 +82,13 @@
       "reelectionLabel": "Re-election (Article 22, paragraph 2)",
       "reelectionHelp": "Tick if this is a re-election to the same title – the rulebook then requires at least half of every numeric threshold since the previous election.",
       "additionalDepositsLabel": "Additional deposits for Article 11(6)",
-      "additionalDepositsHelp": "OpenAlex detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited – but OpenAlex has not yet indexed – or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
+      "additionalDepositsHelp": "We detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
       "ierLeadershipLabel": "Project leadership from ier.si (audit only — does NOT auto-fill Pogoj 3)",
       "ierLeadershipHelp": "From the IER website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), spanning about {years} years. Projects for audit:",
-      "ierLeadershipDisclaimer": "Important: project-leadership years do NOT by themselves satisfy Pogoj 3 path (e). The rulebook requires years holding an executive function (director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group). These projects are surfaced solely as audit evidence and can support manually entered FTE values for Pogoj 3 (a–d) or Pogoj 2 (value of non-ARIS projects).",
+      "ierLeadershipDisclaimer": "Important: project-leadership years do NOT by themselves satisfy Pogoj 3 path (e). The rulebook requires years holding an executive function (director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group). These projects are surfaced solely as audit evidence and can support manually entered EUR values for Pogoj 3 (a–d) or Pogoj 2 (value of non-ARIS projects).",
       "ierLeadershipMore": "… and {count} more led projects.",
-      "authorshipPerPubLabel": "Per-publication authorship",
-      "authorshipPerPubHelp": "The SICRIS bibliography does not expose who was first, lead or corresponding author, so every entry defaults to 0.7 (equal). Tag your actual role – the evaluator recomputes the publication equivalents. This is the single biggest accuracy lever.",
+      "authorshipPerPubLabel": "★ Per-publication authorship (required)",
+      "authorshipPerPubHelp": "Rulebook v2.2 requires the candidate to declare the authorship type per publication: first / lead / corresponding (factor 1.0), equal (0.7), or other co-authorship (0.3). The SICRIS bibliography does not expose this, so every entry defaults to 0.7. Tag your actual role – the evaluator recomputes the equivalents. Note: a publication tagged »equal« cannot also claim »first/corresponding« (Notes on criteria, point 4).",
       "authorshipShowAll": "Show all publications",
       "authorshipShowEvaluated": "Evaluated only (1.x / 2.x)",
       "authorshipShowMore": "Show 25 more ({remaining} remaining)",
@@ -96,9 +96,9 @@
       "authorshipColTitle": "Title",
       "authorshipColTyp": "Typ.",
       "authorshipColRole": "Role",
-      "authorshipRoleFirst": "First / lead / corresponding (1.0)",
-      "authorshipRoleEqual": "Equal (0.7)",
-      "authorshipRoleOther": "Other co-authorship (0.3)",
+      "authorshipRoleFirst": "First / lead / corresponding (factor 1.0)",
+      "authorshipRoleEqual": "Equal authorship (factor 0.7)",
+      "authorshipRoleOther": "Other co-authorship (factor 0.3)",
       "openAccessColHeader": "Open access (11/6)",
       "openAccessOpen": "Open access",
       "openAccessRestricted": "Not possible due to restrictions (exemption)",
@@ -174,8 +174,8 @@
         "body": " = achievement weight × authorship factor (Rulebook, Annex 3, Notes on criteria)."
       },
       "weights": {
-        "head": "Weights",
-        "body": " follow Annex 3: 1.0 for Q1/Q2 articles (1A1/1A2 in COBISS), monographs, patents; 0.7 for other peer-reviewed articles; 0.5 for invited abstracts and professional monographs; 0.3 for professional articles and reports; 0.1 for popular contributions."
+        "head": "Weights (Rulebook v2.2)",
+        "body": " follow Annex 3: 2.0 for granted patents with full examination (2.24); 1.5 for 1.01/1.02 in Q1 (1A1 in COBISS); 1.0 for 1.01/1.02 in Q2 (1A2 in COBISS), 1.16, 2.01; 0.7 for other peer-reviewed articles; 0.5 for invited abstracts and professional monographs; 0.3 for professional articles and reports; 0.1 for popular contributions."
       },
       "q12": {
         "head": "Q1/Q2 status",
@@ -187,15 +187,15 @@
       },
       "citations": {
         "head": "Clean citations",
-        "body": ": the official number for the rulebook check is SICRIS WoS (»čisti citati po WoS« – what ARIS evaluators see – fetched with a two-step call to bib.cobiss.net/biblioweb/cit/…). We also display OpenAlex (covers WoS + Scopus + Crossref + PubMed) as the broader-coverage diagnostic, with self-citations stripped via authorships.author.id matching."
+        "body": ": the official number for the rulebook check is SICRIS WoS (»čisti citati po WoS« – what ARIS evaluators see – fetched with a two-step call to bib.cobiss.net/biblioweb/cit/…). SICRIS Scopus is used as a fallback. Self-citations are excluded."
       },
       "leadership": {
         "head": "Leadership capability (Pogoj 3)",
-        "body": ": the rulebook (Annex 3) offers two alternative paths. (a–d) Cumulative value of completed led projects ≥ 1 / 5 / 10 FTE category A (by career stage) – entered manually, because ier.si does not publish FTE. (e) At least 1 / 2 / 3 years holding an executive function: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group. Years of project leadership (from ier.si/projekti) do NOT qualify for path (e); they are shown as an audit list under the metadata panel, never auto-filled."
+        "body": ": the rulebook v2.2 (Annex 3) offers two alternative paths. (a–d) Cumulative value of completed led projects or work packages ≥ 50,000 / 250,000 / 500,000 EUR (by career stage) – entered manually, because ier.si does not publish EUR. (e) At least 1 / 2 / 3 years holding an executive function: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group. Years of project leadership (from ier.si/projekti) do NOT qualify for path (e); they are shown as an audit list under the metadata panel."
       },
       "openScience": {
         "head": "Open Science (Article 11, paragraph 6)",
-        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 26 May 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed (OpenAlex `open_access.is_oa`) and displayed so candidates see how far they are from 100 % coverage."
+        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 5 Jun 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed and displayed so candidates see how far they are from 100 % coverage."
       },
       "earlyPromotion": {
         "head": "Early promotion (Article 14, paragraph 5)",
@@ -207,7 +207,7 @@
       }
     }
   },
-  "footer": "Methodology per the rulebook of 26 May 2026, Annex 3. Typology per the COBISS typology of documents/works. Citations: SICRIS WoS (official) + OpenAlex (broader coverage). Authorship factor defaults to 0.7 (equal) – set to 1.0 per publication for first / lead / corresponding author.",
+  "footer": "Methodology per the rulebook of 5 Jun 2026 (v2.2), Annex 3. Typology per the COBISS typology of documents/works. Clean citations from SICRIS WoS (official), fallback SICRIS Scopus. Authorship factor defaults to 0.7 (equal) – set to 1.0 per publication for first / lead / corresponding author.",
   "languageSwitcher": {
     "label": "Language",
     "sl": "Slovenščina",
@@ -259,24 +259,23 @@
     "extrasContribution": "Extras contribution",
     "sec1Method": "Σ = Σ(weight × authorship factor) over all publications with a valid typology (Annex 3) + extra achievements (awards, mentorships, editorships). Weights per Rulebook 26 May 2026: 1.01/1.02 in Q1/Q2 = 1.0; otherwise 0.7. 1.16/2.01/2.24 = 1.0. 1.03/1.06/1.07 = 0.7. Etc.",
 
-    "sec2Title": "2. Pogoj 2 – citations OR value of non-ARIS projects",
-    "sec2Subtitle": "Citation source and manual FTE value",
-    "citationSourceLabel": "Citation source",
+    "sec2Title": "2. Pogoj 2 – citations OR value of led non-ARIS projects",
+    "sec2Subtitle": "Clean-citations source and project value in EUR",
+    "citationSourceLabel": "Clean-citations source",
     "citWos": "SICRIS WoS (official)",
     "citScopus": "SICRIS Scopus",
-    "citOpenAlex": "OpenAlex (broader)",
-    "citMax": "Max(WoS, Scopus, OpenAlex)",
-    "externalFteLabel": "Value of non-ARIS projects (FTE)",
-    "citationsUsed": "Citations under simulation",
+    "citMax": "Max(WoS, Scopus)",
+    "externalProjectsValueEurLabel": "Value of non-ARIS projects led by candidate (EUR)",
+    "citationsUsed": "Clean citations under simulation",
     "citationSourceLabelDisplay": "Source",
-    "externalFteUsed": "FTE under simulation",
-    "sec2Method": "Rulebook: Pogoj 2 passes if at least one of the two holds – (a) Σ clean citations ≥ threshold for the chosen title, or (b) FTE value of led non-ARIS projects > threshold. Default source is SICRIS WoS (what an ARIS reviewer sees); OpenAlex is broader but less official.",
+    "externalProjectsValueEurUsed": "EUR under simulation",
+    "sec2Method": "Rulebook v2.2: Pogoj 2 passes if at least one of the two holds – (a) Σ clean citations ≥ threshold for the chosen title, or (b) cumulative value of non-ARIS projects led by the candidate ≥ EUR threshold (scientific / professional-research: 20k/150k/300k EUR). Default source is SICRIS WoS (what an ARIS reviewer sees).",
 
     "sec3Title": "3. Pogoj 3 – leadership capability",
-    "sec3Subtitle": "Cumulative FTE and years in a leadership function",
-    "leadershipFteLabel": "Cumulative FTE of led projects (category A)",
+    "sec3Subtitle": "Cumulative EUR value and years in a leadership function",
+    "leadershipValueEurLabel": "Cumulative value of led projects or work packages (EUR)",
     "leadershipYearsLabel": "Years in a leadership function (director, board chair, science-council chair, programme/infrastructure group head)",
-    "sec3Method": "Rulebook: two alternative paths – (a–d) cumulative FTE of led projects or (e) years served in the exhaustively listed leadership functions: institute director, chair of the management board, chair of the science council, head of the programme group, head of the infrastructure group.",
+    "sec3Method": "Rulebook v2.2: two alternative paths – (a–d) cumulative value of completed led projects or work packages ≥ 50k / 250k / 500k EUR (by stage), or (e) years served in the exhaustively listed leadership functions: institute director, chair of the management board, chair of the science council, head of the programme group, head of the infrastructure group.",
 
     "sec4Title": "4. Open Science (Article 11, paragraph 6)",
     "sec4Subtitle": "Open-access threshold per Decree 59/23",
@@ -290,15 +289,15 @@
     "sec5Title": "5. Per-title thresholds (multiplier)",
     "sec5Subtitle": "Multiply every min* value across all titles",
     "thresholdMultiplier": "Threshold multiplier (1.0 = Rulebook)",
-    "sec5Method": "Multiplies every threshold (minEquivalents, minCitations, minExternalProjectsFte, minLeadershipFte, minLeadershipYears) by the chosen value. 0.5 = halved thresholds (as in re-election per Art. 22(2)); 2.0 = doubled; 1.5 ≈ early-promotion check per Art. 14(5).",
+    "sec5Method": "Multiplies every threshold (minEquivalents, minCitations, minExternalProjectsValueEur, minLeadershipValueEur, minLeadershipYears) by the chosen value. 0.5 = halved thresholds (as in re-election per Art. 22(2)); 2.0 = doubled; 1.5 ≈ early-promotion check per Art. 14(5).",
 
     "perTitleTitle": "Per-title pass / fail (under simulation)",
     "perTitleSpec": "All thresholds apply the chosen multiplier. ✓ means the condition is met, ✗ means it isn't. The overall verdict requires education, enough standards and Open Science.",
     "thTitle": "Title",
     "thMinEq": "Pogoj 1 (≥)",
-    "thMinCit": "Pogoj 2: citations (≥)",
-    "thMinFte": "Pogoj 2: FTE (>)",
-    "thMinLdFte": "Pogoj 3: FTE (≥)",
+    "thMinCit": "Pogoj 2: clean cit. (≥)",
+    "thMinProjEur": "Pogoj 2: EUR (≥)",
+    "thMinLdEur": "Pogoj 3: EUR (≥)",
     "thMinLdYr": "Pogoj 3: years (≥)",
     "thStds": "Standards",
     "thVerdict": "Overall",
@@ -310,11 +309,11 @@
     "limit_senior": "»Lead« author is not separated from »first/corresponding« in the SICRIS feed; if the researcher is a senior author (last in the list), mark the publication as »first/lead/corresponding« manually.",
     "limit_corresponding": "Corresponding author is not auto-detected from SICRIS – mark manually on publications where the researcher is the corresponding author.",
     "limit_q12": "1.01/1.02 without a Q1/Q2 tag count at weight 0.7. The SCImago quartile is detected only for ~60 economics journals in the local seed table; for the rest trust the SICRIS 1A1/1A2 marker.",
-    "limit_selfcite": "OpenAlex citations exclude self-citations; SICRIS WoS and Scopus figures from the bibliography scrape are already »clean citations«.",
-    "limit_fte": "The value of non-ARIS projects is entered manually – ier.si does not publish FTE values for led projects.",
-    "limit_fteValue": "Cumulative FTE of category A is entered manually – the ier.si project list does not expose FTE shares.",
+    "limit_selfcite": "SICRIS WoS and Scopus figures from the bibliography scrape are already »clean citations« (self-citations excluded).",
+    "limit_projectValue": "The EUR value of non-ARIS projects is entered manually – ier.si does not publish per-researcher EUR values for led projects.",
+    "limit_leadershipValue": "Cumulative EUR value of led projects / work packages is entered manually – the ier.si project list does not expose per-researcher EUR shares.",
     "limit_leadershipYears": "»Years in a leadership function« applies strictly to the five listed functions in the Rulebook; years spent leading individual research projects do not count (v2.7.2 correction).",
-    "limit_osDetection": "Open-access detection relies on OpenAlex `is_oa`; if a publication does not match an OpenAlex record it is treated as »closed« until the user marks the exemption.",
+    "limit_osDetection": "Open-access detection relies on automatic data sources; if a publication does not match it is treated as »closed« until the user marks the exemption.",
     "limit_osExemption": "The rulebook carve-out (»publisher restrictions«) requires a manual »restricted-not-possible« tag – it is not auto-detected.",
     "limit_threshold": "The multiplier affects every numeric threshold uniformly; it does not affect the education level (minEducation) or standardsRequired."
   }

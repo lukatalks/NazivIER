@@ -11,10 +11,15 @@
 // simulation result rendered alongside the rulebook verdict so a reviewer can
 // stress-test thresholds and authorship rules in front of the committee.
 //
-// Methodology is mirror-faithful to Pravilnik IER, Priloga 3: same Pogoj 1/2/3
-// shape, same standardsRequired, same education check, same OA logic from
-// Article 11(6). The only thing that varies is the knob values the reviewer
-// supplies.
+// Methodology is mirror-faithful to Pravilnik IER (predlog 05.06.2026, v2.2),
+// Priloga 3: same Pogoj 1/2/3 shape, same standardsRequired, same education
+// check, same OA logic from Article 11(6). The only thing that varies is the
+// knob values the reviewer supplies.
+//
+// v2.8 (05.06.2026) changes:
+//   * Pogoj 2 + Pogoj 3 use EUR values (no longer FTE).
+//   * OpenAlex dropped from citation sources per email Kaja Primc 05.06.
+//     CitationSource union shrinks to 'wos' | 'scopus' | 'max-of-two'.
 
 import { authorshipFactor } from './authorship';
 import { TITLE_CRITERIA, type TitleCriteria } from './criteria';
@@ -35,7 +40,8 @@ export type AuthorshipPolicy =
   | 'lenient-all' // 1.0 for every role (sanity ceiling)
   | 'custom'; // freeform per-role sliders
 
-export type CitationSource = 'wos' | 'scopus' | 'openalex' | 'max-of-all';
+// v2.8: OpenAlex removed per Pravilnik v2.2 (»ni splošno uporabljen v pravilnikih«).
+export type CitationSource = 'wos' | 'scopus' | 'max-of-two';
 
 export interface SimulationConfig {
   // ─── Pogoj 1 ─────────────────────────────────────────────────────
@@ -46,7 +52,9 @@ export interface SimulationConfig {
     otherCoauthor: number;
     unknown: number;
   };
-  /** Treat 1.01/1.02 with unknown JCR rank as Q1/Q2 (weight 1.0). */
+  /** Treat 1.01/1.02 with unknown JCR rank as Q2 baseline (weight 1.0).
+   *  v2.2: Q1 = 1.5, Q2 = 1.0, izven = 0.7 — »unknown as Q1/Q2« defaults
+   *  to the Q2 weight (1.0). */
   treatUnknownAsQ12: boolean;
   /** Factor applied to weight-1.0 ExtraAchievements (awards, completed mentorships). */
   awardFactor: number;
@@ -57,11 +65,11 @@ export interface SimulationConfig {
 
   // ─── Pogoj 2 ─────────────────────────────────────────────────────
   citationSource: CitationSource;
-  /** Override the researcher's stored externalProjectsFte (null = use stored). */
-  externalProjectsFteOverride: number | null;
+  /** Override the researcher's stored externalProjectsValueEur (null = use stored). */
+  externalProjectsValueEurOverride: number | null;
 
   // ─── Pogoj 3 ─────────────────────────────────────────────────────
-  leadershipFteOverride: number | null;
+  leadershipValueEurOverride: number | null;
   leadershipYearsOverride: number | null;
 
   // ─── Article 11(6) Open Science ──────────────────────────────────
@@ -86,8 +94,8 @@ export const RULEBOOK_DEFAULT: SimulationConfig = {
   editorFactor: 0.7,
   specialIssueFactor: 0.7,
   citationSource: 'wos',
-  externalProjectsFteOverride: null,
-  leadershipFteOverride: null,
+  externalProjectsValueEurOverride: null,
+  leadershipValueEurOverride: null,
   leadershipYearsOverride: null,
   osThresholdRatio: 1.0,
   thresholdMultiplier: 1.0,
@@ -133,6 +141,7 @@ function resolveWeight(config: SimulationConfig, p: Publication): number {
     config.treatUnknownAsQ12 &&
     !p.journalRank
   ) {
+    // Q2 baseline (1.0) when treating unknown as Q1/Q2. Conservative vs. Q1.
     return 1.0;
   }
   return weightFor(p);
@@ -155,19 +164,14 @@ function resolveCitations(
         0;
       return { used: v, label: 'SICRIS/Scopus' };
     }
-    case 'openalex': {
-      const v = r.citations?.openAlexCleanCitations ?? 0;
-      return { used: v, label: 'OpenAlex' };
-    }
-    case 'max-of-all': {
+    case 'max-of-two': {
       const wos =
         r.citations?.sicrisWosCleanCitations ?? r.citations?.wosCleanCitations ?? 0;
       const sco =
         r.citations?.sicrisScopusCleanCitations ??
         r.citations?.scopusCleanCitations ??
         0;
-      const oa = r.citations?.openAlexCleanCitations ?? 0;
-      return { used: Math.max(wos, sco, oa), label: 'Maks(WoS, Scopus, OpenAlex)' };
+      return { used: Math.max(wos, sco), label: 'Maks(WoS, Scopus)' };
     }
   }
 }
@@ -183,8 +187,8 @@ export interface TitleSimulationResult {
   /** Thresholds AFTER applying config.thresholdMultiplier. null when not required. */
   minEquivalents: number | null;
   minCitations: number | null;
-  minExternalProjectsFte: number | null;
-  minLeadershipFte: number | null;
+  minExternalProjectsValueEur: number | null;
+  minLeadershipValueEur: number | null;
   minLeadershipYears: number | null;
   pog1Pass: boolean;
   pog2Pass: boolean;
@@ -206,8 +210,8 @@ export interface SimulationResult {
   skippedPublications: number;
   citationsUsed: number;
   citationSourceLabel: string;
-  externalProjectsFte: number;
-  leadershipFte: number;
+  externalProjectsValueEur: number;
+  leadershipValueEur: number;
   leadershipYears: number;
   osTotalCount: number;
   osSatisfiedCount: number;
@@ -253,14 +257,18 @@ export function simulate(
         100,
     ) / 100;
 
-  // ─── Citations / FTE (Pogoj 2) ──
+  // ─── Citations / project value EUR (Pogoj 2) ──
   const cit = resolveCitations(r, config.citationSource);
-  const externalProjectsFte =
-    config.externalProjectsFteOverride ?? r.externalProjectsFte ?? 0;
+  const externalProjectsValueEur =
+    config.externalProjectsValueEurOverride ??
+    r.externalProjectsValueEur ??
+    0;
 
-  // ─── Leadership (Pogoj 3) ──
-  const leadershipFte =
-    config.leadershipFteOverride ?? r.leadership?.cumulativeFte ?? 0;
+  // ─── Leadership EUR + years (Pogoj 3) ──
+  const leadershipValueEur =
+    config.leadershipValueEurOverride ??
+    r.leadership?.cumulativeValueEur ??
+    0;
   const leadershipYears =
     config.leadershipYearsOverride ?? r.leadership?.leadershipYears ?? 0;
 
@@ -286,23 +294,25 @@ export function simulate(
   const perTitle: TitleSimulationResult[] = TITLE_CRITERIA.map((c) => {
     const minEq = c.minEquivalents == null ? null : c.minEquivalents * mult;
     const minCit = c.minCitations == null ? null : c.minCitations * mult;
-    const minFte =
-      c.minExternalProjectsFte == null ? null : c.minExternalProjectsFte * mult;
-    const minLdFte =
-      c.minLeadershipFte == null ? null : c.minLeadershipFte * mult;
+    const minProjEur =
+      c.minExternalProjectsValueEur == null
+        ? null
+        : c.minExternalProjectsValueEur * mult;
+    const minLdEur =
+      c.minLeadershipValueEur == null ? null : c.minLeadershipValueEur * mult;
     const minLdYr =
       c.minLeadershipYears == null ? null : c.minLeadershipYears * mult;
 
     const pog1Pass = minEq == null || totalEquivalents >= minEq;
     const pog2Pass =
-      minCit == null && minFte == null
+      minCit == null && minProjEur == null
         ? true
         : (minCit != null && cit.used >= minCit) ||
-          (minFte != null && externalProjectsFte > minFte);
+          (minProjEur != null && externalProjectsValueEur >= minProjEur);
     const pog3Pass =
-      minLdFte == null && minLdYr == null
+      minLdEur == null && minLdYr == null
         ? true
-        : (minLdFte != null && leadershipFte >= minLdFte) ||
+        : (minLdEur != null && leadershipValueEur >= minLdEur) ||
           (minLdYr != null && leadershipYears >= minLdYr);
 
     const standards = [pog1Pass, pog2Pass, pog3Pass];
@@ -319,8 +329,8 @@ export function simulate(
       educationOk,
       minEquivalents: minEq,
       minCitations: minCit,
-      minExternalProjectsFte: minFte,
-      minLeadershipFte: minLdFte,
+      minExternalProjectsValueEur: minProjEur,
+      minLeadershipValueEur: minLdEur,
       minLeadershipYears: minLdYr,
       pog1Pass,
       pog2Pass,
@@ -341,8 +351,8 @@ export function simulate(
     skippedPublications,
     citationsUsed: cit.used,
     citationSourceLabel: cit.label,
-    externalProjectsFte,
-    leadershipFte,
+    externalProjectsValueEur,
+    leadershipValueEur,
     leadershipYears,
     osTotalCount,
     osSatisfiedCount,

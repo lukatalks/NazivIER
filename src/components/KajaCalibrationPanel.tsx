@@ -366,7 +366,7 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
         <Limits items={[t('limit_authorship'), t('limit_senior'), t('limit_q12')]} />
       </Section>
 
-      {/* ── Pogoj 2: citations / FTE ── */}
+      {/* ── Pogoj 2: citations / project value EUR ── */}
       <Section title={t('sec2Title')} subtitle={t('sec2Subtitle')}>
         <ControlRow label={t('citationSourceLabel')}>
           <select
@@ -378,39 +378,40 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
           >
             <option value="wos">{t('citWos')}</option>
             <option value="scopus">{t('citScopus')}</option>
-            <option value="openalex">{t('citOpenAlex')}</option>
-            <option value="max-of-all">{t('citMax')}</option>
+            <option value="max-of-two">{t('citMax')}</option>
           </select>
         </ControlRow>
 
         <NumberInput
-          label={t('externalFteLabel')}
-          value={config.externalProjectsFteOverride ?? ''}
-          placeholder={fmt(researcher.externalProjectsFte ?? 0)}
+          label={t('externalProjectsValueEurLabel')}
+          value={config.externalProjectsValueEurOverride ?? ''}
+          placeholder={fmt(researcher.externalProjectsValueEur ?? 0)}
+          step={1000}
           onChange={(v) =>
-            patch({ externalProjectsFteOverride: v === '' ? null : Number(v) })
+            patch({ externalProjectsValueEurOverride: v === '' ? null : Number(v) })
           }
         />
 
         <dl className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
           <Row k={t('citationsUsed')} v={result.citationsUsed} />
           <Row k={t('citationSourceLabelDisplay')} v={result.citationSourceLabel} />
-          <Row k={t('externalFteUsed')} v={fmt(result.externalProjectsFte)} />
+          <Row k={t('externalProjectsValueEurUsed')} v={fmtEur(result.externalProjectsValueEur)} />
         </dl>
 
         <Methodology>{t('sec2Method')}</Methodology>
-        <Limits items={[t('limit_corresponding'), t('limit_selfcite'), t('limit_fte')]} />
+        <Limits items={[t('limit_corresponding'), t('limit_selfcite'), t('limit_projectValue')]} />
       </Section>
 
       {/* ── Pogoj 3: leadership ── */}
       <Section title={t('sec3Title')} subtitle={t('sec3Subtitle')}>
         <div className="grid gap-2 sm:grid-cols-2">
           <NumberInput
-            label={t('leadershipFteLabel')}
-            value={config.leadershipFteOverride ?? ''}
-            placeholder={fmt(researcher.leadership?.cumulativeFte ?? 0)}
+            label={t('leadershipValueEurLabel')}
+            value={config.leadershipValueEurOverride ?? ''}
+            placeholder={fmt(researcher.leadership?.cumulativeValueEur ?? 0)}
+            step={1000}
             onChange={(v) =>
-              patch({ leadershipFteOverride: v === '' ? null : Number(v) })
+              patch({ leadershipValueEurOverride: v === '' ? null : Number(v) })
             }
           />
           <NumberInput
@@ -424,7 +425,7 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
         </div>
 
         <Methodology>{t('sec3Method')}</Methodology>
-        <Limits items={[t('limit_fteValue'), t('limit_leadershipYears')]} />
+        <Limits items={[t('limit_leadershipValue'), t('limit_leadershipYears')]} />
       </Section>
 
       {/* ── Open Science ── */}
@@ -481,8 +482,8 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
               <th className="px-2 py-1 font-semibold">{t('thTitle')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinEq')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinCit')}</th>
-              <th className="px-2 py-1 font-semibold">{t('thMinFte')}</th>
-              <th className="px-2 py-1 font-semibold">{t('thMinLdFte')}</th>
+              <th className="px-2 py-1 font-semibold">{t('thMinProjEur')}</th>
+              <th className="px-2 py-1 font-semibold">{t('thMinLdEur')}</th>
               <th className="px-2 py-1 font-semibold">{t('thMinLdYr')}</th>
               <th className="px-2 py-1 font-semibold">{t('thStds')}</th>
               <th className="px-2 py-1 font-semibold">{t('thVerdict')}</th>
@@ -504,13 +505,15 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
                     {row.minCitations == null ? '—' : Math.round(row.minCitations)}
                   </td>
                   <td className="px-2 py-1">
-                    {row.minExternalProjectsFte == null
+                    {row.minExternalProjectsValueEur == null
                       ? '—'
-                      : fmt(row.minExternalProjectsFte)}
+                      : fmtEur(row.minExternalProjectsValueEur)}
                   </td>
                   <td className="px-2 py-1">
                     <Pass on={row.pog3Pass} />
-                    {row.minLeadershipFte == null ? '—' : fmt(row.minLeadershipFte)}
+                    {row.minLeadershipValueEur == null
+                      ? '—'
+                      : fmtEur(row.minLeadershipValueEur)}
                   </td>
                   <td className="px-2 py-1">
                     {row.minLeadershipYears == null
@@ -551,6 +554,14 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
 
 function fmt(n: number): string {
   return n.toLocaleString('sl-SI', { maximumFractionDigits: 2 });
+}
+
+function fmtEur(n: number): string {
+  return new Intl.NumberFormat('sl-SI', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 function configsEqual(a: SimulationConfig, b: SimulationConfig): boolean {
@@ -654,11 +665,13 @@ function NumberInput({
   label,
   value,
   placeholder,
+  step,
   onChange,
 }: {
   label: string;
   value: number | string;
   placeholder?: string;
+  step?: number;
   onChange: (v: string) => void;
 }) {
   return (
@@ -666,7 +679,7 @@ function NumberInput({
       <span className="font-semibold text-[var(--muted)]">{label}</span>
       <input
         type="number"
-        step="0.1"
+        step={step ?? 0.1}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}

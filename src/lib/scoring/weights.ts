@@ -1,18 +1,23 @@
 // Mapping of COBISS typology codes -> achievement weight.
-// Source: Pravilnik IER (26.05.2026), Priloga 3, "Pojasnila k merilom", točka (1).
+// Source: Pravilnik IER (predlog 05.06.2026, v2.2), Priloga 3,
+// "Pojasnila k merilom", točka (1).
 //
-// Note: 1.01 and 1.02 have CONDITIONAL weights:
-//   * weight 1.0 if journal is in WoS/Scopus Q1 or Q2 (i.e. 1A1 or 1A2 in COBISS)
-//   * weight 0.7 otherwise
+// Note: 1.01 and 1.02 have CONDITIONAL weights (per v2.2 update):
+//   * weight 1.5 if journal is in WoS/Scopus Q1 (i.e. 1A1 in COBISS)
+//   * weight 1.0 if journal is in WoS/Scopus Q2 (i.e. 1A2 in COBISS)
+//   * weight 0.7 otherwise (izven Q1 ali Q2)
+// 2.24 patent s polnim preizkusom = 2.0 (bumped from 1.0 in v2.2).
 // All other typology codes have a single weight.
 
 import type { JournalRank, Publication, TypologyCode } from '@/lib/types';
 
 const STATIC_WEIGHTS: Record<TypologyCode, number> = {
+  // Weight 2.0 (v2.2: granted patent with full examination)
+  '2.24': 2.0, // Podeljen patent s polnim preizkusom
+
   // Weight 1.0
   '1.16': 1.0, // Samostojni znanstveni sestavek/poglavje v monografiji
   '2.01': 1.0, // Znanstvena monografija
-  '2.24': 1.0, // Patent s polnim preizkusom
 
   // Weight 0.7 (1.01/1.02 also 0.7 when not Q1/Q2 – handled dynamically below)
   '1.03': 0.7, // Drugi znanstveni članki
@@ -75,10 +80,17 @@ const STATIC_WEIGHTS: Record<TypologyCode, number> = {
 /**
  * Resolve the weight for a single publication.
  * Returns 0 for typology codes not covered by Annex 3 (they don't count).
+ *
+ * For 1.01 / 1.02:
+ *   * Q1 → 1.5
+ *   * Q2 → 1.0
+ *   * other (Q3, Q4, not-indexed, unknown) → 0.7
  */
 export function weightFor(p: Pick<Publication, 'typology' | 'journalRank'>): number {
   if (p.typology === '1.01' || p.typology === '1.02') {
-    return isQ1OrQ2(p.journalRank) ? 1.0 : 0.7;
+    if (p.journalRank === 'Q1') return 1.5;
+    if (p.journalRank === 'Q2') return 1.0;
+    return 0.7;
   }
   return STATIC_WEIGHTS[p.typology] ?? 0;
 }
@@ -89,8 +101,10 @@ export function isQ1OrQ2(rank?: JournalRank): boolean {
 
 /** Human-readable description of which weight bucket a publication falls into. */
 export function weightBucketLabel(weight: number): string {
-  if (weight === 1.0) return 'Najvišja (1,0)';
-  if (weight === 0.7) return 'Visoka (0,7)';
+  if (weight === 2.0) return 'Vrhunska (2,0)';
+  if (weight === 1.5) return 'Najvišja (1,5)';
+  if (weight === 1.0) return 'Visoka (1,0)';
+  if (weight === 0.7) return 'Srednja (0,7)';
   if (weight === 0.5) return 'Srednja (0,5)';
   if (weight === 0.3) return 'Nižja (0,3)';
   if (weight === 0.1) return 'Najnižja (0,1)';
