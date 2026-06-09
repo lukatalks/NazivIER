@@ -80,7 +80,7 @@
       "weight05Count": "Dosežki uteži 0,5 brez tipologije (član uredništva revije, zaključeno vodenje raziskovalnega projekta/programa)",
       "weight03Count": "Dosežki uteži 0,3 brez tipologije (uredništvo posebne številke revije ali zbornika)",
       "reelectionLabel": "Ponovna izvolitev (22. člen, 2. odstavek)",
-      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv – pravilnik zahteva izpolnitev vsaj polovice vrednosti vseh pogojev od zadnje izvolitve.",
+      "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv. Pravilnik v2.2 (22. člen, 2. odstavek) zahteva DVOJE: (1) od zadnje izvolitve mora kandidat izpolniti vsaj polovico pogojev prve izvolitve – avtomatsko upoštevano s polovičnimi pragovi spodaj. (2) Kandidat mora izkazati napredek, ki ustreza vsaj 20 % razlike v vsaj dveh količinskih pogojih med trenutnim in neposredno višjim nazivom – tega kalkulator ne more samodejno preveriti, ker bi potreboval posnetek prejšnje vloge; komisija mora to potrditi ročno.",
       "additionalDepositsLabel": "Dodatna deponiranja za pogoj 11(6)",
       "additionalDepositsHelp": "Zaznano je {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje.",
       "ierLeadershipLabel": "Vodenje projektov z ier.si (revizija, ne polni Pogoja 3 samodejno)",
@@ -161,8 +161,8 @@
     },
     "moreHidden": "… in še {count} publikacij (skrito zaradi dolžine).",
     "noData": "ni podatka",
-    "reelectionBadge": "Ponovna izvolitev (pragovi razpolovljeni)",
-    "reelectionTooltip": "Po 22. členu, 2. odstavku pravilnika morajo biti pri ponovni izvolitvi v isti naziv izpolnjeni vsaj polovični pragovi.",
+    "reelectionBadge": "Ponovna izvolitev (pragovi razpolovljeni) – komisija mora ročno potrditi ≥20 % napredek v ≥2 pogojih",
+    "reelectionTooltip": "Po 22. členu, 2. odstavku pravilnika v2.2: pri ponovni izvolitvi morajo biti izpolnjeni vsaj polovični pragovi (avtomatsko) IN izkazan napredek vsaj 20 % razlike v vsaj 2 količinskih pogojih med trenutnim in neposredno višjim nazivom (presoja komisije).",
     "earlyPromotionBadge": "Upravičen do predčasne izvolitve",
     "openScienceFailBadge": "Pogoj odprte znanosti (11/6) ni izpolnjen"
   },
@@ -203,7 +203,7 @@
       },
       "reelection": {
         "head": "Ponovna izvolitev (22. člen, 2. odstavek)",
-        "body": ": če v meta-polju označite »ponovna izvolitev«, se vsi številčni pragovi razpolovijo – pravilnik zahteva izpolnitev vsaj polovice vrednosti od zadnje izvolitve."
+        "body": ": če v meta-polju označite »ponovna izvolitev«, se vsi številčni pragovi razpolovijo – pravilnik v2.2 zahteva izpolnitev vsaj polovice vrednosti od zadnje izvolitve. Druga zahteva (≥20 % napredek v ≥2 količinskih pogojih med trenutnim in višjim nazivom) ostane v presoji komisije, ker kalkulator nima posnetka prejšnje vloge."
       }
     }
   },

@@ -80,7 +80,7 @@
       "weight05Count": "Weight-0.5 achievements without typology (journal editorial board, completed leadership of research project/programme)",
       "weight03Count": "Weight-0.3 achievements without typology (special-issue editorship)",
       "reelectionLabel": "Re-election (Article 22, paragraph 2)",
-      "reelectionHelp": "Tick if this is a re-election to the same title – the rulebook then requires at least half of every numeric threshold since the previous election.",
+      "reelectionHelp": "Tick if this is a re-election to the same title. Rulebook v2.2 (Article 22, paragraph 2) requires TWO things: (1) since the previous election the candidate must meet at least half of every first-election threshold – auto-applied via halved thresholds below. (2) The candidate must show progress equivalent to ≥20 % of the gap in at least two quantitative conditions between the current and next-higher title – this cannot be checked automatically (would require a previous-application snapshot); the commission must confirm it manually.",
       "additionalDepositsLabel": "Additional deposits for Article 11(6)",
       "additionalDepositsHelp": "We detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
       "ierLeadershipLabel": "Project leadership from ier.si (audit only — does NOT auto-fill Pogoj 3)",
@@ -161,8 +161,8 @@
     },
     "moreHidden": "… and {count} more publications (hidden for length).",
     "noData": "no data",
-    "reelectionBadge": "Re-election (thresholds halved)",
-    "reelectionTooltip": "Article 22(2): on re-election to the same title the candidate must meet at least half of each first-election threshold.",
+    "reelectionBadge": "Re-election (thresholds halved) – commission must manually confirm ≥20 % progress in ≥2 conditions",
+    "reelectionTooltip": "Article 22(2) of rulebook v2.2: on re-election the candidate must meet at least the halved thresholds (auto) AND show ≥20 % progress in at least 2 quantitative conditions between current and next-higher title (commission judgment).",
     "earlyPromotionBadge": "Eligible for early promotion",
     "openScienceFailBadge": "Open-Science requirement (11/6) not met"
   },
@@ -203,7 +203,7 @@
       },
       "reelection": {
         "head": "Re-election (Article 22, paragraph 2)",
-        "body": ": when you tick »re-election« in the meta panel, every numeric threshold is halved – the rulebook requires at least half of the first-election values."
+        "body": ": when you tick »re-election« in the meta panel, every numeric threshold is halved – rulebook v2.2 requires at least half of the first-election values. The second requirement (≥20 % progress in ≥2 quantitative conditions between current and next-higher title) remains a commission judgment because the calculator has no snapshot of the previous application."
       }
     }
   },

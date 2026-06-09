@@ -36,8 +36,12 @@ export interface TitleCriteria {
    *  packages. Per v2.2 paths (a)–(d): 50k/250k/500k EUR. */
   minLeadershipValueEur: number | null;
   minLeadershipYears: number | null;
-  /** Optional minimum years of service in the research sector (only set for III/IV when early promotion). */
-  minYearsInResearchSector?: number;
+  /** Minimum years of service in the research sector (Priloga 2 »Delovna doba«).
+   *  Per Pravilnik v2.2 (05.06.2026), Priloga 2, this is a HARD requirement
+   *  for stages III (10 let) and IV (15 let) across all three groups
+   *  (znanstveni, strokovno-raziskovalni, razvojni). Not just for early
+   *  promotion. Null = no requirement (I and II stages). */
+  minYearsInResearchSector: number | null;
 }
 
 // Helper to produce one row.
@@ -61,6 +65,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'asistent-mag',
@@ -73,6 +78,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'asistent-srr',
@@ -85,6 +91,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'visji-asistent-srr',
@@ -97,6 +104,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'razvijalec',
@@ -109,6 +117,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'visji-razvijalec',
@@ -121,6 +130,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
 
   // ─── II. karierna stopnja – ASISTENT Z DOKTORATOM ────────────────
@@ -136,6 +146,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'visji-strokovno-raziskovalni-asistent',
@@ -148,6 +159,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'samostojni-razvijalec',
@@ -160,6 +172,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: null,
     minLeadershipValueEur: null,
     minLeadershipYears: null,
+    minYearsInResearchSector: null,
   }),
 
   // ─── ZNANSTVENI ─── II.b sodelavec
@@ -175,6 +188,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 20_000,
     minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
+    minYearsInResearchSector: null,
   }),
   // III. višji znanstveni sodelavec
   // v2.2: equivalents 10→20, citations 100→200, projects 150.000 EUR,
@@ -190,6 +204,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 150_000,
     minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
+    minYearsInResearchSector: 10,
   }),
   // IV. znanstveni svetnik
   // v2.2: equivalents 18→40, citations 200→400, projects 300.000 EUR,
@@ -205,6 +220,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 300_000,
     minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
+    minYearsInResearchSector: 15,
   }),
 
   // ─── STROKOVNO-RAZISKOVALNI ─── (same Annex-3 numbers as znanstveni)
@@ -219,6 +235,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 20_000,
     minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'visji-strokovno-raziskovalni-sodelavec',
@@ -231,6 +248,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 150_000,
     minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
+    minYearsInResearchSector: 10,
   }),
   row({
     title: 'strokovno-raziskovalni-svetnik',
@@ -243,6 +261,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 300_000,
     minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
+    minYearsInResearchSector: 15,
   }),
 
   // ─── RAZVOJNI ───
@@ -259,6 +278,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 20_000,
     minLeadershipValueEur: 50_000,
     minLeadershipYears: 1,
+    minYearsInResearchSector: null,
   }),
   row({
     title: 'visji-razvojni-sodelavec',
@@ -271,6 +291,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 150_000,
     minLeadershipValueEur: 250_000,
     minLeadershipYears: 2,
+    minYearsInResearchSector: 10,
   }),
   row({
     title: 'razvojni-svetnik',
@@ -283,6 +304,7 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     minExternalProjectsValueEur: 300_000,
     minLeadershipValueEur: 500_000,
     minLeadershipYears: 3,
+    minYearsInResearchSector: 15,
   }),
 ];
 

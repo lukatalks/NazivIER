@@ -318,8 +318,16 @@ export function simulate(
     const standards = [pog1Pass, pog2Pass, pog3Pass];
     const standardsMet = standards.filter(Boolean).length;
     const educationOk = eduLevel >= c.minEducation;
+    // Priloga 2 v2.2: 10 let za III, 15 let za IV. Hard requirement.
+    const ysActual = r.yearsInResearchSector ?? 0;
+    const workYearsOk =
+      c.minYearsInResearchSector == null ||
+      ysActual >= c.minYearsInResearchSector;
     const overallPass =
-      educationOk && standardsMet >= c.standardsRequired && osPasses;
+      educationOk &&
+      workYearsOk &&
+      standardsMet >= c.standardsRequired &&
+      osPasses;
 
     return {
       title: c.title,

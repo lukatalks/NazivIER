@@ -289,17 +289,29 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     researcher.educationLevel ?? researcher.inferredEducationLevel ?? 0;
   const educationOk = eduLevel >= c.minEducation;
 
+  // Delovna doba (Priloga 2 v2.2): hard requirement for stages III (10 let)
+  // and IV (15 let). Per rulebook this blocks eligibility just like education,
+  // not just a soft signal. When researcher.yearsInResearchSector is undefined
+  // we treat it as 0 (most conservative).
+  const ysActual = researcher.yearsInResearchSector ?? 0;
+  const workYearsOk =
+    c.minYearsInResearchSector == null || ysActual >= c.minYearsInResearchSector;
+
   // Pogoj 1 is always counted toward standards required.
   // For "sodelavec" tier we need 1 of 3; for III/IV we need 2 of 3.
-  const eligible = educationOk && standardsMet >= c.standardsRequired;
+  const eligible =
+    educationOk && workYearsOk && standardsMet >= c.standardsRequired;
 
   // ─── Article 14(5): early-promotion eligibility ────────────────────────
   // Conditions:
   //   - ≥50 % over the minimum thresholds (we measure equivalents AND
-  //     citations OR external-projects FTE)
+  //     citations OR external-projects EUR value)
   //   - ≥10 yrs research sector for stage III, ≥15 yrs for stage IV
   //   - applies only to III/IV (lower stages aren't subject to "predčasno")
-  const ys = researcher.yearsInResearchSector ?? 0;
+  // Note: the same 10/15 years thresholds also appear in Priloga 2 as a
+  // regular eligibility blocker (handled via workYearsOk above). Article
+  // 14(5) reuses them for the early-promotion path.
+  const ys = ysActual;
   const stage = rawCriteria.stage;
   const yearsMin = stage === 'III' ? 10 : stage === 'IV' ? 15 : 0;
   let earlyEligible = false;
@@ -407,6 +419,11 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   if (!educationOk)
     blockingReasons.push(
       `Izobrazba pod ${c.minEducation}. SOK ravnijo (raziskovalec ima raven ${eduLevel || '?'}).`,
+    );
+  if (!workYearsOk)
+    blockingReasons.push(
+      `Delovna doba v raziskovalnem sektorju: ${ysActual} let ` +
+        `(zahtevano ≥ ${c.minYearsInResearchSector} let za ${stage}. stopnjo, Priloga 2).`,
     );
   if (standardsMet < c.standardsRequired)
     blockingReasons.push(
