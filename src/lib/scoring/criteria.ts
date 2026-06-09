@@ -284,7 +284,12 @@ export const TITLE_CRITERIA: TitleCriteria[] = [
     title: 'visji-razvojni-sodelavec',
     groupLabel: 'Višji razvojni sodelavec / višja razvojna sodelavka',
     stage: 'III',
-    minEducation: 8,
+    // v3.0.0 (2026-06-09, pravilnik v2.2 final): višji razvojni sodelavec
+    // education raised from SOK 8 → SOK 9 (magisterij znanosti). See Priloga 2,
+    // Razvojni nazivi tabela (.mark on »8. raven« in earlier draft was the
+    // tracked-change; final wording reads »magisterij znanosti, ki je v skladu
+    // z zakonom … uvrščen na 9. raven«).
+    minEducation: 9,
     standardsRequired: 2,
     minEquivalents: 15,
     minCitations: 50,
