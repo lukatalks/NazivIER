@@ -150,29 +150,25 @@ function pickCitations(r: Researcher): {
 /** Apply Article 22(2): on re-election to the same title the candidate must
  *  meet at least HALF of the values required at the first election. We model
  *  this by halving every numeric threshold; everything else (standardsRequired,
- *  minEducation) stays. The v2.2 rulebook also requires »napredek ≥ 20 % razlike
- *  v ≥2 pogojih« between current and next-higher naziv – this is a manual
- *  judgment that requires comparing to a previous evaluation snapshot, so it
- *  is currently surfaced to the reviewer as text guidance rather than
- *  enforced numerically. */
+ *  minEducation) stays. */
 function applyReelection(c: TitleCriteria): TitleCriteria {
   const half = (n: number | null) => (n == null ? n : n / 2);
   return {
     ...c,
     minEquivalents: half(c.minEquivalents),
     minCitations: half(c.minCitations),
-    minExternalProjectsValueEur: half(c.minExternalProjectsValueEur),
-    minLeadershipValueEur: half(c.minLeadershipValueEur),
+    minExternalProjectsValueFte: half(c.minExternalProjectsValueFte),
+    minLeadershipValueFte: half(c.minLeadershipValueFte),
     minLeadershipYears: half(c.minLeadershipYears),
   };
 }
 
-function fmtEur(n: number): string {
-  return new Intl.NumberFormat('sl-SI', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  }).format(n);
+/** Format an FTE value in Slovenian locale, e.g. "1,5 FTE". */
+function fmtFte(n: number): string {
+  return `${n.toLocaleString('sl-SI', {
+    minimumFractionDigits: n % 1 === 0 ? 0 : 1,
+    maximumFractionDigits: 2,
+  })} FTE`;
 }
 
 /** Evaluate the researcher against a single title. */
@@ -204,16 +200,17 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
           extraNote,
   };
 
-  // Pogoj 2: citati ALI kumulativna vrednost projektov izven ARIS (v EUR)
-  // Per Pravilnik v2.2 (05.06.2026): switched from FTE to EUR. Threshold uses
-  // »najmanj« → ≥ (inclusive).
+  // Pogoj 2: citati ALI kumulativna vrednost projektov izven ARIS (v FTE)
+  // Pravilnik IER v2.2, Priloga 3, Pogoj 2. Threshold uses »več kot« — we
+  // implement ≥ (inclusive) per the standard interpretation of cumulative
+  // thresholds; the difference matters only at exact equality.
   const citPass = c.minCitations != null && cit.used >= c.minCitations;
-  const extProjValue = researcher.externalProjectsValueEur ?? 0;
+  const extProjValue = researcher.externalProjectsValueFte ?? 0;
   const projValuePass =
-    c.minExternalProjectsValueEur != null &&
-    extProjValue >= c.minExternalProjectsValueEur;
+    c.minExternalProjectsValueFte != null &&
+    extProjValue >= c.minExternalProjectsValueFte;
   const pog2Pass =
-    c.minCitations == null && c.minExternalProjectsValueEur == null
+    c.minCitations == null && c.minExternalProjectsValueFte == null
       ? true
       : citPass || projValuePass;
   const pog2: StandardResult = {
@@ -227,17 +224,19 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
           `${cit.used} (zahteva ≥ ${c.minCitations}). ` +
           `ALI kumulativna vrednost projektov izven ARIS, ` +
           `pri katerih je kandidat nastopal kot vodja: ` +
-          `${fmtEur(extProjValue)} ` +
-          `(zahteva ≥ ${fmtEur(c.minExternalProjectsValueEur ?? 0)}). ` +
+          `${fmtFte(extProjValue)} ` +
+          `(zahteva ≥ ${fmtFte(c.minExternalProjectsValueFte ?? 0)}). ` +
           (pog2Pass ? '✓ izpolnjen.' : '✗ ni izpolnjen.'),
   };
 
   // Pogoj 3: zaključeno vodenje
   //
-  // Pravilnik v2.2 (05.06.2026), Priloga 3, opens TWO alternative paths:
+  // Pravilnik IER v2.2, Priloga 3, opens TWO alternative paths:
   //
-  //   (a)–(d) Kumulativna VREDNOST V EUR zaključenih vodenih projektov ali
-  //           delovnih sklopov: ≥ 50.000 / 250.000 / 500.000 EUR (po stopnji).
+  //   (a)–(d) Kumulativna vrednost zaključenih vodenih projektov ali
+  //           delovnih sklopov v FTE kategorije A v vrednosti, ki je
+  //           veljala v letu, ko je bil projekt pridobljen:
+  //           ≥ 1 / 5 / 10 FTE (po stopnji).
   //           Seštevek celotnih sredstev (za Inštitut + ostale partnerje) na
   //           projektih, pri katerih je kandidat imel vodilno vlogo na ravni
   //           projekta (ne zgolj na ravni Inštituta).
@@ -247,30 +246,28 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   //           vodja infrastrukturne skupine — na Inštitutu ali enakovredni
   //           instituciji.
   //
-  // v2.2 change: switched from FTE to EUR for paths (a)–(d).
-  //
-  // Pomembno (v2.7.2, popravek po opozorilu sodelavke): »leta« iz poti (e)
-  // veljajo IZKLJUČNO za zgornjih pet vodilnih funkcij. NE veljajo za leta
-  // vodenja raziskovalnih projektov. Zato `ierProjectLeadership.ledYears`
-  // (unija intervalov vodenih projektov z ier.si/projekti) NE sme samodejno
-  // polniti tega polja — vodenje projekta ≠ vodilna funkcija.
-  const ldValueEur = researcher.leadership?.cumulativeValueEur ?? 0;
+  // Pomembno: »leta« iz poti (e) veljajo IZKLJUČNO za zgornjih pet vodilnih
+  // funkcij. NE veljajo za leta vodenja raziskovalnih projektov. Zato
+  // `ierProjectLeadership.ledYears` (unija intervalov vodenih projektov z
+  // ier.si/projekti) NE sme samodejno polniti tega polja — vodenje projekta
+  // ≠ vodilna funkcija.
+  const ldValueFte = researcher.leadership?.cumulativeValueFte ?? 0;
   const ldYears = researcher.leadership?.leadershipYears ?? 0;
   const pog3Pass =
-    c.minLeadershipValueEur == null && c.minLeadershipYears == null
+    c.minLeadershipValueFte == null && c.minLeadershipYears == null
       ? true
-      : (c.minLeadershipValueEur != null && ldValueEur >= c.minLeadershipValueEur) ||
+      : (c.minLeadershipValueFte != null && ldValueFte >= c.minLeadershipValueFte) ||
         (c.minLeadershipYears != null && ldYears >= c.minLeadershipYears);
   const pog3: StandardResult = {
     name: 'Pogoj 3',
     description: 'Sposobnost vodenja',
     passed: pog3Pass,
     evidence:
-      c.minLeadershipValueEur == null
+      c.minLeadershipValueFte == null
         ? `Ni zahtevan za ta naziv.`
         : `(a–d) Kumulativna vrednost zaključenih vodenih projektov ali ` +
-          `delovnih sklopov: ${fmtEur(ldValueEur)} ` +
-          `(zahteva ≥ ${fmtEur(c.minLeadershipValueEur ?? 0)}). ` +
+          `delovnih sklopov: ${fmtFte(ldValueFte)} ` +
+          `(zahteva ≥ ${fmtFte(c.minLeadershipValueFte ?? 0)}). ` +
           `ALI (e) leta opravljanja vodilne funkcije (direktor, predsednik UO, ` +
           `predsednik ZS, vodja programske ali infrastrukturne skupine): ` +
           `${ldYears} let (zahteva ≥ ${c.minLeadershipYears} let). ` +
@@ -289,28 +286,24 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     researcher.educationLevel ?? researcher.inferredEducationLevel ?? 0;
   const educationOk = eduLevel >= c.minEducation;
 
-  // Delovna doba (Priloga 2 v2.2): hard requirement for stages III (10 let)
-  // and IV (15 let). Per rulebook this blocks eligibility just like education,
-  // not just a soft signal. When researcher.yearsInResearchSector is undefined
-  // we treat it as 0 (most conservative).
+  // Delovna doba: pravilnik Priloga 2 has NO »delovna doba« column.
+  // The 10/15-let figure comes from Article 14(5) and applies ONLY to
+  // predčasna izvolitev — handled inside the early-promotion gate below.
+  // Baseline eligibility ignores yearsInResearchSector entirely.
   const ysActual = researcher.yearsInResearchSector ?? 0;
-  const workYearsOk =
-    c.minYearsInResearchSector == null || ysActual >= c.minYearsInResearchSector;
 
   // Pogoj 1 is always counted toward standards required.
   // For "sodelavec" tier we need 1 of 3; for III/IV we need 2 of 3.
-  const eligible =
-    educationOk && workYearsOk && standardsMet >= c.standardsRequired;
+  const eligible = educationOk && standardsMet >= c.standardsRequired;
 
   // ─── Article 14(5): early-promotion eligibility ────────────────────────
-  // Conditions:
-  //   - ≥50 % over the minimum thresholds (we measure equivalents AND
-  //     citations OR external-projects EUR value)
-  //   - ≥10 yrs research sector for stage III, ≥15 yrs for stage IV
-  //   - applies only to III/IV (lower stages aren't subject to "predčasno")
-  // Note: the same 10/15 years thresholds also appear in Priloga 2 as a
-  // regular eligibility blocker (handled via workYearsOk above). Article
-  // 14(5) reuses them for the early-promotion path.
+  // Pravilnik IER, Article 14(5). Conditions:
+  //   - ≥50 % over the minimum količinski pogoji (measured on equivalents AND
+  //     either citations OR external-projects FTE value)
+  //   - ≥10 let zaposlitve v raziskovalnem sektorju for stage III,
+  //     ≥15 let for stage IV
+  //   - applies only to III/IV (lower stages aren't subject to »predčasno«)
+  //   - kandidat must also satisfy baseline eligibility
   const ys = ysActual;
   const stage = rawCriteria.stage;
   const yearsMin = stage === 'III' ? 10 : stage === 'IV' ? 15 : 0;
@@ -323,9 +316,9 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     const cit15 =
       rawCriteria.minCitations != null && cit.used >= rawCriteria.minCitations * 1.5;
     const proj15 =
-      rawCriteria.minExternalProjectsValueEur != null &&
-      (researcher.externalProjectsValueEur ?? 0) >=
-        rawCriteria.minExternalProjectsValueEur * 1.5;
+      rawCriteria.minExternalProjectsValueFte != null &&
+      (researcher.externalProjectsValueFte ?? 0) >=
+        rawCriteria.minExternalProjectsValueFte * 1.5;
     const overshootOk = eqOk && (cit15 || proj15);
     earlyEligible = yearsOk && overshootOk && eligible;
     earlyEv = earlyEligible
@@ -419,11 +412,6 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   if (!educationOk)
     blockingReasons.push(
       `Izobrazba pod ${c.minEducation}. SOK ravnijo (raziskovalec ima raven ${eduLevel || '?'}).`,
-    );
-  if (!workYearsOk)
-    blockingReasons.push(
-      `Delovna doba v raziskovalnem sektorju: ${ysActual} let ` +
-        `(zahtevano ≥ ${c.minYearsInResearchSector} let za ${stage}. stopnjo, Priloga 2).`,
     );
   if (standardsMet < c.standardsRequired)
     blockingReasons.push(

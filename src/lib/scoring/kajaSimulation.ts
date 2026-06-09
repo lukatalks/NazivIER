@@ -16,8 +16,8 @@
 // check, same OA logic from Article 11(6). The only thing that varies is the
 // knob values the reviewer supplies.
 //
-// v2.8 (05.06.2026) changes:
-//   * Pogoj 2 + Pogoj 3 use EUR values (no longer FTE).
+// v3.0.0 (2026-06-09) revision:
+//   * Pogoj 2 + Pogoj 3 use FTE values (pravilnik never said EUR — v2.8 misread reverted).
 //   * OpenAlex dropped from citation sources per email Kaja Primc 05.06.
 //     CitationSource union shrinks to 'wos' | 'scopus' | 'max-of-two'.
 
@@ -65,11 +65,11 @@ export interface SimulationConfig {
 
   // ─── Pogoj 2 ─────────────────────────────────────────────────────
   citationSource: CitationSource;
-  /** Override the researcher's stored externalProjectsValueEur (null = use stored). */
-  externalProjectsValueEurOverride: number | null;
+  /** Override the researcher's stored externalProjectsValueFte (null = use stored). */
+  externalProjectsValueFteOverride: number | null;
 
   // ─── Pogoj 3 ─────────────────────────────────────────────────────
-  leadershipValueEurOverride: number | null;
+  leadershipValueFteOverride: number | null;
   leadershipYearsOverride: number | null;
 
   // ─── Article 11(6) Open Science ──────────────────────────────────
@@ -94,8 +94,8 @@ export const RULEBOOK_DEFAULT: SimulationConfig = {
   editorFactor: 0.7,
   specialIssueFactor: 0.7,
   citationSource: 'wos',
-  externalProjectsValueEurOverride: null,
-  leadershipValueEurOverride: null,
+  externalProjectsValueFteOverride: null,
+  leadershipValueFteOverride: null,
   leadershipYearsOverride: null,
   osThresholdRatio: 1.0,
   thresholdMultiplier: 1.0,
@@ -187,8 +187,8 @@ export interface TitleSimulationResult {
   /** Thresholds AFTER applying config.thresholdMultiplier. null when not required. */
   minEquivalents: number | null;
   minCitations: number | null;
-  minExternalProjectsValueEur: number | null;
-  minLeadershipValueEur: number | null;
+  minExternalProjectsValueFte: number | null;
+  minLeadershipValueFte: number | null;
   minLeadershipYears: number | null;
   pog1Pass: boolean;
   pog2Pass: boolean;
@@ -210,8 +210,8 @@ export interface SimulationResult {
   skippedPublications: number;
   citationsUsed: number;
   citationSourceLabel: string;
-  externalProjectsValueEur: number;
-  leadershipValueEur: number;
+  externalProjectsValueFte: number;
+  leadershipValueFte: number;
   leadershipYears: number;
   osTotalCount: number;
   osSatisfiedCount: number;
@@ -257,17 +257,17 @@ export function simulate(
         100,
     ) / 100;
 
-  // ─── Citations / project value EUR (Pogoj 2) ──
+  // ─── Citations / project value FTE (Pogoj 2) ──
   const cit = resolveCitations(r, config.citationSource);
-  const externalProjectsValueEur =
-    config.externalProjectsValueEurOverride ??
-    r.externalProjectsValueEur ??
+  const externalProjectsValueFte =
+    config.externalProjectsValueFteOverride ??
+    r.externalProjectsValueFte ??
     0;
 
-  // ─── Leadership EUR + years (Pogoj 3) ──
-  const leadershipValueEur =
-    config.leadershipValueEurOverride ??
-    r.leadership?.cumulativeValueEur ??
+  // ─── Leadership FTE + years (Pogoj 3) ──
+  const leadershipValueFte =
+    config.leadershipValueFteOverride ??
+    r.leadership?.cumulativeValueFte ??
     0;
   const leadershipYears =
     config.leadershipYearsOverride ?? r.leadership?.leadershipYears ?? 0;
@@ -294,25 +294,25 @@ export function simulate(
   const perTitle: TitleSimulationResult[] = TITLE_CRITERIA.map((c) => {
     const minEq = c.minEquivalents == null ? null : c.minEquivalents * mult;
     const minCit = c.minCitations == null ? null : c.minCitations * mult;
-    const minProjEur =
-      c.minExternalProjectsValueEur == null
+    const minProjFte =
+      c.minExternalProjectsValueFte == null
         ? null
-        : c.minExternalProjectsValueEur * mult;
-    const minLdEur =
-      c.minLeadershipValueEur == null ? null : c.minLeadershipValueEur * mult;
+        : c.minExternalProjectsValueFte * mult;
+    const minLdFte =
+      c.minLeadershipValueFte == null ? null : c.minLeadershipValueFte * mult;
     const minLdYr =
       c.minLeadershipYears == null ? null : c.minLeadershipYears * mult;
 
     const pog1Pass = minEq == null || totalEquivalents >= minEq;
     const pog2Pass =
-      minCit == null && minProjEur == null
+      minCit == null && minProjFte == null
         ? true
         : (minCit != null && cit.used >= minCit) ||
-          (minProjEur != null && externalProjectsValueEur >= minProjEur);
+          (minProjFte != null && externalProjectsValueFte >= minProjFte);
     const pog3Pass =
-      minLdEur == null && minLdYr == null
+      minLdFte == null && minLdYr == null
         ? true
-        : (minLdEur != null && leadershipValueEur >= minLdEur) ||
+        : (minLdFte != null && leadershipValueFte >= minLdFte) ||
           (minLdYr != null && leadershipYears >= minLdYr);
 
     const standards = [pog1Pass, pog2Pass, pog3Pass];
@@ -337,8 +337,8 @@ export function simulate(
       educationOk,
       minEquivalents: minEq,
       minCitations: minCit,
-      minExternalProjectsValueEur: minProjEur,
-      minLeadershipValueEur: minLdEur,
+      minExternalProjectsValueFte: minProjFte,
+      minLeadershipValueFte: minLdFte,
       minLeadershipYears: minLdYr,
       pog1Pass,
       pog2Pass,
@@ -359,8 +359,8 @@ export function simulate(
     skippedPublications,
     citationsUsed: cit.used,
     citationSourceLabel: cit.label,
-    externalProjectsValueEur,
-    leadershipValueEur,
+    externalProjectsValueFte,
+    leadershipValueFte,
     leadershipYears,
     osTotalCount,
     osSatisfiedCount,
