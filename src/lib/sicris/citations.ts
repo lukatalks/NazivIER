@@ -78,21 +78,28 @@ async function _fetchSicrisCitations(
   });
 
   let location: string | null = null;
-  try {
-    const post = await fetch(`${FORM_URL}/${sicrisId}`, {
-      method: 'POST',
-      headers: {
-        'User-Agent': UA,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body,
-      redirect: 'manual',
-    });
-    if (post.status === 302 || post.status === 303 || post.status === 301) {
-      location = post.headers.get('location');
+  {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const post = await fetch(`${FORM_URL}/${sicrisId}`, {
+        method: 'POST',
+        headers: {
+          'User-Agent': UA,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body,
+        redirect: 'manual',
+        signal: ctrl.signal,
+      });
+      if (post.status === 302 || post.status === 303 || post.status === 301) {
+        location = post.headers.get('location');
+      }
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timer);
     }
-  } catch {
-    return null;
   }
 
   if (!location) return null;
@@ -108,9 +115,12 @@ async function _fetchSicrisCitations(
   let json: unknown = null;
   for (const delay of delays) {
     if (delay > 0) await new Promise((r) => setTimeout(r, delay));
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
     try {
       const res = await fetch(location, {
         headers: { 'User-Agent': UA },
+        signal: ctrl.signal,
       });
       if (res.ok) {
         const text = await res.text();
@@ -123,6 +133,8 @@ async function _fetchSicrisCitations(
       }
     } catch {
       /* try again */
+    } finally {
+      clearTimeout(timer);
     }
   }
   if (!json) return null;

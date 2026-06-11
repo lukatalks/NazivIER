@@ -36,6 +36,27 @@ const BIBLIO_BASE = 'https://bib.cobiss.net/biblioweb';
 
 const UA = 'NazivIER/0.1 (Institute for Economic Research, internal tool)';
 
+/** Per-attempt hard cap for every COBISS round-trip. An un-timed fetch from a
+ *  far Vercel region was what let big COBISS bibliographies hang for ~20s before
+ *  failing; capping each attempt keeps the whole snapshot bounded and lets the
+ *  retry/backoff loop actually do its job instead of stacking slow attempts. */
+const FETCH_TIMEOUT_MS = 8000;
+
+/** fetch() with an AbortController timeout. Preserves Next.js `next` cache opts. */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit & { next?: { revalidate?: number } } = {},
+  timeoutMs = FETCH_TIMEOUT_MS,
+): Promise<Response> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 type SortKey =
   | 'T.Ydesc'
   | 'T.Yasc'
@@ -45,9 +66,12 @@ type SortKey =
   | 'TI'
   | 'AC';
 
-/** Fetch the COBISS-typed bibliography list (JSON). Retries on 5xx with backoff
- *  because SICRIS occasionally returns transient 500s – happens when the nginx
- *  front blows out its session cache. Two retries (1.5s, 4s) are enough in practice. */
+/** Fetch the COBISS-typed bibliography list (JSON). COBISS biblioweb is the one
+ *  input the snapshot can't synthesize a fallback for, and it is fragile for
+ *  large bibliographies: it 500s, returns an empty body, OR answers 200 with its
+ *  HTML page shell (empty `<h3></h3>`) instead of JSON when its backend can't
+ *  generate the list in time. We treat ALL three as retryable transients, cap
+ *  each attempt with a timeout, and back off with growing delays. */
 export async function fetchBibliography(
   sicrisId: string,
   opts: { fromYear?: number; toYear?: number; sort?: SortKey } = {},
@@ -58,13 +82,15 @@ export async function fetchBibliography(
 
   const url = `${BIBLIO_BASE}/authorCobissList/si/slv/cris/${sicrisId}/${sort}/${from}/${to}`;
 
-  const delays = [0, 1500, 4000];
+  // 4 attempts with growing backoff. Each attempt is hard-capped by
+  // fetchWithTimeout, so a slow COBISS node aborts instead of hanging.
+  const delays = [0, 1200, 3500, 7000];
   let lastErr: Error | null = null;
 
   for (const delay of delays) {
     if (delay > 0) await new Promise((r) => setTimeout(r, delay));
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithTimeout(url, {
         headers: { 'User-Agent': UA, Accept: 'application/json' },
         next: { revalidate: 60 * 60 * 6 },
       });
@@ -78,14 +104,23 @@ export async function fetchBibliography(
       }
 
       const text = await res.text();
-      if (!text.trim()) {
+      const trimmed = text.trim();
+      if (!trimmed) {
         // Empty body – SICRIS sometimes returns 200 with nothing when overloaded.
         lastErr = new Error(`SICRIS returned empty body for ${sicrisId}`);
         continue;
       }
-      const raw = JSON.parse(text) as unknown;
+      // HTML shell instead of JSON – COBISS serves its biblioweb page wrapper
+      // (with an empty results table) when the backend times out. Retry.
+      if (trimmed.startsWith('<')) {
+        lastErr = new Error(`SICRIS returned HTML shell (not JSON) for ${sicrisId}`);
+        continue;
+      }
+      const raw = JSON.parse(trimmed) as unknown;
       return parseBibliographyJson(raw);
     } catch (e) {
+      // AbortError (attempt timeout) and JSON.parse failures both land here and
+      // are retried by the loop.
       lastErr = e instanceof Error ? e : new Error(String(e));
     }
   }
@@ -117,14 +152,57 @@ export interface ResearcherSnapshot {
   };
   /** Auto-scraped IER project leadership for Pogoj 3. */
   ierProjectLeadership?: IerProjectLeadershipSummary;
+  /** True when the COBISS bibliography could not be loaded after all retries.
+   *  The snapshot is returned partial (no publications) so the UI can show a
+   *  "temporarily unavailable – retry" state instead of a blank 502. */
+  bibliographyUnavailable?: boolean;
 }
 
 /** All-in-one fetch used by the API route. */
 export async function fetchResearcherSnapshot(sicrisId: string): Promise<ResearcherSnapshot> {
-  // Run the three independent SICRIS/COBISS/IER calls in parallel. Each one
-  // tolerates failure on its own and we fall back to sensible defaults below.
-  const [publications, profile, sicrisCit, ierProjects] = await Promise.all([
-    fetchBibliography(sicrisId),
+  // The bibliography is the ONE input we can't synthesize a fallback for, so we
+  // fetch it FIRST and ALONE. Firing it concurrently with the profile + citation
+  // scrapes (all three hit bib.cobiss.net) made COBISS throttle and 500 the heavy
+  // ones. If it still can't load we degrade gracefully (partial snapshot + flag)
+  // rather than 502-ing the whole page.
+  let publications: Publication[] = [];
+  let bibliographyUnavailable = false;
+  try {
+    publications = await fetchBibliography(sicrisId);
+  } catch {
+    bibliographyUnavailable = true;
+  }
+
+  const rosterEntry = IER_ROSTER_SEED.find((r) => r.sicrisId === sicrisId);
+
+  // Graceful degradation: COBISS bibliography is down for this researcher. Return
+  // a minimal partial snapshot fast so the UI shows a retry banner, not a blank.
+  if (bibliographyUnavailable) {
+    const profile = await fetchProfile(sicrisId).catch(
+      (): SicrisProfile => ({
+        sicrisId,
+        fullName: rosterEntry?.fullName ?? `SICRIS #${sicrisId}`,
+      }),
+    );
+    const nameForLookup = rosterEntry?.fullName ?? profile.fullName;
+    return {
+      profile,
+      publications: [],
+      citations: {
+        wosCleanCitations: 0,
+        openAlexCleanCitations: 0,
+        primarySource: 'none',
+      },
+      inferredEducationLevel:
+        profile.inferredEducationLevel ?? inferEducationLevel(nameForLookup),
+      bibliographyUnavailable: true,
+    };
+  }
+
+  // Bibliography is in hand. Now the rest – they only hit COBISS AFTER the heavy
+  // bibliography call has finished, so they no longer contend with it. Each
+  // tolerates its own failure.
+  const [profile, sicrisCit, ierProjects] = await Promise.all([
     fetchProfile(sicrisId).catch(
       (): SicrisProfile => ({ sicrisId, fullName: `SICRIS #${sicrisId}` }),
     ),
@@ -132,14 +210,15 @@ export async function fetchResearcherSnapshot(sicrisId: string): Promise<Researc
     fetchIerProjects().catch(() => []),
   ]);
 
-  const rosterEntry = IER_ROSTER_SEED.find((r) => r.sicrisId === sicrisId);
   // Prefer the roster's full name for the OpenAlex lookup (includes ", mag."
   // suffix that the SICRIS biblio H3 strips); fall back to the SICRIS profile.
   const nameForLookup = rosterEntry?.fullName ?? profile.fullName;
+  // OpenAlex is secondary data (Q1/Q2 tagging, self-citation exclusion, OA
+  // detection) and must never crash the snapshot, so wrap the resolution.
   const author = await resolveAuthor({
     name: nameForLookup,
     orcid: rosterEntry?.orcid,
-  });
+  }).catch((): OpenAlexAuthor | null => null);
 
   // Re-run education inference using the richer roster name so we pick up
   // ", mag." suffixes that the biblio H3 doesn't expose. The profile's own

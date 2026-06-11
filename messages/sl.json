@@ -34,6 +34,12 @@
   "error": {
     "label": "Napaka pri pridobivanju podatkov:"
   },
+  "bibUnavailable": {
+    "label": "Bibliografija trenutno ni dosegljiva.",
+    "body": "Strežnik SICRIS/COBISS za {name} trenutno ne odgovori (preobremenjen ali začasno nedosegljiv). Poskusite znova čez nekaj trenutkov.",
+    "retry": "Poskusi znova",
+    "retrying": "Nalagam …"
+  },
   "summary": {
     "fetchedAt": "SICRIS #{id} · pridobljeno {date}",
     "publicationsFromSicris": "Publikacij iz SICRIS",

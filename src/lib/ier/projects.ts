@@ -68,9 +68,12 @@ export async function fetchIerProjects(): Promise<IerProject[]> {
   // Cache key suffixed with parser revision; bump when the parser changes so
   // earlier (raw-entity) snapshots don't survive a deploy.
   return cached('ier:projects:current:v2', TTL_SEC, async () => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
     try {
       const res = await fetch(PROJECTS_URL, {
         headers: { 'User-Agent': UA, Accept: 'text/html' },
+        signal: ctrl.signal,
         next: { revalidate: TTL_SEC },
       });
       if (!res.ok) return [];
@@ -78,6 +81,8 @@ export async function fetchIerProjects(): Promise<IerProject[]> {
       return parseIerProjects(html);
     } catch {
       return [];
+    } finally {
+      clearTimeout(timer);
     }
   });
 }

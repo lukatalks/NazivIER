@@ -40,10 +40,18 @@ export interface OpenAlexAuthor {
 
 const json = async (url: string) => {
   const sep = url.includes('?') ? '&' : '?';
-  const res = await fetch(`${url}${sep}mailto=${encodeURIComponent(POLITE_EMAIL)}`, {
-    headers: { 'User-Agent': `NazivIER/0.1 (mailto:${POLITE_EMAIL})` },
-    next: { revalidate: 60 * 60 * 24 }, // citation totals change slowly
-  });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  let res: Response;
+  try {
+    res = await fetch(`${url}${sep}mailto=${encodeURIComponent(POLITE_EMAIL)}`, {
+      headers: { 'User-Agent': `NazivIER/0.1 (mailto:${POLITE_EMAIL})` },
+      signal: ctrl.signal,
+      next: { revalidate: 60 * 60 * 24 }, // citation totals change slowly
+    });
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) throw new Error(`OpenAlex ${res.status} on ${url}`);
   return res.json();
 };

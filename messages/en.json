@@ -34,6 +34,12 @@
   "error": {
     "label": "Data fetch error:"
   },
+  "bibUnavailable": {
+    "label": "Bibliography temporarily unavailable.",
+    "body": "The SICRIS/COBISS server is not responding for {name} right now (overloaded or briefly down). Please try again in a few moments.",
+    "retry": "Try again",
+    "retrying": "Loading …"
+  },
   "summary": {
     "fetchedAt": "SICRIS #{id} · fetched {date}",
     "publicationsFromSicris": "Publications in SICRIS",

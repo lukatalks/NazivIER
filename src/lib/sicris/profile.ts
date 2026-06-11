@@ -29,10 +29,18 @@ export interface SicrisProfile {
 }
 
 export async function fetchProfile(sicrisId: string): Promise<SicrisProfile> {
-  const res = await fetch(`${BIBLIO_BASE}/biblio/si/slv/cris/${sicrisId}`, {
-    headers: { 'User-Agent': UA, Accept: 'text/html' },
-    next: { revalidate: 60 * 60 * 24 },
-  });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  let res: Response;
+  try {
+    res = await fetch(`${BIBLIO_BASE}/biblio/si/slv/cris/${sicrisId}`, {
+      headers: { 'User-Agent': UA, Accept: 'text/html' },
+      signal: ctrl.signal,
+      next: { revalidate: 60 * 60 * 24 },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) {
     throw new Error(`SICRIS profile fetch failed (${res.status}) for ${sicrisId}`);
   }

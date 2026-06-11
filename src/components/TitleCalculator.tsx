@@ -65,12 +65,14 @@ interface ResearcherResponse {
   inferredEducationLevel?: EducationLevel;
   citationDiagnostics?: CitationDiagnostics;
   ierProjectLeadership?: IerProjectLeadershipSummary;
+  bibliographyUnavailable?: boolean;
   fetchedAt: string;
 }
 
 interface FullResearcher extends Researcher {
   openAlex?: OpenAlexInfo;
   citationDiagnostics?: CitationDiagnostics;
+  bibliographyUnavailable?: boolean;
 }
 
 interface Props {
@@ -121,6 +123,7 @@ export function TitleCalculator({ locale }: Props) {
         openScienceCompliance: data.openScienceCompliance,
         citationDiagnostics: data.citationDiagnostics,
         ierProjectLeadership: data.ierProjectLeadership,
+        bibliographyUnavailable: data.bibliographyUnavailable,
       };
       // v2.9: re-apply any persisted manual inputs for this SICRIS ID.
       // Fresh fetch always wins for bibliography/citations; persisted blob only
@@ -231,7 +234,24 @@ export function TitleCalculator({ locale }: Props) {
           </div>
         ) : null}
 
-        {researcher ? (
+        {researcher && researcher.bibliographyUnavailable ? (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
+            <p>
+              <strong className="font-semibold">{t('bibUnavailable.label')}</strong>{' '}
+              {t('bibUnavailable.body', { name: researcher.fullName })}
+            </p>
+            <button
+              type="button"
+              onClick={() => load(researcher.sicrisId, researcher.fullName)}
+              disabled={loading}
+              className="mt-3 inline-flex items-center rounded-md border border-amber-400 bg-white px-3 py-1.5 font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-600 dark:bg-transparent dark:text-amber-100 dark:hover:bg-amber-900/40"
+            >
+              {loading ? t('bibUnavailable.retrying') : t('bibUnavailable.retry')}
+            </button>
+          </div>
+        ) : null}
+
+        {researcher && !researcher.bibliographyUnavailable ? (
           <>
             {/* `key={researcher.sicrisId}` on the per-researcher subtrees
                 forces React to unmount + remount when the user picks a

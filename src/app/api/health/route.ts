@@ -5,6 +5,7 @@ import { scimagoCoverage } from '@/lib/scimago/quartiles';
 import { ALGO_VERSION, APP_VERSION, COMMIT_REF, COMMIT_SHA, ENV } from '@/lib/version';
 
 export const runtime = 'nodejs';
+export const preferredRegion = 'fra1';
 
 /** Minimal health endpoint – surfaces feature flags and snapshot freshness so
  *  IER can see at a glance which integrations are hot. Not for monitoring,
