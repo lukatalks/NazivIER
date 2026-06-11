@@ -66,12 +66,66 @@ type SortKey =
   | 'TI'
   | 'AC';
 
-/** Fetch the COBISS-typed bibliography list (JSON). COBISS biblioweb is the one
- *  input the snapshot can't synthesize a fallback for, and it is fragile for
- *  large bibliographies: it 500s, returns an empty body, OR answers 200 with its
- *  HTML page shell (empty `<h3></h3>`) instead of JSON when its backend can't
- *  generate the list in time. We treat ALL three as retryable transients, cap
- *  each attempt with a timeout, and back off with growing delays. */
+/** Fetch ONE year-range slice of the COBISS bibliography. Returns the parsed
+ *  publications, or `null` when the slice can't be loaded after `delays.length`
+ *  attempts. COBISS biblioweb is fragile: it 500s, returns an empty body, OR
+ *  answers 200 with its HTML page shell (empty `<h3></h3>`) instead of JSON when
+ *  its backend can't generate the result within its ~5s server-side budget. All
+ *  three are treated as retryable; each attempt is hard-capped by a timeout. */
+async function fetchBiblioRange(
+  sicrisId: string,
+  from: number,
+  to: number,
+  sort: SortKey,
+  delays: number[],
+): Promise<Publication[] | null> {
+  const url = `${BIBLIO_BASE}/authorCobissList/si/slv/cris/${sicrisId}/${sort}/${from}/${to}`;
+  for (const delay of delays) {
+    if (delay > 0) await new Promise((r) => setTimeout(r, delay));
+    try {
+      const res = await fetchWithTimeout(url, {
+        headers: { 'User-Agent': UA, Accept: 'application/json' },
+        next: { revalidate: 60 * 60 * 6 },
+      });
+      if (res.status >= 500 && res.status < 600) continue; // transient – retry
+      if (!res.ok) return null; // 4xx won't fix by retrying
+      const trimmed = (await res.text()).trim();
+      if (!trimmed) continue; // empty body – retry
+      if (trimmed.startsWith('<')) continue; // HTML shell, not JSON – retry
+      return parseBibliographyJson(JSON.parse(trimmed) as unknown);
+    } catch {
+      // AbortError (attempt timeout) + JSON.parse failures land here; retry.
+    }
+  }
+  return null;
+}
+
+/** Year windows for the chunked fallback, newest-first. Recent years are dense,
+ *  so 3-year windows keep each COBISS generation under its ~5s budget; older
+ *  years are sparse and fit wider windows. */
+function biblioYearWindows(toYear: number): Array<[number, number]> {
+  const windows: Array<[number, number]> = [];
+  let hi = toYear;
+  while (hi >= 2010) {
+    const lo = Math.max(hi - 2, 2010);
+    windows.push([lo, hi]);
+    hi = lo - 1;
+  }
+  windows.push([2000, 2009]);
+  windows.push([1990, 1999]);
+  windows.push([1800, 1989]);
+  return windows;
+}
+
+/** Fetch the full COBISS-typed bibliography list.
+ *
+ *  Fast path: one full-range request – ~1-3s, works for the large majority.
+ *  Fallback: very prolific researchers (e.g. 300+ records) blow past COBISS's
+ *  ~5s server-side generation budget, so the full-range query 500s every time
+ *  (confirmed COBISS-side, IP-independent). We then fetch in small year windows
+ *  – each renders fast enough to succeed – and merge, deduped by COBISS id. This
+ *  reliably recovers even the heaviest bibliographies. Throws only when every
+ *  range fails (COBISS genuinely down), which the caller degrades gracefully. */
 export async function fetchBibliography(
   sicrisId: string,
   opts: { fromYear?: number; toYear?: number; sort?: SortKey } = {},
@@ -80,52 +134,36 @@ export async function fetchBibliography(
   const to = opts.toYear ?? new Date().getFullYear();
   const sort = opts.sort ?? 'T.CI.Ydesc';
 
-  const url = `${BIBLIO_BASE}/authorCobissList/si/slv/cris/${sicrisId}/${sort}/${from}/${to}`;
+  // Fast path: single full-range request, 2 quick attempts.
+  const full = await fetchBiblioRange(sicrisId, from, to, sort, [0, 1500]);
+  if (full) return full;
 
-  // 4 attempts with growing backoff. Each attempt is hard-capped by
-  // fetchWithTimeout, so a slow COBISS node aborts instead of hanging.
-  const delays = [0, 1200, 3500, 7000];
-  let lastErr: Error | null = null;
-
-  for (const delay of delays) {
-    if (delay > 0) await new Promise((r) => setTimeout(r, delay));
-    try {
-      const res = await fetchWithTimeout(url, {
-        headers: { 'User-Agent': UA, Accept: 'application/json' },
-        next: { revalidate: 60 * 60 * 6 },
-      });
-
-      if (res.status >= 500 && res.status < 600) {
-        lastErr = new Error(`SICRIS bibliography ${res.status} (transient) for ${sicrisId}`);
-        continue;
-      }
-      if (!res.ok) {
-        throw new Error(`SICRIS bibliography fetch failed (${res.status}) for ${sicrisId}`);
-      }
-
-      const text = await res.text();
-      const trimmed = text.trim();
-      if (!trimmed) {
-        // Empty body – SICRIS sometimes returns 200 with nothing when overloaded.
-        lastErr = new Error(`SICRIS returned empty body for ${sicrisId}`);
-        continue;
-      }
-      // HTML shell instead of JSON – COBISS serves its biblioweb page wrapper
-      // (with an empty results table) when the backend times out. Retry.
-      if (trimmed.startsWith('<')) {
-        lastErr = new Error(`SICRIS returned HTML shell (not JSON) for ${sicrisId}`);
-        continue;
-      }
-      const raw = JSON.parse(trimmed) as unknown;
-      return parseBibliographyJson(raw);
-    } catch (e) {
-      // AbortError (attempt timeout) and JSON.parse failures both land here and
-      // are retried by the loop.
-      lastErr = e instanceof Error ? e : new Error(String(e));
+  // Fallback: chunk by year window and merge. Sequential (not parallel) so we
+  // don't fire concurrent COBISS requests, which is what triggers throttling.
+  const byId = new Map<string, Publication>();
+  let anyOk = false;
+  for (const [lo, hi] of biblioYearWindows(to)) {
+    if (hi < from || lo > to) continue;
+    const slice = await fetchBiblioRange(
+      sicrisId,
+      Math.max(lo, from),
+      Math.min(hi, to),
+      sort,
+      [0, 1200, 3000],
+    );
+    if (slice) {
+      anyOk = true;
+      for (const p of slice) byId.set(p.id, p);
     }
   }
 
-  throw lastErr ?? new Error(`SICRIS bibliography fetch failed for ${sicrisId}`);
+  if (!anyOk) {
+    throw new Error(`SICRIS bibliography unavailable (all ranges failed) for ${sicrisId}`);
+  }
+  // Window order is already newest-first; within each window COBISS returned
+  // citation-desc. Good enough for the position-based Q1/Q2 fallback heuristic
+  // (real quartiles come from the SCImago/OpenAlex ISSN match where available).
+  return [...byId.values()];
 }
 
 export interface ResearcherSnapshot {
