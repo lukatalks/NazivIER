@@ -245,7 +245,7 @@
     "restoreToast": "Inputs restored",
     "resetSaved": "Clear saved data",
     "resetHint": "Removes only your manual inputs for this researcher from this browser. SICRIS data stays.",
-    "resetConfirm": "Really clear all manual inputs for this researcher? This cannot be undone.",
+    "resetConfirm": "Really clear all manual inputs for this researcher (locally and in the shared institute store)? This cannot be undone.",
     "resetToast": "Storage cleared",
     "autosaveAt": "Auto-saved: {time}",
     "autosaveNone": "No auto-save yet",
@@ -253,7 +253,12 @@
     "copiedToast": "Summary copied to clipboard",
     "copyFailed": "Copy failed – try »Email backup« instead",
     "printingToast": "Opening print …",
-    "explainer": "Inputs are auto-saved to your browser (localStorage, keyed by SICRIS ID). For cross-device transfer use »Email backup« plus »Restore from text«. For the final version use »Print / save as PDF« or »Copy summary«."
+    "explainer": "Inputs are auto-saved to your browser (localStorage, keyed by SICRIS ID). For cross-device transfer use »Email backup« plus »Restore from text«. For the final version use »Print / save as PDF« or »Copy summary«.",
+    "editorNameLabel": "Your name:",
+    "editorNamePlaceholder": "for the edit trail",
+    "sharedExplainer": "Inputs are also saved to the shared institute store so the administrator (Kaja) sees the real state. The record is visible and editable to everyone at the institute.",
+    "sharedSavedBy": "Shared institute store · last edited by {who} · {when}",
+    "sharedUnknownEditor": "unknown"
   },
   "kajaCalibration": {
     "lockButtonAria": "Unlock simulation view",

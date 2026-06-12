@@ -97,3 +97,50 @@ export async function cached<T>(
 export function cacheBackend(): 'upstash-redis' | 'memory-only' {
   return getRedis() ? 'upstash-redis' : 'memory-only';
 }
+
+// ─── Persistent store (no TTL) ─────────────────────────────────────────────
+// For source-of-truth data like user inputs that must NOT expire. Same Redis
+// backend, but without an `ex` so the value lives until explicitly deleted.
+// The in-memory fallback (local dev without Redis env) keeps it for the life
+// of the process only – production always has Redis, confirmed via /api/health.
+
+/** Persist a value with no expiry. Best-effort; failures don't throw. */
+export async function storeSet(key: string, value: unknown): Promise<void> {
+  const r = getRedis();
+  if (r) {
+    try {
+      await r.set(key, value as object);
+    } catch {
+      /* swallow */
+    }
+  }
+  memStore.set(key, { value, expiresAt: Number.MAX_SAFE_INTEGER });
+}
+
+/** Read a persisted value. Returns null when missing. */
+export async function storeGet<T>(key: string): Promise<T | null> {
+  const r = getRedis();
+  if (r) {
+    try {
+      const v = await r.get<T>(key);
+      if (v !== null && v !== undefined) return v;
+    } catch {
+      /* fall through to memory */
+    }
+  }
+  const entry = memStore.get(key);
+  return entry ? (entry.value as T) : null;
+}
+
+/** Delete a persisted value. Best-effort. */
+export async function storeDelete(key: string): Promise<void> {
+  const r = getRedis();
+  if (r) {
+    try {
+      await r.del(key);
+    } catch {
+      /* swallow */
+    }
+  }
+  memStore.delete(key);
+}

@@ -245,7 +245,7 @@
     "restoreToast": "Vnosi obnovljeni",
     "resetSaved": "Pobriši shranjene podatke",
     "resetHint": "Briše samo vaše ročne vnose za tega raziskovalca iz brskalnika. SICRIS podatki ostanejo.",
-    "resetConfirm": "Res želite pobrisati vse ročne vnose za tega raziskovalca? Tega ne morete razveljaviti.",
+    "resetConfirm": "Res želite pobrisati vse ročne vnose za tega raziskovalca (lokalno in v skupni bazi inštituta)? Tega ne morete razveljaviti.",
     "resetToast": "Shramba pobrisana",
     "autosaveAt": "Samodejno shranjeno: {time}",
     "autosaveNone": "Še ni samodejnega shranjevanja",
@@ -253,7 +253,12 @@
     "copiedToast": "Povzetek je v odložišču",
     "copyFailed": "Kopiranje ni uspelo – poskusite z »Pošlji shrambo v e-pošto«",
     "printingToast": "Odpiram tiskanje …",
-    "explainer": "Vnosi se samodejno shranijo v vaš brskalnik (localStorage, vezano na SICRIS ID raziskovalca). Za prenos med napravami uporabite »Pošlji shrambo v e-pošto« in »Naloži iz besedila«. Za zaključno verzijo izberite »Natisni / shrani v PDF« ali »Kopiraj povzetek«."
+    "explainer": "Vnosi se samodejno shranijo v vaš brskalnik (localStorage, vezano na SICRIS ID raziskovalca). Za prenos med napravami uporabite »Pošlji shrambo v e-pošto« in »Naloži iz besedila«. Za zaključno verzijo izberite »Natisni / shrani v PDF« ali »Kopiraj povzetek«.",
+    "editorNameLabel": "Vaše ime:",
+    "editorNamePlaceholder": "za sled urejanja",
+    "sharedExplainer": "Vnosi se shranijo tudi v skupno bazo inštituta, da administrator (Kaja) vidi dejansko stanje. Zapis je viden in urejljiv vsem na inštitutu.",
+    "sharedSavedBy": "Skupna baza inštituta · nazadnje uredil/-a {who} · {when}",
+    "sharedUnknownEditor": "neznano"
   },
   "kajaCalibration": {
     "lockButtonAria": "Odkleni simulacijski pogled",

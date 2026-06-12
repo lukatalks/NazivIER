@@ -47,6 +47,9 @@ export interface PersistedResearcherInputs {
   schemaVersion: number;
   sicrisId: string;
   savedAt: string; // ISO timestamp
+  /** Free-text name of whoever last saved this record (shared-store trust model,
+   *  no login). Optional – omitted when the editor left the name field blank. */
+  lastEditedBy?: string;
   educationLevel?: EducationLevel;
   yearsInResearchSector?: number;
   externalProjectsValueEur?: number;
@@ -108,6 +111,20 @@ export function savePersistedInputs(
   };
   try {
     w.localStorage.setItem(storageKey(sicrisId), JSON.stringify(blob));
+  } catch {
+    /* ignore quota / disabled */
+  }
+}
+
+/** Write a complete blob verbatim into localStorage, preserving its savedAt /
+ *  lastEditedBy. Used to mirror the authoritative server copy into the local
+ *  cache without stamping a fresh timestamp. */
+export function savePersistedBlob(blob: PersistedResearcherInputs): void {
+  const w = safeWindow();
+  if (!w) return;
+  if (blob.schemaVersion !== SCHEMA_VERSION || !blob.sicrisId) return;
+  try {
+    w.localStorage.setItem(storageKey(blob.sicrisId), JSON.stringify(blob));
   } catch {
     /* ignore quota / disabled */
   }

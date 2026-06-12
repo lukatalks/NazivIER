@@ -27,6 +27,11 @@ import {
   exportInputsAsJson,
   importInputsFromJson,
 } from '@/lib/persistence/researcherStorage';
+import {
+  deleteServerInputs,
+  getEditorName,
+  setEditorName,
+} from '@/lib/persistence/serverInputsClient';
 import type { TitleEvaluation } from '@/lib/scoring/evaluate';
 import type { Researcher } from '@/lib/types';
 
@@ -34,15 +39,28 @@ interface Props {
   researcher: Researcher;
   evaluations: TitleEvaluation[];
   onResearcherChange: (next: Researcher) => void;
+  /** Who last saved the shared (server) record + when. From TitleCalculator. */
+  sharedMeta?: { lastEditedBy?: string; savedAt?: string } | null;
 }
 
-export function ExportToolbar({ researcher, evaluations, onResearcherChange }: Props) {
+export function ExportToolbar({
+  researcher,
+  evaluations,
+  onResearcherChange,
+  sharedMeta,
+}: Props) {
   const t = useTranslations('exportToolbar');
   const [toast, setToast] = useState<string | null>(null);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [restoreText, setRestoreText] = useState('');
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [savedLabel, setSavedLabel] = useState<string>('');
+  const [editorName, setEditorNameState] = useState<string>('');
+
+  // Load the remembered editor name once on mount (client only).
+  useEffect(() => {
+    setEditorNameState(getEditorName());
+  }, []);
 
   // Refresh the auto-save timestamp whenever the researcher state changes.
   // Read it back from localStorage so the label reflects the actual write,
@@ -142,9 +160,25 @@ export function ExportToolbar({ researcher, evaluations, onResearcherChange }: P
   function resetSaved() {
     if (!window.confirm(t('resetConfirm'))) return;
     clearPersistedInputs(researcher.sicrisId);
+    // Trust model: clearing resets the shared record too, so the next load
+    // doesn't silently re-pull the old inputs from the server.
+    void deleteServerInputs(researcher.sicrisId);
     setSavedLabel('');
     flash(t('resetToast'));
   }
+
+  function onEditorNameChange(value: string) {
+    setEditorNameState(value);
+    setEditorName(value);
+  }
+
+  const sharedLine =
+    sharedMeta && sharedMeta.savedAt
+      ? t('sharedSavedBy', {
+          who: sharedMeta.lastEditedBy?.trim() || t('sharedUnknownEditor'),
+          when: new Date(sharedMeta.savedAt).toLocaleString('sl-SI'),
+        })
+      : null;
 
   return (
     <section
@@ -194,7 +228,18 @@ export function ExportToolbar({ researcher, evaluations, onResearcherChange }: P
         >
           🗑 {t('resetSaved')}
         </button>
-        <span className="ml-auto flex items-center gap-2 text-[var(--muted)]">
+        <label className="ml-auto flex items-center gap-1.5 text-[var(--muted)]">
+          <span className="whitespace-nowrap">{t('editorNameLabel')}</span>
+          <input
+            type="text"
+            value={editorName}
+            onChange={(e) => onEditorNameChange(e.target.value)}
+            placeholder={t('editorNamePlaceholder')}
+            maxLength={80}
+            className="w-32 rounded-md border border-[var(--border)] bg-transparent px-2 py-1 text-xs focus:border-[var(--accent)] focus:outline-none"
+          />
+        </label>
+        <span className="flex items-center gap-2 text-[var(--muted)]">
           {savedLabel ? (
             <span title={t('autosaveTooltip')}>
               {t('autosaveAt', { time: savedLabel })}
@@ -207,8 +252,11 @@ export function ExportToolbar({ researcher, evaluations, onResearcherChange }: P
           ) : null}
         </span>
       </div>
-      <p className="mt-2 text-[10px] leading-snug text-[var(--muted)]">
-        {t('explainer')}
+      {sharedLine ? (
+        <p className="mt-2 text-[10px] leading-snug text-[var(--accent)]">{sharedLine}</p>
+      ) : null}
+      <p className="mt-1 text-[10px] leading-snug text-[var(--muted)]">
+        {t('explainer')} {t('sharedExplainer')}
       </p>
 
       {restoreOpen ? (

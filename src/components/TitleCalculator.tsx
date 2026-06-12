@@ -21,8 +21,14 @@ import {
   applyPersistedInputs,
   extractPersistableInputs,
   loadPersistedInputs,
+  savePersistedBlob,
   savePersistedInputs,
 } from '@/lib/persistence/researcherStorage';
+import {
+  fetchServerInputs,
+  getEditorName,
+  pushServerInputs,
+} from '@/lib/persistence/serverInputsClient';
 import { evaluateAll, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import type {
   CitationData,
@@ -97,13 +103,24 @@ export function TitleCalculator({ locale }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSicrisId, setLastSicrisId] = useState<string | null>(null);
+  // Who last saved the shared (server) record for the current researcher, for
+  // transparency in the toolbar. Null when there's no shared record yet.
+  const [sharedMeta, setSharedMeta] = useState<{
+    lastEditedBy?: string;
+    savedAt?: string;
+  } | null>(null);
 
   async function load(sicrisId: string, fallbackLabel: string) {
     setLoading(true);
     setError(null);
     setLastSicrisId(sicrisId);
     try {
-      const r = await fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`);
+      // The bibliography fetch is slow (COBISS); the shared-inputs read is a
+      // tiny Redis GET — run them together so hydration adds no latency.
+      const [r, serverBlob] = await Promise.all([
+        fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`),
+        fetchServerInputs(sicrisId),
+      ]);
       if (!r.ok) {
         const body = (await r.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? `HTTP ${r.status}`);
@@ -125,12 +142,34 @@ export function TitleCalculator({ locale }: Props) {
         ierProjectLeadership: data.ierProjectLeadership,
         bibliographyUnavailable: data.bibliographyUnavailable,
       };
-      // v2.9: re-apply any persisted manual inputs for this SICRIS ID.
-      // Fresh fetch always wins for bibliography/citations; persisted blob only
-      // overlays scalar fields (EUR amounts, years, education override) and
-      // per-publication authorship + OA overrides keyed by publication.id.
-      const persisted = loadPersistedInputs(data.sicrisId);
-      setResearcher(persisted ? applyPersistedInputs(fresh, persisted) : fresh);
+      // Re-apply persisted manual inputs for this SICRIS ID. Fresh fetch always
+      // wins for bibliography/citations; the persisted blob only overlays scalar
+      // fields (EUR amounts, years, education override) and per-publication
+      // authorship + OA overrides keyed by publication.id.
+      //
+      // v3.1: the shared server store is the source of truth so everyone —
+      // including Kaja's calibration panel — sees the same realistic state.
+      // The localStorage cache is a fallback that migrates up the first time we
+      // find the server empty (e.g. inputs entered before this feature shipped).
+      const localBlob = loadPersistedInputs(data.sicrisId);
+      if (serverBlob) {
+        setResearcher(applyPersistedInputs(fresh, serverBlob));
+        savePersistedBlob(serverBlob);
+        setSharedMeta({
+          lastEditedBy: serverBlob.lastEditedBy,
+          savedAt: serverBlob.savedAt,
+        });
+      } else if (localBlob) {
+        setResearcher(applyPersistedInputs(fresh, localBlob));
+        void pushServerInputs(localBlob.sicrisId, localBlob, getEditorName());
+        setSharedMeta({
+          lastEditedBy: localBlob.lastEditedBy,
+          savedAt: localBlob.savedAt,
+        });
+      } else {
+        setResearcher(fresh);
+        setSharedMeta(null);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -145,7 +184,16 @@ export function TitleCalculator({ locale }: Props) {
     if (!researcher) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      savePersistedInputs(researcher.sicrisId, extractPersistableInputs(researcher));
+      const inputs = extractPersistableInputs(researcher);
+      // Dual-write: localStorage (instant, offline-safe) + shared server store
+      // (so Kaja and colleagues see the same realistic state).
+      savePersistedInputs(researcher.sicrisId, inputs);
+      const editor = getEditorName();
+      void pushServerInputs(researcher.sicrisId, inputs, editor);
+      setSharedMeta({
+        lastEditedBy: editor.trim() || undefined,
+        savedAt: new Date().toISOString(),
+      });
     }, 350);
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -265,6 +313,7 @@ export function TitleCalculator({ locale }: Props) {
               researcher={researcher}
               evaluations={evaluations}
               onResearcherChange={setResearcher}
+              sharedMeta={sharedMeta}
             />
             <OpenScienceDemoBanner evaluations={evaluations} />
             <KajaCalibrationPanel
