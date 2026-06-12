@@ -227,14 +227,22 @@ export function TitleCalculator({ locale }: Props) {
 
   // Bring the results (verdict cards) into view the moment a researcher
   // finishes loading. The picker sits at the top; without this the user landed
-  // on the config panel and "saw no numbers" (reported 2026-06-12). Fires only
-  // when the loaded SICRIS ID changes or loading flips — never on input edits
-  // (those keep the same sicrisId and loading stays false).
+  // on the config panel and "saw no numbers" (reported 2026-06-12). Guarded so
+  // it fires once per loaded researcher — never on input edits.
   const resultsRef = useRef<HTMLDivElement>(null);
+  const scrolledForId = useRef<string | null>(null);
   useEffect(() => {
-    if (researcher && !researcher.bibliographyUnavailable && !loading) {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (!researcher || researcher.bibliographyUnavailable || loading) return;
+    if (scrolledForId.current === researcher.sicrisId) return;
+    scrolledForId.current = researcher.sicrisId;
+    // Defer one frame so the freshly mounted results subtree is laid out, then
+    // jump instantly. Programmatic `behavior:'smooth'` scrolls are silently
+    // dropped outside a user gesture (verified live 2026-06-12 — smooth left
+    // scrollY at 0, 'auto' scrolled correctly). scroll-mt-4 keeps a top gap.
+    const raf = requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    });
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [researcher?.sicrisId, loading]);
 
