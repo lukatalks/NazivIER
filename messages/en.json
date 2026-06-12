@@ -46,7 +46,7 @@
     "citationsSicrisWos": "SICRIS WoS (official)",
     "citationsSicrisScopus": "SICRIS Scopus",
     "hIndex": "h-index",
-    "openScience": "open access {ratio}% ({count} post-2023 works)",
+    "openScience": "open access {ratio}% ({count} post-2024 scientific works)",
     "groups": {
       "znanstveni": "Scientific",
       "strokovno-raziskovalni": "Professional-research",
@@ -176,7 +176,9 @@
     "reelectionBadge": "Re-election (thresholds halved) – commission must manually confirm ≥20 % progress in ≥2 conditions",
     "reelectionTooltip": "Article 22(2) of rulebook v2.2: on re-election the candidate must meet at least the halved thresholds (auto) AND show ≥20 % progress in at least 2 quantitative conditions between current and next-higher title (commission judgment).",
     "earlyPromotionBadge": "Eligible for early promotion",
-    "openScienceFailBadge": "Open-Science requirement (11/6) not met"
+    "openScienceFailBadge": "Open-Science requirement (11/6) not met",
+    "eligibleWithoutPogoj1Note": "Eligible despite an unmet Pogoj 1 (published output) – the rulebook allows meeting 2 of 3 conditions. Check that this is intended.",
+    "selfReportedNote": "Eligibility partly rests on manually entered, unverified values (Pogoj 2: value of non-ARIS projects; Pogoj 3: leadership value or years)."
   },
   "methodology": {
     "title": "Methodology",
@@ -207,7 +209,7 @@
       },
       "openScience": {
         "head": "Open Science (Article 11, paragraph 6)",
-        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 5 Jun 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed and displayed so candidates see how far they are from 100 % coverage."
+        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 5 Jun 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). It applies only to scientific publications subject to evaluation (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26) created from 2024 onward; interviews, reviews, professional and popular pieces are excluded. In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed and displayed so candidates see how far they are from 100 % coverage."
       },
       "earlyPromotion": {
         "head": "Early promotion (Article 14, paragraph 5)",

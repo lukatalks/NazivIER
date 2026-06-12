@@ -91,6 +91,31 @@ export function EvaluationCard({ evaluation: e, defaultExpanded = false }: Props
               </span>
             ) : null}
           </div>
+          {/* Transparency notes (always visible, not hidden behind expand): the
+              card can be green while Pogoj 1 failed (rulebook allows 2 of 3),
+              and/or while leaning on self-entered, unverifiable EUR/years. A
+              reviewer scanning the green header must see both caveats. */}
+          {e.eligibleWithoutPogoj1 || e.reliesOnSelfReportedInputs ? (
+            <div className="mt-2 space-y-1.5">
+              {e.eligibleWithoutPogoj1 ? (
+                <p
+                  className="rounded-md border px-2 py-1 text-xs leading-snug"
+                  style={{
+                    background: 'var(--warn-bg)',
+                    borderColor: 'var(--warn)',
+                    color: 'var(--warn)',
+                  }}
+                >
+                  {t('eligibleWithoutPogoj1Note')}
+                </p>
+              ) : null}
+              {e.reliesOnSelfReportedInputs ? (
+                <p className="text-[11px] italic leading-snug text-[var(--muted)]">
+                  {t('selfReportedNote')}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <button
           type="button"

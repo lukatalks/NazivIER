@@ -30,6 +30,7 @@ import {
   pushServerInputs,
 } from '@/lib/persistence/serverInputsClient';
 import { evaluateAll, type TitleEvaluation } from '@/lib/scoring/evaluate';
+import { computeLiveOpenScience } from '@/lib/scoring/openScience';
 import type {
   CitationData,
   EducationLevel,
@@ -358,6 +359,13 @@ function SummaryStrip({
 }) {
   const t = useTranslations('summary');
   const dateLocale = locale === 'sl' ? 'sl-SI' : 'en-GB';
+  // Live Article 11(6) ratio computed from the current publications + per-pub
+  // overrides — NOT the immutable server snapshot, which never reacted to user
+  // edits (Tjaša Bartolj bug, 2026-06-10). Recomputes when an OA radio changes.
+  const liveOa = useMemo(
+    () => computeLiveOpenScience(researcher),
+    [researcher],
+  );
 
   return (
     <section className="rounded-lg border border-[var(--border)] bg-white dark:bg-black/20 p-4 sm:p-5">
@@ -414,20 +422,19 @@ function SummaryStrip({
             ) : null}
           </>
         ) : null}
-        {researcher.openScienceCompliance &&
-        researcher.openScienceCompliance.postOrdinanceCount > 0 ? (
+        {liveOa.hasData ? (
           <>
             {' '}·{' '}
             <span
               className={
-                researcher.openScienceCompliance.fullyCompliant
+                liveOa.fullyCompliant
                   ? 'text-[var(--success)]'
                   : 'text-[var(--warn)]'
               }
             >
               {t('openScience', {
-                ratio: Math.round(researcher.openScienceCompliance.ratio * 100),
-                count: researcher.openScienceCompliance.postOrdinanceCount,
+                ratio: Math.round(liveOa.ratio * 100),
+                count: liveOa.total,
               })}
             </span>
           </>

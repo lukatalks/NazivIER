@@ -6,6 +6,7 @@
 // works as a quick PDF source via pandoc if needed.
 
 import { APP_VERSION, ALGO_VERSION } from '@/lib/version';
+import { computeLiveOpenScience } from '@/lib/scoring/openScience';
 
 import type { Researcher } from '@/lib/types';
 import type { TitleEvaluation } from '@/lib/scoring/evaluate';
@@ -97,6 +98,40 @@ export function buildMarkdownSummary(
   lines.push(`- Število publikacij iz SICRIS-a: ${researcher.publications.length}`);
   lines.push('');
 
+  // ─── Open Science (Article 11(6)) ───────────────────────────────────
+  // Mirrors the live on-screen ratio: post-2024 scientific publications only,
+  // honouring per-publication OA overrides. Previously absent from the export
+  // entirely (Tjaša Bartolj review, 2026-06-10).
+  const oa = computeLiveOpenScience(researcher);
+  lines.push('## Odprti dostop (11. člen, 6. odstavek)');
+  lines.push('');
+  if (!oa.hasData) {
+    lines.push(
+      '- Ni znanstvenih objav po letu 2024, ki bi bile predmet pogoja odprtega dostopa.',
+    );
+  } else {
+    lines.push(`- Znanstvene objave po 2024 (predmet 11(6)): **${oa.total}**`);
+    lines.push(`- V odprtem dostopu: **${oa.openCount}**`);
+    if (oa.restrictedCount > 0) {
+      lines.push(
+        `- Z dokumentirano založniško omejitvijo (izjema): **${oa.restrictedCount}**`,
+      );
+    }
+    lines.push(`- Brez odprtega dostopa: **${oa.closedCount}**`);
+    lines.push(
+      `- Delež izpolnjevanja: **${Math.round(oa.ratio * 100)} %**` +
+        (oa.fullyCompliant ? ' (izpolnjeno)' : ''),
+    );
+  }
+  lines.push('');
+  lines.push(
+    '_Pogoj velja le za znanstvene objave, ki so predmet presoje ' +
+      '(1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26), nastale po uveljavitvi ' +
+      'Uredbe 59/23 (od leta 2024). Intervjuji, recenzije, strokovni in ' +
+      'poljudni prispevki niso vključeni._',
+  );
+  lines.push('');
+
   // ─── Per-title verdict, grouped ─────────────────────────────────────
   // Filter to the meaningful "sodelavec"-and-above tier; group by stage label.
   const evaluated = [...evaluations].filter((e) =>
@@ -135,6 +170,20 @@ export function buildMarkdownSummary(
       lines.push(`**${mark} ${std.name} — ${std.description}**`);
       lines.push('');
       lines.push(`> ${std.evidence}`);
+      lines.push('');
+    }
+    if (ev.eligibleWithoutPogoj1) {
+      lines.push(
+        '> ⚠ Izvolljiv kljub neizpolnjenemu Pogoju 1 (objavljeni dosežki) – ' +
+          'pravilnik dopušča izpolnitev 2 od 3 pogojev.',
+      );
+      lines.push('');
+    }
+    if (ev.reliesOnSelfReportedInputs) {
+      lines.push(
+        '> ⚠ Izvolljivost se opira na ročno vnesene, nepreverjene vrednosti ' +
+          '(Pogoj 2: vrednost projektov izven ARIS; Pogoj 3: vrednost ali leta vodenja).',
+      );
       lines.push('');
     }
     if (ev.blockingReasons.length > 0) {

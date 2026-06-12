@@ -23,6 +23,7 @@
 
 import { authorshipFactor } from './authorship';
 import { TITLE_CRITERIA, type TitleCriteria } from './criteria';
+import { computeLiveOpenScience } from './openScience';
 import { weightFor } from './weights';
 
 import type {
@@ -297,19 +298,13 @@ export function simulate(
     config.leadershipYearsOverride ?? r.leadership?.leadershipYears ?? 0;
 
   // ─── Open Science (Art 11(6)) ──
-  const postOrdinancePubs = r.publications.filter(
-    (p) => p.year >= 2024 && /^1\./.test(p.typology),
-  );
-  let openCount = 0;
-  let restrictedCount = 0;
-  for (const p of postOrdinancePubs) {
-    const state = p.openAccessOverride ?? (p.openAccessAuto ? 'open' : 'closed');
-    if (state === 'open') openCount += 1;
-    else if (state === 'restricted-not-possible') restrictedCount += 1;
-  }
-  const osTotalCount = postOrdinancePubs.length;
-  const osSatisfiedCount = openCount + restrictedCount;
-  const osRatio = osTotalCount === 0 ? 1 : osSatisfiedCount / osTotalCount;
+  // Same canonical denominator as the rulebook evaluator: post-2024 SCIENTIFIC
+  // publications subject to evaluation, honouring per-pub overrides. Keeps the
+  // simulated ratio aligned with the headline figure (shared helper).
+  const liveOa = computeLiveOpenScience(r);
+  const osTotalCount = liveOa.total;
+  const osSatisfiedCount = liveOa.satisfied;
+  const osRatio = liveOa.ratio;
   const osPasses = osRatio >= config.osThresholdRatio;
 
   // ─── Per-title pass/fail ──

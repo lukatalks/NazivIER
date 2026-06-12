@@ -3,6 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
+import {
+  computeLiveOpenScience,
+  isOaApplicable,
+} from '@/lib/scoring/openScience';
 import type {
   AuthorshipRole,
   EducationLevel,
@@ -24,6 +28,11 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
   const [open, setOpen] = useState(true);
   const [pubFilter, setPubFilter] = useState<'evaluated' | 'all'>('evaluated');
   const [pubLimit, setPubLimit] = useState(25);
+
+  // Live Article 11(6) figures (post-2024 scientific publications + per-pub
+  // overrides), so the deposits gate reacts to OA edits instead of reading the
+  // stale server snapshot.
+  const liveOa = useMemo(() => computeLiveOpenScience(r), [r]);
 
   // Publications shown in the authorship-override table. "Evaluated" = anything
   // the weights table touches (typology 1.x / 2.x). "All" = everything,
@@ -251,29 +260,22 @@ export function MetadataPanel({ researcher: r, onChange }: Props) {
               reviewed. The evaluator recomputes the OA ratio with those counts
               and applies the rulebook's 100 % threshold honestly – nothing is
               bypassed. */}
-          {r.openScienceCompliance &&
-          r.openScienceCompliance.postOrdinanceCount > 0 &&
-          !r.openScienceCompliance.fullyCompliant ? (
+          {liveOa.hasData && !liveOa.fullyCompliant ? (
             <label className="flex flex-col sm:col-span-2 lg:col-span-4 mt-2 border-t border-[var(--border)] pt-3">
               <span className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
                 {t('fields.additionalDepositsLabel')}
               </span>
               <span className="text-xs text-[var(--muted)] mt-1">
                 {t('fields.additionalDepositsHelp', {
-                  missing:
-                    r.openScienceCompliance.postOrdinanceCount -
-                    r.openScienceCompliance.depositedCount,
-                  total: r.openScienceCompliance.postOrdinanceCount,
-                  deposited: r.openScienceCompliance.depositedCount,
+                  missing: liveOa.missing,
+                  total: liveOa.total,
+                  deposited: liveOa.satisfied,
                 })}
               </span>
               <input
                 type="number"
                 min={0}
-                max={
-                  r.openScienceCompliance.postOrdinanceCount -
-                  r.openScienceCompliance.depositedCount
-                }
+                max={liveOa.missing}
                 step={1}
                 value={r.additionalDepositsPlanned ?? ''}
                 onChange={(e) =>
@@ -435,8 +437,10 @@ function AuthorshipRow({ pub, onChangeRole, onChangeOa }: AuthorshipRowProps) {
   // so the visible state matches reality the moment the table opens.
   const effectiveOa: OpenAccessStatus =
     pub.openAccessOverride ?? (pub.openAccessAuto ? 'open' : 'closed');
-  // Only post-2024 evaluated publications (1.x) participate in Article 11(6).
-  const oaApplies = pub.year >= 2024 && /^1\./.test(pub.typology);
+  // Only post-2024 SCIENTIFIC publications participate in Article 11(6). Same
+  // predicate the ratio uses, so a row shows the OA radios iff it counts toward
+  // the denominator — no more OA radios on interviews / reviews (1.22, 1.19).
+  const oaApplies = isOaApplicable(pub);
   return (
     <tr className="border-b border-[var(--border)]/40 align-top">
       <td className="py-1.5 pr-3 tabnum">{pub.year || '–'}</td>

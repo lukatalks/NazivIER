@@ -4,6 +4,7 @@
 
 import { authorshipFactor, authorshipLabel } from './authorship';
 import { TITLE_CRITERIA, criteriaFor, type TitleCriteria } from './criteria';
+import { computeLiveOpenScience } from './openScience';
 import { weightFor } from './weights';
 
 import type { Publication, Researcher, Title } from '@/lib/types';
@@ -74,6 +75,14 @@ export interface TitleEvaluation {
   openScienceStrictlyPassed: boolean;
   /** Re-election flag echoed for the UI. */
   isReelection: boolean;
+  /** True when the title is eligible even though Pogoj 1 (objavljeni dosežki)
+   *  failed. The rulebook allows 2 of 3 standards, so a reviewer can miss that
+   *  the publications condition was not met — surfaced as a transparency note. */
+  eligibleWithoutPogoj1: boolean;
+  /** True when eligibility leans on researcher-entered, tool-unverifiable values
+   *  (Pogoj 2 external-projects EUR, or Pogoj 3 EUR/years). Citations are
+   *  SICRIS-sourced, so a Pogoj-2 pass via citations does NOT set this flag. */
+  reliesOnSelfReportedInputs: boolean;
 }
 
 function fmt(n: number, decimals = 2): string {
@@ -346,38 +355,26 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   // (but OpenAlex hasn't indexed yet) or will make before the application is
   // reviewed. We add those to the deposited count, cap to the missing total,
   // and recompute the ratio strictly per the rulebook.
-  // Recompute Open Science compliance walking through publications so that
-  // per-pub user overrides take precedence over OpenAlex's auto-detected OA
-  // flag. Article 11(6) explicitly allows »razen kadar to onemogočajo
-  // založniške omejitve« – publications tagged 'restricted-not-possible'
-  // count as satisfied via the rulebook exemption.
-  const postOrdinancePubs = researcher.publications.filter(
-    (p) => p.year >= 2024 && /^1\./.test(p.typology),
-  );
-  let restrictedCount = 0;
-  let openCount = 0;
-  let closedCount = 0;
-  for (const p of postOrdinancePubs) {
-    const override = p.openAccessOverride;
-    const state: 'open' | 'restricted-not-possible' | 'closed' =
-      override ?? (p.openAccessAuto ? 'open' : 'closed');
-    if (state === 'open') openCount++;
-    else if (state === 'restricted-not-possible') restrictedCount++;
-    else closedCount++;
-  }
-  const recomputedTotal = postOrdinancePubs.length;
-  const recomputedSatisfied = openCount + restrictedCount;
+  // Recompute Open Science compliance by walking the researcher's publications
+  // (so per-pub overrides take precedence over OpenAlex's auto-detected flag),
+  // restricted to post-2024 SCIENTIFIC publications subject to evaluation. The
+  // shared `computeLiveOpenScience` helper is the single source of truth — the
+  // summary strip, the deposits gate and the markdown export all consume the
+  // same figures, so the headline ratio reacts to user edits (Tjaša Bartolj bug,
+  // 2026-06-10). Article 11(6) explicitly allows »razen kadar to onemogočajo
+  // založniške omejitve« — publications tagged 'restricted-not-possible' count
+  // as satisfied via the rulebook exemption.
+  const live = computeLiveOpenScience(researcher);
+  const restrictedCount = live.restrictedCount;
   // Fall back to the snapshot's OS stats when we have no walked pubs (e.g.
   // OpenAlex didn't match anything). Keeps backwards compatibility with the
   // earlier OS-summary-driven path.
   const os = researcher.openScienceCompliance;
-  const usingWalk = recomputedTotal > 0;
+  const usingWalk = live.hasData;
   const osHasData = usingWalk || (!!os && os.postOrdinanceCount > 0);
-  const totalCount = usingWalk
-    ? recomputedTotal
-    : (os?.postOrdinanceCount ?? 0);
+  const totalCount = usingWalk ? live.total : (os?.postOrdinanceCount ?? 0);
   const satisfiedCount = usingWalk
-    ? recomputedSatisfied
+    ? live.satisfied
     : (os?.depositedCount ?? 0);
   const missing = osHasData ? totalCount - satisfiedCount : 0;
   const declared = Math.max(
@@ -436,11 +433,21 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
       } deponiranj za izpolnitev 11(6). člena.`,
     );
 
+  // Transparency flags for the UI / export (display-only, no scoring impact):
+  //  - eligible despite a failed Pogoj 1 (the rulebook allows 2 of 3 standards);
+  //  - eligibility leaning on self-reported, unverifiable figures (Pogoj 2 via
+  //    the external-projects EUR path rather than sourced citations, or Pogoj 3
+  //    EUR/years which are always manually entered).
+  const isEligible = eligible && osPass;
+  const eligibleWithoutPogoj1 = isEligible && !pog1.passed;
+  const reliesOnSelfReportedInputs =
+    isEligible && ((projValuePass && !citPass) || pog3Pass);
+
   return {
     title,
     groupLabel: c.groupLabel,
     stage: c.stage,
-    eligible: eligible && osPass,
+    eligible: isEligible,
     educationOk,
     standards,
     standardsMet,
@@ -457,6 +464,8 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
     openScienceDemoMode: OS_DEMO_PASS,
     openScienceStrictlyPassed: strictPass,
     isReelection: !!researcher.isReelection,
+    eligibleWithoutPogoj1,
+    reliesOnSelfReportedInputs,
   };
 }
 
