@@ -25,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import {
   KAJA_STRICT_PRESET,
+  KAJA_WEIGHTS_PRESET,
   RULEBOOK_DEFAULT,
   type SimulationConfig,
   simulate,
@@ -209,6 +210,16 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
     }));
   }
 
+  function patchWeight(
+    key: keyof SimulationConfig['pog1Weights'],
+    val: number,
+  ) {
+    setConfig((prev) => ({
+      ...prev,
+      pog1Weights: { ...prev.pog1Weights, [key]: val },
+    }));
+  }
+
   return (
     <section className="rounded-lg border border-[var(--accent)] bg-[var(--muted-bg)] p-4 sm:p-5">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
@@ -230,6 +241,11 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
           label={t('presetKajaStrict')}
           onClick={() => setConfig(KAJA_STRICT_PRESET)}
           active={configsEqual(config, KAJA_STRICT_PRESET)}
+        />
+        <PresetButton
+          label={t('presetKajaWeights')}
+          onClick={() => setConfig(KAJA_WEIGHTS_PRESET)}
+          active={configsEqual(config, KAJA_WEIGHTS_PRESET)}
         />
       </div>
 
@@ -253,6 +269,46 @@ export function KajaCalibrationPanel({ researcher, rulebookTotal }: PanelProps) 
           tone={result.totalEquivalents >= rulebookTotal ? 'success' : 'warn'}
         />
       </div>
+
+      {/* ── Pogoj 1: publication weight schedule ── */}
+      <Section title={t('sec0Title')} subtitle={t('sec0Subtitle')}>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <NumberSlider
+            label={t('wQ1Label')}
+            value={config.pog1Weights.q1}
+            min={0}
+            max={2}
+            step={0.05}
+            onChange={(v) => patchWeight('q1', v)}
+          />
+          <NumberSlider
+            label={t('wQ2Label')}
+            value={config.pog1Weights.q2}
+            min={0}
+            max={2}
+            step={0.05}
+            onChange={(v) => patchWeight('q2', v)}
+          />
+          <NumberSlider
+            label={t('wIzvenLabel')}
+            value={config.pog1Weights.izvenQ12}
+            min={0}
+            max={2}
+            step={0.05}
+            onChange={(v) => patchWeight('izvenQ12', v)}
+          />
+          <NumberSlider
+            label={t('w103Label')}
+            value={config.pog1Weights.w103}
+            min={0}
+            max={2}
+            step={0.05}
+            onChange={(v) => patchWeight('w103', v)}
+          />
+        </div>
+        <Methodology>{t('sec0Method')}</Methodology>
+        <Limits items={[t('limit_weights')]} />
+      </Section>
 
       {/* ── Pogoj 1: equivalents ── */}
       <Section title={t('sec1Title')} subtitle={t('sec1Subtitle')}>

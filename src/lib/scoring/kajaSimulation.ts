@@ -45,6 +45,19 @@ export type CitationSource = 'wos' | 'scopus' | 'max-of-two';
 
 export interface SimulationConfig {
   // ─── Pogoj 1 ─────────────────────────────────────────────────────
+  /** Publication weight schedule (Annex 3). Defaults mirror weights.ts.
+   *  1.01/1.02 are quartile-conditional; 1.03 is a single weight. Lets the
+   *  reviewer model a proposed rulebook amendment without touching weights.ts. */
+  pog1Weights: {
+    /** 1.01/1.02 in WoS/Scopus Q1. Rulebook v2.2 = 1.5. */
+    q1: number;
+    /** 1.01/1.02 in WoS/Scopus Q2. Rulebook v2.2 = 1.0. */
+    q2: number;
+    /** 1.01/1.02 outside Q1/Q2 (Q3/Q4/unindexed/unknown). Rulebook v2.2 = 0.7. */
+    izvenQ12: number;
+    /** 1.03 Drugi znanstveni članki. Rulebook v2.2 = 0.7. */
+    w103: number;
+  };
   authorshipPolicy: AuthorshipPolicy;
   customFactors: {
     firstOrCorresponding: number;
@@ -82,6 +95,7 @@ export interface SimulationConfig {
 }
 
 export const RULEBOOK_DEFAULT: SimulationConfig = {
+  pog1Weights: { q1: 1.5, q2: 1.0, izvenQ12: 0.7, w103: 0.7 },
   authorshipPolicy: 'pravilnik',
   customFactors: {
     firstOrCorresponding: 1.0,
@@ -106,6 +120,14 @@ export const KAJA_STRICT_PRESET: SimulationConfig = {
   ...RULEBOOK_DEFAULT,
   authorshipPolicy: 'strict-first-corr',
   awardFactor: 1.0,
+};
+
+/** Kaja's proposed weight schedule (2026-06-12): 1.01/1.02 Q1 = Q2 = 1.5,
+ *  izven Q1/Q2 = 1.0; 1.03 = 1.0. Models a proposed rulebook amendment so the
+ *  committee can read the point impact — simulation only, weights.ts untouched. */
+export const KAJA_WEIGHTS_PRESET: SimulationConfig = {
+  ...RULEBOOK_DEFAULT,
+  pog1Weights: { q1: 1.5, q2: 1.5, izvenQ12: 1.0, w103: 1.0 },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -136,14 +158,16 @@ function resolveFactor(
 }
 
 function resolveWeight(config: SimulationConfig, p: Publication): number {
-  if (
-    (p.typology === '1.01' || p.typology === '1.02') &&
-    config.treatUnknownAsQ12 &&
-    !p.journalRank
-  ) {
-    // Q2 baseline (1.0) when treating unknown as Q1/Q2. Conservative vs. Q1.
-    return 1.0;
+  const w = config.pog1Weights;
+  if (p.typology === '1.01' || p.typology === '1.02') {
+    if (p.journalRank === 'Q1') return w.q1;
+    if (p.journalRank === 'Q2') return w.q2;
+    // No Q1/Q2 tag: optionally treat unknown as the Q2 baseline (conservative
+    // vs. Q1); otherwise it falls outside Q1/Q2.
+    if (!p.journalRank && config.treatUnknownAsQ12) return w.q2;
+    return w.izvenQ12;
   }
+  if (p.typology === '1.03') return w.w103;
   return weightFor(p);
 }
 

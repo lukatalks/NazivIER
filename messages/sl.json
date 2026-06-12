@@ -265,6 +265,7 @@
     "simSpec": "Premakni gumbe in spremeni privzete vrednosti, da preveriš kako Pravilnik in algoritem reagirata pri drugačnih predpostavkah. Vsaka sprememba prikaže nov Σ ekvivalentov, citate, vodilne vrednosti in pass/fail po nazivih – pravilniški rezultat zgoraj ostane nedotaknjen.",
     "presetRulebook": "Privzeto (Pravilnik)",
     "presetKajaStrict": "Strogo (samo prvi/korespondenčni)",
+    "presetKajaWeights": "Predlog Kaja (Q1/Q2 = 1,5; izven = 1,0; 1.03 = 1,0)",
     "rulebookTotal": "Σ pravilniški",
     "rulebookHint": "Privzeti izračun po Pravilniku (Pogoj 1).",
     "simTotal": "Σ simulacijski",
@@ -272,6 +273,14 @@
     "delta": "Razlika",
     "deltaAbove": "Simulacijski Σ je nad pravilniškim.",
     "deltaBelow": "Simulacijski Σ je pod pravilniškim.",
+
+    "sec0Title": "1.0 Pogoj 1 – uteži objav (1.01 / 1.02 / 1.03)",
+    "sec0Subtitle": "Uteži po kvartilu revije; privzeto po Pravilniku v2.2",
+    "wQ1Label": "Utež – 1.01/1.02 v Q1",
+    "wQ2Label": "Utež – 1.01/1.02 v Q2",
+    "wIzvenLabel": "Utež – 1.01/1.02 izven Q1/Q2",
+    "w103Label": "Utež – 1.03 (drugi znanstveni članki)",
+    "sec0Method": "Privzete uteži po Pravilniku v2.2 (Priloga 3): 1.01/1.02 v Q1 = 1,5, v Q2 = 1,0, izven Q1/Q2 = 0,7; 1.03 = 0,7. Drsniki spremenijo te uteži samo v simulaciji – kanonični izračun (weights.ts / evaluate.ts) ostane nedotaknjen za vse raziskovalce. Preset »Predlog Kaja« nastavi Q1 = Q2 = 1,5, izven = 1,0 in 1.03 = 1,0.",
 
     "sec1Title": "1. Pogoj 1 – Σ ekvivalentov (uteži in avtorstvo)",
     "sec1Subtitle": "Faktor avtorstva, Q1/Q2 detekcija, dodatni dosežki",
@@ -341,6 +350,7 @@
     "resetRulebook": "Ponastavi na Pravilnik",
     "reminderNotPassFail": "Vsi rezultati v tem panelu so simulacijski – pravilniški pass/fail v glavni evalvaciji ostaja nedotaknjen.",
 
+    "limit_weights": "Uteži veljajo le v tem simulacijskem panelu. Če odbor predlog sprejme, se nove uteži uveljavijo z novo različico algoritma (ALGO_VERSION) za vse raziskovalce enako – nikoli posamično. Kvartil je trenutno statičen (brez leta objave); glej omejitev pri 1.01/1.02.",
     "limit_authorship": "Faktor avtorstva izhaja iz ročno nastavljene vloge pri vsaki publikaciji (privzeto enakovredno 0,7); preden zaupaš simulaciji, preveri vloge v razdelku Metapodatki.",
     "limit_senior": "»Vodilni« avtor v SICRIS feedu ni ločen od »prvega/korespondenčnega«; če je raziskovalec senior author (zadnji v seznamu), to ročno označi kot »prvi/vodilni/korespondenčni«.",
     "limit_corresponding": "Korespondenčni avtor ni samodejno zaznan iz SICRIS-a – ročno popraviti pri publikacijah, kjer je raziskovalec dopisni.",

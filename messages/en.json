@@ -265,6 +265,7 @@
     "simSpec": "Move the sliders and toggles to see how the Rulebook and the algorithm react under different assumptions. Every change updates Σ equivalents, citations, leadership values and per-title pass/fail. The rulebook result above remains untouched.",
     "presetRulebook": "Default (Rulebook)",
     "presetKajaStrict": "Strict (first/corresponding only)",
+    "presetKajaWeights": "Kaja proposal (Q1/Q2 = 1.5; outside = 1.0; 1.03 = 1.0)",
     "rulebookTotal": "Σ rulebook",
     "rulebookHint": "Default calculation per the Rulebook (Pogoj 1).",
     "simTotal": "Σ simulation",
@@ -272,6 +273,14 @@
     "delta": "Difference",
     "deltaAbove": "Simulation Σ is above the rulebook Σ.",
     "deltaBelow": "Simulation Σ is below the rulebook Σ.",
+
+    "sec0Title": "1.0 Pogoj 1 – publication weights (1.01 / 1.02 / 1.03)",
+    "sec0Subtitle": "Weights by journal quartile; default per Rulebook v2.2",
+    "wQ1Label": "Weight – 1.01/1.02 in Q1",
+    "wQ2Label": "Weight – 1.01/1.02 in Q2",
+    "wIzvenLabel": "Weight – 1.01/1.02 outside Q1/Q2",
+    "w103Label": "Weight – 1.03 (other scientific articles)",
+    "sec0Method": "Default weights per Rulebook v2.2 (Annex 3): 1.01/1.02 in Q1 = 1.5, in Q2 = 1.0, outside Q1/Q2 = 0.7; 1.03 = 0.7. The sliders change these weights in the simulation only – the canonical calculation (weights.ts / evaluate.ts) stays untouched for every researcher. The »Kaja proposal« preset sets Q1 = Q2 = 1.5, outside = 1.0 and 1.03 = 1.0.",
 
     "sec1Title": "1. Pogoj 1 – Σ equivalents (weights and authorship)",
     "sec1Subtitle": "Authorship factor, Q1/Q2 detection, extras",
@@ -341,6 +350,7 @@
     "resetRulebook": "Reset to Rulebook",
     "reminderNotPassFail": "All results in this panel are simulation only – the rulebook pass/fail in the main evaluation remains untouched.",
 
+    "limit_weights": "Weights apply only in this simulation panel. If the committee adopts the proposal, the new weights ship as a new algorithm version (ALGO_VERSION) for every researcher uniformly – never per individual. The quartile is currently static (no publication year); see the 1.01/1.02 limit.",
     "limit_authorship": "The authorship factor comes from the role manually set on each publication (default equal 0.7); before trusting the simulation, review the roles in the Metadata section.",
     "limit_senior": "»Lead« author is not separated from »first/corresponding« in the SICRIS feed; if the researcher is a senior author (last in the list), mark the publication as »first/lead/corresponding« manually.",
     "limit_corresponding": "Corresponding author is not auto-detected from SICRIS – mark manually on publications where the researcher is the corresponding author.",
