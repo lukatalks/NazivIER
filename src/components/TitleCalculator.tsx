@@ -235,14 +235,16 @@ export function TitleCalculator({ locale }: Props) {
     if (!researcher || researcher.bibliographyUnavailable || loading) return;
     if (scrolledForId.current === researcher.sicrisId) return;
     scrolledForId.current = researcher.sicrisId;
-    // Defer one frame so the freshly mounted results subtree is laid out, then
-    // jump instantly. Programmatic `behavior:'smooth'` scrolls are silently
-    // dropped outside a user gesture (verified live 2026-06-12 — smooth left
-    // scrollY at 0, 'auto' scrolled correctly). scroll-mt-4 keeps a top gap.
-    const raf = requestAnimationFrame(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
-    });
-    return () => cancelAnimationFrame(raf);
+    // Jump instantly. Two findings drove this (verified live 2026-06-12):
+    //  · programmatic `behavior:'smooth'` is silently dropped outside a user
+    //    gesture (left scrollY at 0); `behavior:'auto'` scrolls correctly.
+    //  · a requestAnimationFrame defer never fires in a backgrounded tab
+    //    (rAF is paused while document.visibilityState === 'hidden').
+    // useEffect already runs after paint, so the results subtree is laid out
+    // and a synchronous scrollIntoView is both correct and robust. The results
+    // div's top only depends on the fixed-height picker above it, so there's no
+    // layout-settle race to wait for. scroll-mt-4 keeps a small top gap.
+    resultsRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [researcher?.sicrisId, loading]);
 

@@ -5,7 +5,7 @@
 // them separate lets reviewers distinguish UI/tooling changes from changes
 // that affect researcher pass/fail.
 
-export const APP_VERSION = '3.2.4';
+export const APP_VERSION = '3.2.5';
 export const ALGO_VERSION = '2026-06-09-v2.2-final';
 /** Build timestamp, injected automatically at build time (next.config `env`).
  *  Always fresh on every deploy – the footer date can never go stale again,
