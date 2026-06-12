@@ -36,13 +36,18 @@ export function setEditorName(name: string): void {
   }
 }
 
-/** Read the shared record for a researcher. Returns null when absent or on error. */
+/** Read the shared record for a researcher. Returns null when absent or on error.
+ *  Accepts an optional AbortSignal so the caller's load timeout also bounds this
+ *  read — otherwise a hung /api/inputs (researcher fetch already settled) would
+ *  leave the loader spinning forever (reported 2026-06-12). */
 export async function fetchServerInputs(
   sicrisId: string,
+  signal?: AbortSignal,
 ): Promise<PersistedResearcherInputs | null> {
   try {
     const res = await fetch(`/api/inputs?id=${encodeURIComponent(sicrisId)}`, {
       cache: 'no-store',
+      signal,
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { inputs?: PersistedResearcherInputs | null };

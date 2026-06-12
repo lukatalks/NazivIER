@@ -9,9 +9,13 @@ import type { RosterEntry } from '@/lib/sicris/roster';
 interface Props {
   onPick(sicrisId: string, label: string): void;
   loading: boolean;
+  /** SICRIS ID of the researcher whose data is currently loaded, so the
+   *  matching roster row turns light green ("data present" cue). Null until a
+   *  fetch succeeds. */
+  loadedId: string | null;
 }
 
-export function ResearcherPicker({ onPick, loading }: Props) {
+export function ResearcherPicker({ onPick, loading, loadedId }: Props) {
   const t = useTranslations('picker');
   const [roster, setRoster] = useState<RosterEntry[]>([]);
   const [rosterState, setRosterState] = useState<'loading' | 'ready' | 'error'>(
@@ -90,13 +94,17 @@ export function ResearcherPicker({ onPick, loading }: Props) {
             every other button became unclickable. We now keep buttons live;
             the selected one is visually marked and clicks update selection
             even mid-load (the parent's setLoading guards the actual fetch). */}
-        {/* Cap + inner scroll only on ≥sm. On mobile a nested scroll box
-            fights the page scroll (janky name rendering + odd top gap reported
-            2026-06-12), so let the roster flow with the page there. */}
-        <ul className="mt-4 grid gap-2 sm:max-h-[26rem] sm:overflow-y-auto pr-1">
+        {/* Capped + inner-scrolled on every viewport. An uncapped mobile roster
+            (tried 2026-06-12) pushed the results far down the page; a fixed-height
+            scroll box keeps the picker compact so the verdict cards stay close. */}
+        <ul className="mt-4 grid gap-2 max-h-[26rem] overflow-y-auto pr-1">
           {roster.map((r) => {
             const isSelected = selectedId === r.sicrisId;
             const isLoadingThis = isSelected && loading;
+            // Light-green "data present" cue once this researcher's data has
+            // loaded successfully (parent passes loadedId on a 200). Selected
+            // (accent) wins while a fetch is still in flight.
+            const isLoaded = loadedId === r.sicrisId && !isLoadingThis;
             return (
               <li key={r.sicrisId}>
                 <button
@@ -105,10 +113,16 @@ export function ResearcherPicker({ onPick, loading }: Props) {
                   aria-pressed={isSelected}
                   className="w-full text-left rounded-md border px-3 py-2 transition-colors hover:bg-white dark:hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                   style={{
-                    borderColor: isSelected ? 'var(--accent)' : 'transparent',
-                    background: isSelected
-                      ? 'rgba(169, 40, 37, 0.06)'
-                      : 'transparent',
+                    borderColor: isLoaded
+                      ? 'var(--success)'
+                      : isSelected
+                        ? 'var(--accent)'
+                        : 'transparent',
+                    background: isLoaded
+                      ? 'rgba(22, 163, 74, 0.08)'
+                      : isSelected
+                        ? 'rgba(169, 40, 37, 0.06)'
+                        : 'transparent',
                     touchAction: 'manipulation',
                   }}
                 >
@@ -117,6 +131,14 @@ export function ResearcherPicker({ onPick, loading }: Props) {
                     {isLoadingThis ? (
                       <span className="text-xs text-[var(--accent)] tabnum">
                         {t('loadingInline')}
+                      </span>
+                    ) : null}
+                    {isLoaded ? (
+                      <span
+                        className="text-xs text-[var(--success)]"
+                        aria-hidden="true"
+                      >
+                        ✓
                       </span>
                     ) : null}
                   </div>

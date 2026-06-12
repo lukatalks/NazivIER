@@ -127,7 +127,7 @@ export function TitleCalculator({ locale }: Props) {
         fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`, {
           signal: ctrl.signal,
         }),
-        fetchServerInputs(sicrisId),
+        fetchServerInputs(sicrisId, ctrl.signal),
       ]);
       if (!r.ok) {
         const body = (await r.json().catch(() => ({}))) as { error?: string };
@@ -225,6 +225,19 @@ export function TitleCalculator({ locale }: Props) {
     [researcher],
   );
 
+  // Bring the results (verdict cards) into view the moment a researcher
+  // finishes loading. The picker sits at the top; without this the user landed
+  // on the config panel and "saw no numbers" (reported 2026-06-12). Fires only
+  // when the loaded SICRIS ID changes or loading flips — never on input edits
+  // (those keep the same sicrisId and loading stays false).
+  const resultsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (researcher && !researcher.bibliographyUnavailable && !loading) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [researcher?.sicrisId, loading]);
+
   return (
     <div className="flex flex-1 flex-col">
       <StructuredData locale={locale} />
@@ -276,7 +289,15 @@ export function TitleCalculator({ locale }: Props) {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 overflow-x-hidden px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
-        <ResearcherPicker onPick={load} loading={loading} />
+        <ResearcherPicker
+          onPick={load}
+          loading={loading}
+          loadedId={
+            researcher && !researcher.bibliographyUnavailable
+              ? researcher.sicrisId
+              : null
+          }
+        />
 
         {loading ? (
           <div className="rounded-lg border border-[var(--border)] bg-[var(--muted-bg)] p-5 text-sm">
@@ -316,13 +337,14 @@ export function TitleCalculator({ locale }: Props) {
         ) : null}
 
         {researcher && !researcher.bibliographyUnavailable ? (
-          <>
-            {/* `key={researcher.sicrisId}` on the per-researcher subtrees
-                forces React to unmount + remount when the user picks a
-                different researcher. Without it, MetadataPanel's open
-                state and GroupedBreakdown's opened group (+ each
-                EvaluationCard's expansion) would persist across the swap
-                and show stale toggles for the new researcher. */}
+          // Results-first ordering (2026-06-12): the verdict cards
+          // (GroupedBreakdown) now render directly under the headline strip,
+          // ABOVE the large MetadataPanel config. Previously the config sat
+          // first and the user "saw no numbers, only things to configure".
+          // `key={researcher.sicrisId}` on the per-researcher subtrees forces
+          // React to remount on a different pick so MetadataPanel/GroupedBreakdown
+          // don't show stale toggles. scroll-mt-4 offsets the smooth scroll.
+          <div ref={resultsRef} className="scroll-mt-4 space-y-6 sm:space-y-8">
             <SummaryStrip researcher={researcher} locale={locale} />
             <ExportToolbar
               key={`export-${researcher.sicrisId}`}
@@ -332,6 +354,12 @@ export function TitleCalculator({ locale }: Props) {
               sharedMeta={sharedMeta}
             />
             <OpenScienceDemoBanner evaluations={evaluations} />
+            {/* THE NUMBERS — verdict cards first, so picking a researcher
+                immediately shows pass/fail + equivalents. */}
+            <GroupedBreakdown
+              key={`breakdown-${researcher.sicrisId}`}
+              evaluations={evaluations}
+            />
             <KajaCalibrationPanel
               key={`kaja-${researcher.sicrisId}`}
               researcher={researcher}
@@ -341,17 +369,15 @@ export function TitleCalculator({ locale }: Props) {
               key={`dups-${researcher.sicrisId}`}
               publications={researcher.publications}
             />
+            {/* Config below the results — refine authorship / EUR / education
+                here, then the numbers above recompute live. */}
             <MetadataPanel
               key={`meta-${researcher.sicrisId}`}
               researcher={researcher}
               onChange={patchResearcher}
             />
-            <GroupedBreakdown
-              key={`breakdown-${researcher.sicrisId}`}
-              evaluations={evaluations}
-            />
             <Methodology />
-          </>
+          </div>
         ) : null}
       </main>
 
