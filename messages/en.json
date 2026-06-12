@@ -193,7 +193,7 @@
       },
       "q12": {
         "head": "Q1/Q2 status",
-        "body": " is determined primarily via an embedded SCImago JR snapshot keyed by journal ISSN-L (economics, finance and adjacent journals). When the ISSN is not in the snapshot, we fall back to a heuristic: 1.01/1.02 publications are ranked by impact, the top quartile is tagged Q1, the next Q2."
+        "body": " is determined primarily via an embedded SCImago JR snapshot keyed by journal ISSN-L (economics, finance and adjacent journals). When the ISSN is not in the snapshot, we fall back to a heuristic: 1.01/1.02 publications are ranked by impact, the top quartile is tagged Q1, the next Q2. Note (demo simplification): in this version the quartile is taken from the latest available SCImago year, not the publication year; the rulebook (Annex 3) requires the quartile in the year of publication – exact year-bound classification follows in the autumn final release."
       },
       "authorship": {
         "head": "Authorship factor",

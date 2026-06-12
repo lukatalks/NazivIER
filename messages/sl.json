@@ -193,7 +193,7 @@
       },
       "q12": {
         "head": "Q1/Q2 status",
-        "body": " se določi prvenstveno po ujemanju ISSN z vgrajeno SCImago JR snapshot tabelo (ekonomske, finančne in sorodne revije). Kjer ISSN ni v snapshotu, pademo nazaj na hevristiko: 1.01/1.02 publikacije so razvrščene po vplivu, zgornja četrtina dobi Q1, naslednja Q2."
+        "body": " se določi prvenstveno po ujemanju ISSN z vgrajeno SCImago JR snapshot tabelo (ekonomske, finančne in sorodne revije). Kjer ISSN ni v snapshotu, pademo nazaj na hevristiko: 1.01/1.02 publikacije so razvrščene po vplivu, zgornja četrtina dobi Q1, naslednja Q2. Opomba (poenostavitev za demo): kvartil je v tej različici vzet iz zadnjega razpoložljivega leta SCImago, ne iz leta objave; pravilnik (Priloga 3) sicer zahteva kvartil v letu objave – natančna letno-vezana razvrstitev sledi v jesenski končni različici."
       },
       "authorship": {
         "head": "Faktor avtorstva",
