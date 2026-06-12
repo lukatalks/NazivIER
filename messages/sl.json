@@ -140,10 +140,16 @@
   "diagnostics": {
     "versionTooltip": "Različica aplikacije (UI/orodje)",
     "algoTooltip": "Različica algoritma / pravilnika, po kateri se računa",
+    "buildTooltip": "Datum zadnje namestitve · algoritem {algo}",
     "detailsSummary": "Tehnične podrobnosti za prijavo napake",
     "detailsHelp": "Kopirajte spodnji blok in ga priložite prijavi napake. Vključuje različico, ID raziskovalca, čas in podrobnosti napake. Brez osebnih podatkov.",
     "copy": "Kopiraj v odložišče",
     "copied": "Kopirano!"
+  },
+  "versionWatcher": {
+    "message": "Na voljo je nova različica ({version}). Osvežite za najnovejši izračun.",
+    "refresh": "Osveži",
+    "dismiss": "Zapri"
   },
   "evalCard": {
     "eligible": "✓ Izvolljiv",

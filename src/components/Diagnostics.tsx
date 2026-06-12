@@ -11,15 +11,30 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { APP_VERSION, ALGO_VERSION, COMMIT_REF, COMMIT_SHA, ENV } from '@/lib/version';
+import {
+  APP_VERSION,
+  ALGO_VERSION,
+  COMMIT_REF,
+  COMMIT_SHA,
+  ENV,
+  buildDateISO,
+} from '@/lib/version';
 
 export function VersionFooter() {
   const t = useTranslations('diagnostics');
+  const built = buildDateISO();
   return (
     <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--muted)]/70">
       <span title={t('versionTooltip')}>v{APP_VERSION}</span>
-      <span aria-hidden>·</span>
-      <span title={t('algoTooltip')}>alg {ALGO_VERSION}</span>
+      {built ? (
+        <>
+          <span aria-hidden>·</span>
+          {/* Always-fresh deploy date. The rulebook/algorithm stamp lives in the
+              tooltip + the diagnostics block, so the visible date can never drift
+              out of sync with the version again. */}
+          <span title={t('buildTooltip', { algo: ALGO_VERSION })}>{built}</span>
+        </>
+      ) : null}
       {ENV !== 'production' ? (
         <>
           <span aria-hidden>·</span>

@@ -140,10 +140,16 @@
   "diagnostics": {
     "versionTooltip": "Application version (UI / tooling)",
     "algoTooltip": "Algorithm / rulebook version driving the calculation",
+    "buildTooltip": "Last deploy date · algorithm {algo}",
     "detailsSummary": "Technical details for a bug report",
     "detailsHelp": "Copy the block below and include it in a bug report. It contains the version, researcher ID, timestamp and error details. No personal data.",
     "copy": "Copy to clipboard",
     "copied": "Copied!"
+  },
+  "versionWatcher": {
+    "message": "A new version is available ({version}). Refresh for the latest calculation.",
+    "refresh": "Refresh",
+    "dismiss": "Dismiss"
   },
   "evalCard": {
     "eligible": "✓ Eligible",
