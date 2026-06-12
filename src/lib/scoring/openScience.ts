@@ -29,12 +29,14 @@ import type { Publication, Researcher } from '@/lib/types';
  *  scientific class-1 typologies (all of them carry a Pogoj-1 weight, so they
  *  are by definition »predmet presoje«).
  *
- *  Scientific monographs (2.01) and reviewed proceedings (2.31) are also
- *  »znanstvene objave«, but open access for a printed monograph is frequently
- *  not feasible (the publisher-restriction exemption already covers that), so we
- *  keep the denominator to the article-level outputs where OA is the norm.
- *  → If Kaja decides class-2 scientific books must be in scope, add '2.01' /
- *  '2.31' here; the change is non-blocking (11(6) is still in demo mode). */
+ *  Scientific monographs (2.01) and reviewed scientific proceedings (2.31) are
+ *  also »znanstvene objave, ki so predmet presoje«, so per the rulebook text
+ *  they ARE in scope. Open access for a whole printed monograph is often not
+ *  feasible — that is exactly what the publisher-restriction exemption
+ *  ('restricted-not-possible') is for, NOT a reason to drop them from the
+ *  denominator. (Scientific reference works 2.27/2.28 and scientific A/V 2.18
+ *  are also typed »znanstveni« but virtually never appear in post-2024 IER
+ *  bibliographies; add them here if they ever do.) */
 export const OA_SCIENTIFIC_TYPOLOGIES = new Set<string>([
   '1.01', // izvirni znanstveni članek
   '1.02', // pregledni znanstveni članek
@@ -43,6 +45,8 @@ export const OA_SCIENTIFIC_TYPOLOGIES = new Set<string>([
   '1.08', // objavljeni znanstveni prispevek na konferenci
   '1.16', // samostojni znanstveni sestavek ali poglavje v monografiji
   '1.26', // znanstveni sestavek v slovarju, enciklopediji, leksikonu
+  '2.01', // znanstvena monografija
+  '2.31', // zbornik recenziranih znanstvenih prispevkov (mednarodna/tuja konf.)
 ]);
 
 /** Uredba 59/23 took effect during 2023, so 2024+ is the strict open-access

@@ -126,9 +126,9 @@ export function buildMarkdownSummary(
   lines.push('');
   lines.push(
     '_Pogoj velja le za znanstvene objave, ki so predmet presoje ' +
-      '(1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26), nastale po uveljavitvi ' +
-      'Uredbe 59/23 (od leta 2024). Intervjuji, recenzije, strokovni in ' +
-      'poljudni prispevki niso vključeni._',
+      '(1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31), nastale po ' +
+      'uveljavitvi Uredbe 59/23 (od leta 2024). Intervjuji, recenzije, ' +
+      'strokovni in poljudni prispevki niso vključeni._',
   );
   lines.push('');
 

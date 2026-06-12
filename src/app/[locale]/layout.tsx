@@ -20,6 +20,12 @@ export function generateStaticParams() {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // Lock zoom on mobile: pinch-zoom / double-tap-zoom break the dense table
+  // layout and the fixed banners. Trade-off: this reduces low-vision zoom
+  // (WCAG 1.4.4); acceptable for an internal tool, revert if accessibility
+  // feedback comes in.
+  maximumScale: 1,
+  userScalable: false,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#fafafa' },
     { media: '(prefers-color-scheme: dark)', color: '#0b0d12' },

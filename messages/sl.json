@@ -209,7 +209,7 @@
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
-        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 05. 6. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Pogoj velja le za znanstvene objave, ki so predmet presoje (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26) in nastale po letu 2024; intervjuji, recenzije ter strokovni in poljudni prispevki niso vključeni. V tej demo različici ga obravnavamo kot izpolnjen za vse raziskovalce – dokler pravilnik ni sprejet, ne želimo blokirati izvolljivosti. Resnično stanje odprtega dostopa pa še vedno izračunamo in ga vidno prikažemo."
+        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 05. 6. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Pogoj velja le za znanstvene objave, ki so predmet presoje (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31) in nastale po letu 2024; intervjuji, recenzije ter strokovni in poljudni prispevki niso vključeni. V tej demo različici ga obravnavamo kot izpolnjen za vse raziskovalce – dokler pravilnik ni sprejet, ne želimo blokirati izvolljivosti. Resnično stanje odprtega dostopa pa še vedno izračunamo in ga vidno prikažemo."
       },
       "earlyPromotion": {
         "head": "Predčasna izvolitev (14. člen, 5. odstavek)",
