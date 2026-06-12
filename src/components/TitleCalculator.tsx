@@ -115,11 +115,18 @@ export function TitleCalculator({ locale }: Props) {
     setLoading(true);
     setError(null);
     setLastSicrisId(sicrisId);
+    // Hard client-side timeout so a dead/slow mobile connection surfaces an
+    // error + retry path instead of an indefinite spinner (reported 2026-06-12,
+    // weak mobile signal). 45 s comfortably clears even Verbič's 545-pub fetch.
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 45000);
     try {
       // The bibliography fetch is slow (COBISS); the shared-inputs read is a
       // tiny Redis GET — run them together so hydration adds no latency.
       const [r, serverBlob] = await Promise.all([
-        fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`),
+        fetch(`/api/researcher?id=${encodeURIComponent(sicrisId)}`, {
+          signal: ctrl.signal,
+        }),
         fetchServerInputs(sicrisId),
       ]);
       if (!r.ok) {
@@ -172,8 +179,16 @@ export function TitleCalculator({ locale }: Props) {
         setSharedMeta(null);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      setError(
+        aborted
+          ? 'Časovna omejitev (45 s) presežena – poskusite znova. · Request timed out (45 s) – please retry.'
+          : e instanceof Error
+            ? e.message
+            : String(e),
+      );
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }
@@ -260,7 +275,7 @@ export function TitleCalculator({ locale }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 overflow-x-hidden px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
         <ResearcherPicker onPick={load} loading={loading} />
 
         {loading ? (

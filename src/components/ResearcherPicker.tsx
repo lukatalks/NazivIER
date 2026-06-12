@@ -90,7 +90,10 @@ export function ResearcherPicker({ onPick, loading }: Props) {
             every other button became unclickable. We now keep buttons live;
             the selected one is visually marked and clicks update selection
             even mid-load (the parent's setLoading guards the actual fetch). */}
-        <ul className="mt-4 grid gap-2 max-h-[26rem] overflow-y-auto pr-1">
+        {/* Cap + inner scroll only on ≥sm. On mobile a nested scroll box
+            fights the page scroll (janky name rendering + odd top gap reported
+            2026-06-12), so let the roster flow with the page there. */}
+        <ul className="mt-4 grid gap-2 sm:max-h-[26rem] sm:overflow-y-auto pr-1">
           {roster.map((r) => {
             const isSelected = selectedId === r.sicrisId;
             const isLoadingThis = isSelected && loading;
