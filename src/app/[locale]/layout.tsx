@@ -8,6 +8,8 @@ import type { Metadata, Viewport } from 'next';
 import { VersionWatcher } from '@/components/VersionWatcher';
 import { type Locale, locales } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
+import { getTenant } from '@/lib/tenancy/server';
+import { tenantThemeCss } from '@/lib/tenancy/theme';
 
 import '../globals.css';
 
@@ -42,6 +44,7 @@ export async function generateMetadata({
     ? (raw as Locale)
     : routing.defaultLocale;
   const t = await getTranslations({ locale, namespace: 'site' });
+  const tenant = await getTenant();
 
   const languageAlternates = Object.fromEntries(
     locales.map((l) => [l, l === routing.defaultLocale ? '/' : `/${l}`]),
@@ -49,10 +52,10 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: t('title'), template: '%s · NazivIER' },
+    title: { default: t('title'), template: `%s · ${tenant.brand.productName}` },
     description: t('description'),
-    applicationName: 'NazivIER',
-    authors: [{ name: 'Inštitut za ekonomska raziskovanja' }],
+    applicationName: tenant.brand.productName,
+    authors: [{ name: tenant.brand.instituteNameSl }],
     keywords: [
       'IER',
       'Inštitut za ekonomska raziskovanja',
@@ -77,7 +80,7 @@ export async function generateMetadata({
       title: t('title'),
       description: t('ogDescription'),
       url: locale === routing.defaultLocale ? SITE_URL : `${SITE_URL}/${locale}`,
-      siteName: 'NazivIER',
+      siteName: tenant.brand.productName,
       locale: locale === 'sl' ? 'sl_SI' : 'en_US',
       alternateLocale: locale === 'sl' ? ['en_US'] : ['sl_SI'],
       type: 'website',
@@ -108,9 +111,17 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  const tenant = await getTenant();
+
   return (
     <html lang={locale} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        {/* Per-tenant brand colour overrides. For IER these equal the globals.css
+            defaults (visual no-op); a new tenant re-themes the whole app from its
+            colour set alone. String-child <style> (not dangerouslySetInnerHTML):
+            the CSS contains no <, > or & so it renders verbatim, and the values
+            come only from our static tenant config. */}
+        <style id="tenant-theme">{tenantThemeCss(tenant)}</style>
         <NextIntlClientProvider>
           {children}
           <VersionWatcher />

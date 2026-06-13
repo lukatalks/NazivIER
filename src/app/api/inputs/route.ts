@@ -3,13 +3,20 @@ import { NextResponse } from 'next/server';
 import { storeDelete, storeGet, storeSet } from '@/lib/cache/redis';
 import type { PersistedResearcherInputs } from '@/lib/persistence/researcherStorage';
 import { extractSicrisId } from '@/lib/sicris/url';
+import { DEFAULT_TENANT_ID } from '@/lib/tenancy/registry';
+import { resolveTenantIdFromRequest } from '@/lib/tenancy/resolve';
 
 // Shared, login-less store for per-researcher manual inputs (authorship, OA,
 // EUR amounts, education, years). Trust model: anyone at the institute can read
-// or write any researcher's inputs, so Kaja's calibration panel always reflects
-// the realistic state people have entered. Every write stamps `lastEditedBy` +
-// `savedAt` for transparency. The single source of truth is Redis; localStorage
-// is only a per-browser cache layered on top.
+// or write any researcher's inputs WITHIN THAT INSTITUTE, so the calibration
+// panel always reflects the realistic state people have entered. Every write
+// stamps `lastEditedBy` + `savedAt` for transparency. The single source of truth
+// is Redis; localStorage is only a per-browser cache layered on top.
+//
+// Multi-tenant scoping: keys are namespaced by the tenant resolved from the
+// request Host, so one institute can never read or overwrite another's inputs.
+// The default (IER) tenant keeps the legacy un-prefixed keyspace so existing
+// production data is preserved; every other tenant gets an `{tenantId}:` segment.
 
 export const runtime = 'nodejs';
 export const preferredRegion = 'fra1';
@@ -20,8 +27,11 @@ const KEY_PREFIX = 'nazivier:inputs:v1:';
 // Reject anything wildly larger as malformed/abusive.
 const MAX_BODY_BYTES = 256 * 1024;
 
-function keyFor(sicrisId: string): string {
-  return `${KEY_PREFIX}${sicrisId}`;
+function keyFor(tenantId: string, sicrisId: string): string {
+  // Backward-compatible: the default tenant keeps the original key shape; any
+  // other tenant is isolated under its own id segment.
+  const scope = tenantId === DEFAULT_TENANT_ID ? '' : `${tenantId}:`;
+  return `${KEY_PREFIX}${scope}${sicrisId}`;
 }
 
 /** GET /api/inputs?id=12345 → { inputs: PersistedResearcherInputs | null } */
@@ -31,7 +41,8 @@ export async function GET(request: Request) {
   if (!sicrisId) {
     return NextResponse.json({ error: 'Neveljaven SICRIS ID' }, { status: 400 });
   }
-  const inputs = await storeGet<PersistedResearcherInputs>(keyFor(sicrisId));
+  const tenantId = resolveTenantIdFromRequest(request);
+  const inputs = await storeGet<PersistedResearcherInputs>(keyFor(tenantId, sicrisId));
   return NextResponse.json(
     { inputs: inputs ?? null },
     { headers: { 'Cache-Control': 'no-store' } },
@@ -78,7 +89,8 @@ export async function PUT(request: Request) {
     lastEditedBy,
   };
 
-  await storeSet(keyFor(sicrisId), blob);
+  const tenantId = resolveTenantIdFromRequest(request);
+  await storeSet(keyFor(tenantId, sicrisId), blob);
   return NextResponse.json({ ok: true, savedAt: blob.savedAt });
 }
 
@@ -89,6 +101,7 @@ export async function DELETE(request: Request) {
   if (!sicrisId) {
     return NextResponse.json({ error: 'Neveljaven SICRIS ID' }, { status: 400 });
   }
-  await storeDelete(keyFor(sicrisId));
+  const tenantId = resolveTenantIdFromRequest(request);
+  await storeDelete(keyFor(tenantId, sicrisId));
   return NextResponse.json({ ok: true });
 }
