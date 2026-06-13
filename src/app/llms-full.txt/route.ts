@@ -1,22 +1,25 @@
 // /llms-full.txt – full reference for LLM crawlers
 // Includes the complete methodology, weight tables, threshold tables, and API contract.
 
+import { INSTITUTE } from '@/lib/institute';
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nazivier.vercel.app';
 
 export const dynamic = 'force-static';
 export const revalidate = 86400;
 
 export function GET() {
-  const body = `# NazivIER – full reference
+  const { brand, organization, sources } = INSTITUTE;
+  const body = `# ${brand.productName} – full reference
 
-NazivIER is an internal web application of the Institute for Economic Research (Inštitut za ekonomska raziskovanja, IER) in Ljubljana, Slovenia. It automatically evaluates whether a researcher meets the criteria for promotion to each researcher title under the new IER rulebook on researcher titles (proposed draft of 26 May 2026). The app is open-source (https://github.com/lukatalks/NazivIER), runs at ${SITE_URL}, and is available in Slovenian and English.
+${brand.productName} is an internal web application of the ${brand.instituteNameEn} (${brand.instituteNameSl}, ${brand.instituteShort}) in Ljubljana, Slovenia. It automatically evaluates whether a researcher meets the criteria for promotion to each researcher title under the new ${brand.instituteShort} rulebook on researcher titles (proposed draft of 26 May 2026). The app is open-source (https://github.com/lukatalks/NazivIER), runs at ${SITE_URL}, and is available in Slovenian and English.
 
 ## What it does
 
 Given a SICRIS researcher ID (e.g. 33182 for dr. Kaja Primc), the app:
 
 1. Fetches the researcher's full bibliography from the public COBISS bibliography API (https://bib.cobiss.net/biblioweb/authorCobissList/si/slv/cris/{id}/T.CI.Ydesc/1800/{currentYear}). Each entry includes a COBISS typology code, year, parent journal/book title, and a COBISS unit ID.
-2. Fetches the researcher's OpenAlex profile (https://api.openalex.org/authors/orcid:{orcid} when ORCID known, otherwise a name search filtered by the IER institution ID I4210112708). Returns cited_by_count, h-index, works_count.
+2. Fetches the researcher's OpenAlex profile (https://api.openalex.org/authors/orcid:{orcid} when ORCID known, otherwise a name search filtered by the ${brand.instituteShort} institution ID ${sources.openAlexInstitutionId}). Returns cited_by_count, h-index, works_count.
 3. Maps each publication to a weight per Annex 3 of the rulebook (see Weight table below).
 4. Multiplies by the authorship factor (default 0.7 = equal authorship; user can override per publication).
 5. Sums into total equivalents (Pogoj 1).
@@ -78,16 +81,16 @@ Minimum education (SOK level): 10 (doctorate) for scientific and professional-re
 
 ### GET ${SITE_URL}/api/roster
 
-Returns the IER organization metadata and seeded researcher roster.
+Returns the ${brand.instituteShort} organization metadata and seeded researcher roster.
 
 \`\`\`json
 {
   "organization": {
-    "id": "656",
-    "code": "0502",
-    "fullName": "Inštitut za ekonomska raziskovanja",
-    "shortName": "IER",
-    "website": "https://www.ier.si",
+    "id": "${organization.id}",
+    "code": "${organization.code}",
+    "fullName": "${organization.fullName}",
+    "shortName": "${organization.shortName}",
+    "website": "${organization.website}",
     "programmeGroups": [...]
   },
   "researchers": [
@@ -144,11 +147,11 @@ Citations are cached for 6 hours, OpenAlex profile for 24 hours.
 - Source: https://github.com/lukatalks/NazivIER (MIT)
 - Built with Next.js 16, TypeScript, Tailwind CSS, next-intl
 - Hosted on Vercel
-- Maintained by: developer collaboration with the Institute for Economic Research
+- Maintained by: developer collaboration with the ${brand.instituteNameEn}
 
-## About the Institute for Economic Research (IER)
+## About the ${brand.instituteNameEn} (${brand.instituteShort})
 
-The Institute for Economic Research (Inštitut za ekonomska raziskovanja, IER) is a public research institution in Ljubljana, Slovenia, founded in 1965. SICRIS organization ID: 656; ARIS registry code: 0502. The institute hosts four programme groups (mednarodna ekonomija, gospodarski razvoj, strateško planiranje, socialni razvoj) and ~20 researchers. Director: dr. Damjan Kavaš. Address: Kardeljeva ploščad 17, 1000 Ljubljana, Slovenia. Website: https://www.ier.si.
+The ${brand.instituteNameEn} (${brand.instituteNameSl}, ${brand.instituteShort}) is a public research institution in Ljubljana, Slovenia, founded in 1965. SICRIS organization ID: ${sources.sicrisOrgId}; ARIS registry code: ${sources.arisCode}. The institute hosts four programme groups (mednarodna ekonomija, gospodarski razvoj, strateško planiranje, socialni razvoj) and ~20 researchers. Director: dr. Damjan Kavaš. Address: Kardeljeva ploščad 17, 1000 Ljubljana, Slovenia. Website: ${brand.websiteUrl}.
 `;
 
   return new Response(body, {

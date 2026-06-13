@@ -1,19 +1,19 @@
 {
   "site": {
-    "title": "NazivIER – kalkulator raziskovalnih nazivov IER",
-    "shortTitle": "NazivIER",
-    "description": "Interno orodje Inštituta za ekonomska raziskovanja za samodejen izračun raziskovalnih nazivov po novem pravilniku, na podlagi podatkov iz SICRIS.",
-    "ogDescription": "Avtomatski izračun pogojev za izvolitev v raziskovalni naziv po pravilniku IER (predlog 05. 6. 2026, v2.2). Bibliografija in citati iz SICRIS WoS."
+    "title": "%PRODUCT% – kalkulator raziskovalnih nazivov %SHORT%",
+    "shortTitle": "%PRODUCT%",
+    "description": "Interno orodje %INSTITUTE_SL_GEN% za samodejen izračun raziskovalnih nazivov po novem pravilniku, na podlagi podatkov iz SICRIS.",
+    "ogDescription": "Avtomatski izračun pogojev za izvolitev v raziskovalni naziv po pravilniku %SHORT% (predlog 05. 6. 2026, v2.2). Bibliografija in citati iz SICRIS WoS."
   },
   "header": {
-    "eyebrow": "Inštitut za ekonomska raziskovanja · interno orodje",
-    "title": "NazivIER – kalkulator raziskovalnih nazivov",
+    "eyebrow": "%INSTITUTE_SL% · interno orodje",
+    "title": "%PRODUCT% – kalkulator raziskovalnih nazivov",
     "subtitle1": "Avtomatski izračun izpolnjevanja pogojev po novem ",
     "subtitleEm": "Pravilniku o raziskovalnih nazivih",
     "subtitle2": " (predlog 05. 6. 2026, v2.2), Priloge 2 in 3. Bibliografija in čisti citati iz SICRIS (WoS oz. Scopus). Faktor avtorstva ročno vnesen za vsako publikacijo."
   },
   "picker": {
-    "selectFromList": "1. Izberi raziskovalca z IER",
+    "selectFromList": "1. Izberi raziskovalca z %SHORT%",
     "selectFromListHint1": "Seznam je pridobljen z ",
     "selectFromListHint2": " (",
     "selectFromListHintCount": "{count, plural, =1 {# raziskovalec} few {# raziskovalci} other {# raziskovalcev}}",
@@ -30,7 +30,7 @@
     "rosterError": "Seznama ni bilo mogoče naložiti ({msg}). Uporabite polje desno za ročni vnos SICRIS ID-ja.",
     "loadingInline": "(nalagam…)"
   },
-  "loading": "Pridobivamo bibliografijo in čiste citate iz SICRIS-a ter projekte z ier.si … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
+  "loading": "Pridobivamo bibliografijo in čiste citate iz SICRIS-a ter projekte z %PROJECTS_HOST% … (lahko traja nekaj sekund prvič, nato je predpomnjeno).",
   "error": {
     "label": "Napaka pri pridobivanju podatkov:"
   },
@@ -56,14 +56,14 @@
     "stageStandards": "Stopnja {stage}. · {met}/{required} standardov · ekv.: {eq}",
     "matchType": {
       "orcid": "ujemanje po ORCID-u",
-      "ier-match": "ime + IER",
+      "ier-match": "ime + %SHORT%",
       "best-name": "samo ime",
       "none": "ni ujemanja"
     }
   },
   "metadata": {
     "title": "Podatki, ki jih ni v javnih virih",
-    "subtitle": "Bibliografijo, čiste citate in projekte pridobimo samodejno iz SICRIS-a in ier.si. Pomembno: faktor avtorstva (prvi/vodilni/korespondenčni, enakovredni, ostalo) je treba ročno potrditi za vsako publikacijo – brez tega so izračunani ekvivalenti zgolj groba ocena.",
+    "subtitle": "Bibliografijo, čiste citate in projekte pridobimo samodejno iz SICRIS-a in %PROJECTS_HOST%. Pomembno: faktor avtorstva (prvi/vodilni/korespondenčni, enakovredni, ostalo) je treba ročno potrditi za vsako publikacijo – brez tega so izračunani ekvivalenti zgolj groba ocena.",
     "open": "Uredi",
     "close": "Zapri",
     "fields": {
@@ -89,8 +89,8 @@
       "reelectionHelp": "Označite, če gre za ponovno izvolitev v isti naziv. Pravilnik v2.2 (22. člen, 2. odstavek) zahteva DVOJE: (1) od zadnje izvolitve mora kandidat izpolniti vsaj polovico pogojev prve izvolitve – avtomatsko upoštevano s polovičnimi pragovi spodaj. (2) Kandidat mora izkazati napredek, ki ustreza vsaj 20 % razlike v vsaj dveh količinskih pogojih med trenutnim in neposredno višjim nazivom – tega kalkulator ne more samodejno preveriti, ker bi potreboval posnetek prejšnje vloge; komisija mora to potrditi ročno.",
       "additionalDepositsLabel": "Dodatna deponiranja za pogoj 11(6)",
       "additionalDepositsHelp": "Zaznano je {deposited} od {total} po-2024 objav v odprtem dostopu (manjka {missing}). Če ste ali boste pred oddajo vloge deponirali še katero objavo v institucionalnem ali tematskem repozitoriju, vnesite število tukaj – evalvator bo ponovno izračunal delež skladno s 100-odstotno zahtevo iz 11. člena, 6. odstavka. Nič ne preskoči pogoja, le evidentira realno stanje.",
-      "ierLeadershipLabel": "Vodenje projektov z ier.si (revizija, ne polni Pogoja 3 samodejno)",
-      "ierLeadershipHelp": "Z IER spletne strani smo zaznali, da kandidat vodi {count} projektov ({external} izven čistega ARIS financiranja), v razponu približno {years} let. Spodaj so projekti za revizijo:",
+      "ierLeadershipLabel": "Vodenje projektov z %PROJECTS_HOST% (revizija, ne polni Pogoja 3 samodejno)",
+      "ierLeadershipHelp": "Z %SHORT% spletne strani smo zaznali, da kandidat vodi {count} projektov ({external} izven čistega ARIS financiranja), v razponu približno {years} let. Spodaj so projekti za revizijo:",
       "ierLeadershipDisclaimer": "Pomembno: leta vodenja projektov sama po sebi NE izpolnijo Pogoja 3, poti (e). Pravilnik tam zahteva leta opravljanja vodilne funkcije (direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine, vodja infrastrukturne skupine). Ti projekti so prikazani izključno kot dokaz za revizijo in lahko služijo kot podlaga za ročno vnesene EUR vrednosti pri Pogoju 3 (a–d) ali za Pogoj 2 (vrednost projektov izven ARIS).",
       "ierLeadershipMore": "… in še {count} drugih vodenih projektov.",
       "authorshipPerPubLabel": "★ Avtorstvo za posamezno publikacijo (obvezno)",
@@ -205,11 +205,11 @@
       },
       "leadership": {
         "head": "Sposobnost vodenja (Pogoj 3)",
-        "body": ": pravilnik v2.2 (Priloga 3) ponuja dve alternativni poti. (a–d) Kumulativna vrednost zaključenih vodenih projektov ali delovnih sklopov ≥ 50.000 / 250.000 / 500.000 EUR (po karierni stopnji) – vnaša se ročno, ker ier.si EUR vrednosti ne objavlja. (e) Vsaj 1 / 2 / 3 leta opravljanja vodilne funkcije: direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine ali vodja infrastrukturne skupine. Leta vodenja projektov (z ier.si/projekti) NE sodijo v pot (e); prikazana so kot revizijski seznam pod metapodatki."
+        "body": ": pravilnik v2.2 (Priloga 3) ponuja dve alternativni poti. (a–d) Kumulativna vrednost zaključenih vodenih projektov ali delovnih sklopov ≥ 50.000 / 250.000 / 500.000 EUR (po karierni stopnji) – vnaša se ročno, ker %PROJECTS_HOST% EUR vrednosti ne objavlja. (e) Vsaj 1 / 2 / 3 leta opravljanja vodilne funkcije: direktor, predsednik upravnega odbora, predsednik znanstvenega sveta, vodja programske skupine ali vodja infrastrukturne skupine. Leta vodenja projektov (z %PROJECTS_LABEL%) NE sodijo v pot (e); prikazana so kot revizijski seznam pod metapodatki."
       },
       "openScience": {
         "head": "Odprta znanost (11. člen, 6. odstavek)",
-        "body": ": pogoj odprte znanosti je nov v IER-jevem pravilniku (predlog 05. 6. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Pogoj velja le za znanstvene objave, ki so predmet presoje (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31) in nastale po letu 2024; intervjuji, recenzije ter strokovni in poljudni prispevki niso vključeni. V tej demo različici ga obravnavamo kot izpolnjen za vse raziskovalce – dokler pravilnik ni sprejet, ne želimo blokirati izvolljivosti. Resnično stanje odprtega dostopa pa še vedno izračunamo in ga vidno prikažemo."
+        "body": ": pogoj odprte znanosti je nov v %SHORT%-jevem pravilniku (predlog 05. 6. 2026, 11. člen, 6.–8. odstavek), s katerim Inštitut izrecno prenaša zahteve Uredbe o izvajanju znanstvenoraziskovalnega dela (Uradni list RS, št. 59/23). Pogoj velja le za znanstvene objave, ki so predmet presoje (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31) in nastale po letu 2024; intervjuji, recenzije ter strokovni in poljudni prispevki niso vključeni. V tej demo različici ga obravnavamo kot izpolnjen za vse raziskovalce – dokler pravilnik ni sprejet, ne želimo blokirati izvolljivosti. Resnično stanje odprtega dostopa pa še vedno izračunamo in ga vidno prikažemo."
       },
       "earlyPromotion": {
         "head": "Predčasna izvolitev (14. člen, 5. odstavek)",
@@ -233,16 +233,16 @@
     "copySummary": "Kopiraj povzetek",
     "emailBackup": "Pošlji shrambo v e-pošto",
     "emailHint": "Odpre privzeti e-poštni odjemalec z vsemi vnesenimi podatki. Pošljite si na svoj naslov ali Kaji za varnostno kopijo.",
-    "emailIntro": "V priponki je shramba vnesenih podatkov NazivIER za {name}. Vsebino lahko prilepite v polje »Naloži iz besedila«, da podatke obnovite v orodju.",
+    "emailIntro": "V priponki je shramba vnesenih podatkov %PRODUCT% za {name}. Vsebino lahko prilepite v polje »Naloži iz besedila«, da podatke obnovite v orodju.",
     "emailToast": "Odpiram e-pošto …",
     "restoreFromText": "Naloži iz besedila",
     "restoreHint": "Prilepite predhodno shranjeno JSON besedilo (npr. iz e-pošte) za obnovo vnosov.",
     "restoreTitle": "Naloži shrambo iz besedila",
-    "restoreIntro": "Prilepite JSON, ki ste ga prejeli v e-pošti »NazivIER shramba …«. Orodje bo obnovilo vse ročne vnose za tega raziskovalca.",
+    "restoreIntro": "Prilepite JSON, ki ste ga prejeli v e-pošti »%PRODUCT% shramba …«. Orodje bo obnovilo vse ročne vnose za tega raziskovalca.",
     "restorePlaceholder": "Sem prilepi vsebino JSON (lahko z ali brez ``` ograde) …",
     "restoreCancel": "Prekliči",
     "restoreConfirm": "Obnovi",
-    "restoreInvalid": "Vsebine ni mogoče razbrati kot veljaven NazivIER JSON.",
+    "restoreInvalid": "Vsebine ni mogoče razbrati kot veljaven %PRODUCT% JSON.",
     "restoreMismatch": "Shramba pripada drugemu raziskovalcu (SICRIS {have}); trenutno je naložen {want}. Najprej izberite ustreznega raziskovalca.",
     "restoreToast": "Vnosi obnovljeni",
     "resetSaved": "Pobriši shranjene podatke",
@@ -369,8 +369,8 @@
     "limit_corresponding": "Korespondenčni avtor ni samodejno zaznan iz SICRIS-a – ročno popraviti pri publikacijah, kjer je raziskovalec dopisni.",
     "limit_q12": "1.01/1.02 brez Q1/Q2 oznake štejejo z utežjo 0,7. Kvartil iz SCImago se zaznava le za ~60 ekonomskih revij v lokalni semenski tabeli; za ostalo zaupaj SICRIS oznaki 1A1/1A2.",
     "limit_selfcite": "SICRIS WoS in Scopus številke iz biblio scrape-a so že »čisti citati« (brez avtocitatov).",
-    "limit_projectValue": "EUR vrednost projektov izven ARIS vnese uporabnik ročno – ier.si ne objavlja EUR vrednosti po raziskovalcu.",
-    "limit_leadershipValue": "Kumulativna EUR vrednost vodenih projektov / delovnih sklopov se vnaša ročno – ier.si seznam projektov ne razkriva EUR deležev na ravni raziskovalca.",
+    "limit_projectValue": "EUR vrednost projektov izven ARIS vnese uporabnik ročno – %PROJECTS_HOST% ne objavlja EUR vrednosti po raziskovalcu.",
+    "limit_leadershipValue": "Kumulativna EUR vrednost vodenih projektov / delovnih sklopov se vnaša ročno – %PROJECTS_HOST% seznam projektov ne razkriva EUR deležev na ravni raziskovalca.",
     "limit_leadershipYears": "Leta vodilne funkcije se nanašajo izključno na naštetih pet funkcij iz Pravilnika; leta vodenja raziskovalnih projektov ne štejejo (popravek v2.7.2).",
     "limit_osDetection": "Detekcija odprtega dostopa se opira na samodejne podatkovne vire; če se objava ne ujema, je obravnavana kot »closed« dokler uporabnik ročno ne označi izjeme.",
     "limit_osExemption": "Pravilniška izjema (»založniške omejitve«) zahteva ročno oznako »restricted-not-possible« – ni samodejno zaznana.",

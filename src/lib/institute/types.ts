@@ -27,10 +27,18 @@ export interface InstituteColorSet {
 export interface InstituteBrand {
   /** Product name shown in this institute's instance (e.g. "NazivIER"). */
   productName: string;
+  /** Institute name, Slovenian nominative (e.g. "Inštitut za ekonomska raziskovanja"). */
   instituteNameSl: string;
+  /** Slovenian genitive ("…orodje Inštituta za ekonomska raziskovanja…"). */
+  instituteNameSlGenitive: string;
+  /** Slovenian locative ("…na Inštitutu za ekonomska raziskovanja…"). */
+  instituteNameSlLocative: string;
+  /** Institute name, English (e.g. "Institute for Economic Research"). */
   instituteNameEn: string;
   /** Short acronym (e.g. "IER"). */
   instituteShort: string;
+  /** City the institute sits in (e.g. "Ljubljana"); used in descriptions. */
+  city: string;
   websiteUrl: string;
   /** Logo for light surfaces (path under /public). */
   logoLight: string;
@@ -54,6 +62,15 @@ export interface InstituteSources {
   staffPage: string | null;
 }
 
+/** Postal address for the organisation's JSON-LD schema. */
+export interface InstituteAddress {
+  streetAddress: string;
+  postalCode: string;
+  addressLocality: string;
+  /** ISO country code (e.g. "SI"). */
+  addressCountry: string;
+}
+
 /** Organisation metadata surfaced in the UI, JSON-LD and roster API. */
 export interface InstituteOrganization {
   id: string;
@@ -62,6 +79,7 @@ export interface InstituteOrganization {
   shortName: string;
   website: string;
   staffPage: string;
+  address: InstituteAddress;
   programmeGroups: { code: string; name: string; lead?: string }[];
 }
 

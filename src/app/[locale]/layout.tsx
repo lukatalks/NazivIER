@@ -56,8 +56,8 @@ export async function generateMetadata({
     applicationName: institute.brand.productName,
     authors: [{ name: institute.brand.instituteNameSl }],
     keywords: [
-      'IER',
-      'Inštitut za ekonomska raziskovanja',
+      institute.brand.instituteShort,
+      institute.brand.instituteNameSl,
       'raziskovalni nazivi',
       'pravilnik o raziskovalnih nazivih',
       'SICRIS',
@@ -69,7 +69,7 @@ export async function generateMetadata({
       'bibliometrija',
       'researcher titles',
       'Slovenia research evaluation',
-      'NazivIER',
+      institute.brand.productName,
     ],
     alternates: {
       canonical: locale === routing.defaultLocale ? '/' : `/${locale}`,

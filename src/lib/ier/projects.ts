@@ -30,8 +30,9 @@
 // Cache TTL: 24 h. The IER website moves slowly.
 
 import { cached } from '@/lib/cache/redis';
+import { INSTITUTE } from '@/lib/institute';
 
-const PROJECTS_URL = 'https://www.ier.si/projekti/';
+const PROJECTS_URL = INSTITUTE.sources.projectsUrl;
 const UA = 'NazivIER/0.1 (Institute for Economic Research, internal tool)';
 const TTL_SEC = 60 * 60 * 24;
 
@@ -67,6 +68,8 @@ export interface IerProject {
 export async function fetchIerProjects(): Promise<IerProject[]> {
   // Cache key suffixed with parser revision; bump when the parser changes so
   // earlier (raw-entity) snapshots don't survive a deploy.
+  // Institute has no projects listing configured → no projects, no fetch.
+  if (!PROJECTS_URL) return [];
   return cached('ier:projects:current:v2', TTL_SEC, async () => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
@@ -131,7 +134,7 @@ export function projectsForResearcher(
     ledMonthsTotal: ledMonths,
     ledYears: Math.round((ledMonths / 12) * 10) / 10,
     ledExternalCount: externalCount,
-    sourceUrl: PROJECTS_URL,
+    sourceUrl: PROJECTS_URL ?? '',
   };
 }
 

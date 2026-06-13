@@ -4,10 +4,11 @@
 import { ImageResponse } from 'next/og';
 
 import { type Locale, locales } from '@/i18n/config';
+import { INSTITUTE } from '@/lib/institute';
 
 // `runtime` must be unset when paired with generateStaticParams; the Node
 // runtime handles ImageResponse just fine on Vercel.
-export const alt = 'NazivIER – kalkulator raziskovalnih nazivov IER';
+export const alt = `${INSTITUTE.brand.productName} – kalkulator raziskovalnih nazivov ${INSTITUTE.brand.instituteShort}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -22,14 +23,14 @@ interface Props {
 
 const COPY: Record<Locale, { eyebrow: string; title: string; sub: string; tagline: string }> = {
   sl: {
-    eyebrow: 'Inštitut za ekonomska raziskovanja',
-    title: 'NazivIER',
+    eyebrow: INSTITUTE.brand.instituteNameSl,
+    title: INSTITUTE.brand.productName,
     sub: 'Kalkulator raziskovalnih nazivov',
     tagline: 'Avtomatski izračun pogojev iz SICRIS-a in OpenAlex.',
   },
   en: {
-    eyebrow: 'Institute for Economic Research',
-    title: 'NazivIER',
+    eyebrow: INSTITUTE.brand.instituteNameEn,
+    title: INSTITUTE.brand.productName,
     sub: 'Researcher-title calculator',
     tagline: 'Automatic eligibility check from SICRIS and OpenAlex.',
   },
@@ -40,8 +41,8 @@ export default async function Image({ params }: Props) {
   const locale = (locales as readonly string[]).includes(raw) ? (raw as Locale) : 'sl';
   const c = COPY[locale];
 
-  // IER brand red + a darker bleed for depth.
-  const bgPrimary = '#a92825';
+  // Institute brand primary + a darker bleed for depth.
+  const bgPrimary = INSTITUTE.brand.colorsLight.primary;
   const bgDeep = '#7a1c1a';
 
   return new ImageResponse(
@@ -59,7 +60,7 @@ export default async function Image({ params }: Props) {
           fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
         }}
       >
-        {/* Top row: small IER mark */}
+        {/* Top row: small institute mark */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div
             style={{
@@ -76,7 +77,7 @@ export default async function Image({ params }: Props) {
               letterSpacing: -1,
             }}
           >
-            IER
+            {INSTITUTE.brand.instituteShort}
           </div>
           <div
             style={{

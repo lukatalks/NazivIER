@@ -167,6 +167,12 @@ export const IER_ORGANIZATION = {
   shortName: 'IER',
   website: 'https://www.ier.si',
   staffPage: 'https://www.ier.si/zaposleni',
+  address: {
+    streetAddress: 'Kardeljeva ploščad 17',
+    postalCode: '1000',
+    addressLocality: 'Ljubljana',
+    addressCountry: 'SI',
+  },
   programmeGroups: [
     { code: '0502-001', name: 'Skupina za mednarodno ekonomijo' },
     { code: '0502-002', name: 'Skupina za gospodarski razvoj', lead: 'dr. Nika Murovec' },

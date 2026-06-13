@@ -15,9 +15,9 @@
 //      Otherwise we search by name and pick the best institutional match.
 
 import { cached } from '@/lib/cache/redis';
+import { INSTITUTE } from '@/lib/institute';
 
 const BASE = 'https://api.openalex.org';
-const IER_OPENALEX_INSTITUTION_ID = 'I4210104025'; // Institute for Economic Research, Ljubljana
 const POLITE_EMAIL = 'ai@scaientist.com'; // OpenAlex polite-pool requires a contact email
 
 // Cache TTLs (sec). Citation totals + works lists move slowly; author lookups
@@ -81,21 +81,27 @@ export function cleanResearcherName(name: string): string {
     .trim();
 }
 
-/** Search by name, prefer authors affiliated with IER. */
+/** Search by name, prefer authors affiliated with the configured institute. */
 async function byName(name: string): Promise<OpenAlexAuthor | null> {
-  // Step 1: try with IER institution filter.
   const cleanedName = cleanResearcherName(name);
-  try {
-    const filtered = await json(
-      `${BASE}/authors?search=${encodeURIComponent(cleanedName)}` +
-        `&filter=last_known_institutions.id:${IER_OPENALEX_INSTITUTION_ID}` +
-        `&per-page=1`,
-    );
-    if (filtered.results?.length > 0) {
-      return toAuthor(filtered.results[0], 'ier-match');
+
+  // Step 1: try with the institute institution filter — only when the active
+  // institute exposes an OpenAlex institution id. When null, skip straight to
+  // the name-only search below.
+  const institutionId = INSTITUTE.sources.openAlexInstitutionId;
+  if (institutionId) {
+    try {
+      const filtered = await json(
+        `${BASE}/authors?search=${encodeURIComponent(cleanedName)}` +
+          `&filter=last_known_institutions.id:${institutionId}` +
+          `&per-page=1`,
+      );
+      if (filtered.results?.length > 0) {
+        return toAuthor(filtered.results[0], 'ier-match');
+      }
+    } catch {
+      /* fall through */
     }
-  } catch {
-    /* fall through */
   }
 
   // Step 2: name only.

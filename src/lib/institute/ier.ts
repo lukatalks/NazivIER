@@ -16,8 +16,11 @@ export const IER_INSTITUTE: InstituteConfig = {
   brand: {
     productName: 'NazivIER',
     instituteNameSl: 'Inštitut za ekonomska raziskovanja',
+    instituteNameSlGenitive: 'Inštituta za ekonomska raziskovanja',
+    instituteNameSlLocative: 'Inštitutu za ekonomska raziskovanja',
     instituteNameEn: 'Institute for Economic Research',
     instituteShort: 'IER',
+    city: 'Ljubljana',
     websiteUrl: 'https://www.ier.si',
     logoLight: '/brand/ier/ier-logo.png',
     logoDark: '/brand/ier/ier-logo-dark.png',

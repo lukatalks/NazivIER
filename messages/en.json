@@ -1,19 +1,19 @@
 {
   "site": {
-    "title": "NazivIER – IER researcher-title calculator",
-    "shortTitle": "NazivIER",
-    "description": "Internal tool of the Institute for Economic Research (IER, Ljubljana) for automatic calculation of researcher titles under the new rulebook, powered by SICRIS.",
-    "ogDescription": "Automatic title-eligibility check under the IER researcher-titles rulebook (draft 5 Jun 2026, v2.2). Bibliography and clean citations from SICRIS (WoS / Scopus)."
+    "title": "%PRODUCT% – %SHORT% researcher-title calculator",
+    "shortTitle": "%PRODUCT%",
+    "description": "Internal tool of the %INSTITUTE_EN% (%SHORT%, %CITY%) for automatic calculation of researcher titles under the new rulebook, powered by SICRIS.",
+    "ogDescription": "Automatic title-eligibility check under the %SHORT% researcher-titles rulebook (draft 5 Jun 2026, v2.2). Bibliography and clean citations from SICRIS (WoS / Scopus)."
   },
   "header": {
-    "eyebrow": "Institute for Economic Research · internal tool",
-    "title": "NazivIER – researcher-title calculator",
+    "eyebrow": "%INSTITUTE_EN% · internal tool",
+    "title": "%PRODUCT% – researcher-title calculator",
     "subtitle1": "Automatic eligibility check against the new ",
     "subtitleEm": "Rulebook on researcher titles",
     "subtitle2": " (draft 5 Jun 2026, v2.2), Annexes 2 and 3. Bibliography and clean citations from SICRIS (WoS or Scopus). Authorship factor entered manually per publication."
   },
   "picker": {
-    "selectFromList": "1. Pick an IER researcher",
+    "selectFromList": "1. Pick an %SHORT% researcher",
     "selectFromListHint1": "Roster sourced from ",
     "selectFromListHint2": " (",
     "selectFromListHintCount": "{count, plural, one {# researcher} other {# researchers}}",
@@ -30,7 +30,7 @@
     "rosterError": "Could not load the list ({msg}). Use the field on the right to enter a SICRIS ID manually.",
     "loadingInline": "(loading…)"
   },
-  "loading": "Fetching bibliography and clean citations from SICRIS, and projects from ier.si … (a few seconds on first request, cached after).",
+  "loading": "Fetching bibliography and clean citations from SICRIS, and projects from %PROJECTS_HOST% … (a few seconds on first request, cached after).",
   "error": {
     "label": "Data fetch error:"
   },
@@ -56,14 +56,14 @@
     "stageStandards": "Stage {stage}. · {met}/{required} standards · equiv.: {eq}",
     "matchType": {
       "orcid": "matched by ORCID",
-      "ier-match": "name + IER",
+      "ier-match": "name + %SHORT%",
       "best-name": "name only",
       "none": "no match"
     }
   },
   "metadata": {
     "title": "Data not exposed by public sources",
-    "subtitle": "Bibliography, clean citations and projects are fetched automatically from SICRIS and ier.si. Important: the authorship factor (first/lead/corresponding, equal, other) must be confirmed manually per publication — without it the computed equivalents are only a rough estimate.",
+    "subtitle": "Bibliography, clean citations and projects are fetched automatically from SICRIS and %PROJECTS_HOST%. Important: the authorship factor (first/lead/corresponding, equal, other) must be confirmed manually per publication — without it the computed equivalents are only a rough estimate.",
     "open": "Edit",
     "close": "Close",
     "fields": {
@@ -89,8 +89,8 @@
       "reelectionHelp": "Tick if this is a re-election to the same title. Rulebook v2.2 (Article 22, paragraph 2) requires TWO things: (1) since the previous election the candidate must meet at least half of every first-election threshold – auto-applied via halved thresholds below. (2) The candidate must show progress equivalent to ≥20 % of the gap in at least two quantitative conditions between the current and next-higher title – this cannot be checked automatically (would require a previous-application snapshot); the commission must confirm it manually.",
       "additionalDepositsLabel": "Additional deposits for Article 11(6)",
       "additionalDepositsHelp": "We detected {deposited} of {total} post-2024 publications as open access ({missing} missing). If you have already deposited or will deposit additional works in the institutional / thematic repository before the application is reviewed, enter the count here. The evaluator recomputes the ratio against the 100 % threshold in Article 11(6). This never bypasses the rule, it records the realistic state.",
-      "ierLeadershipLabel": "Project leadership from ier.si (audit only — does NOT auto-fill Pogoj 3)",
-      "ierLeadershipHelp": "From the IER website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), spanning about {years} years. Projects for audit:",
+      "ierLeadershipLabel": "Project leadership from %PROJECTS_HOST% (audit only — does NOT auto-fill Pogoj 3)",
+      "ierLeadershipHelp": "From the %SHORT% website we detected the candidate leads {count} projects ({external} outside pure ARIS funding), spanning about {years} years. Projects for audit:",
       "ierLeadershipDisclaimer": "Important: project-leadership years do NOT by themselves satisfy Pogoj 3 path (e). The rulebook requires years holding an executive function (director, chair of management board, chair of scientific council, head of programme group, head of infrastructure group). These projects are surfaced solely as audit evidence and can support manually entered EUR values for Pogoj 3 (a–d) or Pogoj 2 (value of non-ARIS projects).",
       "ierLeadershipMore": "… and {count} more led projects.",
       "authorshipPerPubLabel": "★ Per-publication authorship (required)",
@@ -205,11 +205,11 @@
       },
       "leadership": {
         "head": "Leadership capability (Pogoj 3)",
-        "body": ": the rulebook v2.2 (Annex 3) offers two alternative paths. (a–d) Cumulative value of completed led projects or work packages ≥ 50,000 / 250,000 / 500,000 EUR (by career stage) – entered manually, because ier.si does not publish EUR. (e) At least 1 / 2 / 3 years holding an executive function: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group. Years of project leadership (from ier.si/projekti) do NOT qualify for path (e); they are shown as an audit list under the metadata panel."
+        "body": ": the rulebook v2.2 (Annex 3) offers two alternative paths. (a–d) Cumulative value of completed led projects or work packages ≥ 50,000 / 250,000 / 500,000 EUR (by career stage) – entered manually, because %PROJECTS_HOST% does not publish EUR. (e) At least 1 / 2 / 3 years holding an executive function: director, chair of the management board, chair of the scientific council, head of programme group, head of infrastructure group. Years of project leadership (from %PROJECTS_LABEL%) do NOT qualify for path (e); they are shown as an audit list under the metadata panel."
       },
       "openScience": {
         "head": "Open Science (Article 11, paragraph 6)",
-        "body": ": the Open-Science requirement is new in the IER rulebook (draft of 5 Jun 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). It applies only to scientific publications subject to evaluation (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31) created from 2024 onward; interviews, reviews, professional and popular pieces are excluded. In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed and displayed so candidates see how far they are from 100 % coverage."
+        "body": ": the Open-Science requirement is new in the %SHORT% rulebook (draft of 5 Jun 2026, Article 11(6)–(8)). It explicitly transposes the Slovenian Ordinance on the conduct of scientific-research work (Official Gazette RS, 59/23). It applies only to scientific publications subject to evaluation (1.01, 1.02, 1.03, 1.06, 1.08, 1.16, 1.26, 2.01, 2.31) created from 2024 onward; interviews, reviews, professional and popular pieces are excluded. In this demo we therefore treat it as fulfilled for every researcher – while the rulebook is still a proposal we do not want to block eligibility. The true OA status is still computed and displayed so candidates see how far they are from 100 % coverage."
       },
       "earlyPromotion": {
         "head": "Early promotion (Article 14, paragraph 5)",
@@ -233,16 +233,16 @@
     "copySummary": "Copy summary",
     "emailBackup": "Email backup",
     "emailHint": "Opens your default mail client with all your inputs. Send to yourself or to Kaja as a portable backup.",
-    "emailIntro": "Attached is a NazivIER backup for {name}. Paste the JSON into the »Restore from text« field to recover inputs in the tool.",
+    "emailIntro": "Attached is a %PRODUCT% backup for {name}. Paste the JSON into the »Restore from text« field to recover inputs in the tool.",
     "emailToast": "Opening mail …",
     "restoreFromText": "Restore from text",
     "restoreHint": "Paste a previously saved JSON (e.g. from an email backup) to restore your inputs.",
     "restoreTitle": "Restore backup from text",
-    "restoreIntro": "Paste the JSON you received in a »NazivIER backup …« email. The tool will restore every manual input for this researcher.",
+    "restoreIntro": "Paste the JSON you received in a »%PRODUCT% backup …« email. The tool will restore every manual input for this researcher.",
     "restorePlaceholder": "Paste JSON here (with or without ``` fences) …",
     "restoreCancel": "Cancel",
     "restoreConfirm": "Restore",
-    "restoreInvalid": "Could not parse the content as a valid NazivIER JSON backup.",
+    "restoreInvalid": "Could not parse the content as a valid %PRODUCT% JSON backup.",
     "restoreMismatch": "Backup belongs to a different researcher (SICRIS {have}); currently loaded: {want}. Switch to the matching researcher first.",
     "restoreToast": "Inputs restored",
     "resetSaved": "Clear saved data",
@@ -369,8 +369,8 @@
     "limit_corresponding": "Corresponding author is not auto-detected from SICRIS – mark manually on publications where the researcher is the corresponding author.",
     "limit_q12": "1.01/1.02 without a Q1/Q2 tag count at weight 0.7. The SCImago quartile is detected only for ~60 economics journals in the local seed table; for the rest trust the SICRIS 1A1/1A2 marker.",
     "limit_selfcite": "SICRIS WoS and Scopus figures from the bibliography scrape are already »clean citations« (self-citations excluded).",
-    "limit_projectValue": "The EUR value of non-ARIS projects is entered manually – ier.si does not publish per-researcher EUR values for led projects.",
-    "limit_leadershipValue": "Cumulative EUR value of led projects / work packages is entered manually – the ier.si project list does not expose per-researcher EUR shares.",
+    "limit_projectValue": "The EUR value of non-ARIS projects is entered manually – %PROJECTS_HOST% does not publish per-researcher EUR values for led projects.",
+    "limit_leadershipValue": "Cumulative EUR value of led projects / work packages is entered manually – the %PROJECTS_HOST% project list does not expose per-researcher EUR shares.",
     "limit_leadershipYears": "»Years in a leadership function« applies strictly to the five listed functions in the Rulebook; years spent leading individual research projects do not count (v2.7.2 correction).",
     "limit_osDetection": "Open-access detection relies on automatic data sources; if a publication does not match it is treated as »closed« until the user marks the exemption.",
     "limit_osExemption": "The rulebook carve-out (»publisher restrictions«) requires a manual »restricted-not-possible« tag – it is not auto-detected.",
