@@ -1,18 +1,17 @@
-// Tenant descriptor for white-label multi-tenancy.
+// Per-institute configuration — the single customisation surface for a
+// white-label build.
 //
-// One Habilis deployment serves many institutes. Each institute is a `TenantConfig`
-// resolved at request time from the incoming Host header (see resolve.ts). The
-// scoring engine is shared; everything that differs per institute lives here:
-// branding, data-source identifiers, roster, and the ruleset reference.
-//
-// Adding an institute = one new file under tenancy/tenants/ + an entry in
-// registry.ts + a domain pointed at the deployment. No engine changes.
+// This deployment serves ONE institute. To create a build for another institute,
+// copy ./ier.ts, edit the config + drop its brand assets under /public/brand,
+// and point INSTITUTE (see ./index.ts) at the new config. The scoring engine and
+// all components read everything institute-specific from here, so a new institute
+// is a config change, not a code fork of the engine.
 
 import type { RosterEntry } from '@/lib/sicris/roster';
-import type { RulesetId } from '@/lib/tenancy/ruleset';
+import type { RulesetId } from '@/lib/institute/ruleset';
 
 /** A set of brand colours for one colour scheme (light or dark). */
-export interface TenantColorSet {
+export interface InstituteColorSet {
   /** Primary CTA / brand fill. */
   primary: string;
   /** Foreground on top of `primary`. */
@@ -25,8 +24,8 @@ export interface TenantColorSet {
   mutedBg?: string;
 }
 
-export interface TenantBrand {
-  /** White-label product name shown in this tenant's instance (e.g. "NazivIER"). */
+export interface InstituteBrand {
+  /** Product name shown in this institute's instance (e.g. "NazivIER"). */
   productName: string;
   instituteNameSl: string;
   instituteNameEn: string;
@@ -37,12 +36,12 @@ export interface TenantBrand {
   logoLight: string;
   /** Logo for dark surfaces (path under /public). */
   logoDark: string;
-  colorsLight: TenantColorSet;
-  colorsDark: TenantColorSet;
+  colorsLight: InstituteColorSet;
+  colorsDark: InstituteColorSet;
 }
 
 /** External data-source identifiers used by the SICRIS / OpenAlex / projects layers. */
-export interface TenantSources {
+export interface InstituteSources {
   /** SICRIS organisation id (e.g. IER = "656"). */
   sicrisOrgId: string;
   /** ARIS programme code (e.g. IER = "0502"). */
@@ -56,7 +55,7 @@ export interface TenantSources {
 }
 
 /** Organisation metadata surfaced in the UI, JSON-LD and roster API. */
-export interface TenantOrganization {
+export interface InstituteOrganization {
   id: string;
   code: string;
   fullName: string;
@@ -66,17 +65,15 @@ export interface TenantOrganization {
   programmeGroups: { code: string; name: string; lead?: string }[];
 }
 
-export interface TenantConfig {
-  /** Stable slug; also the default subdomain label (e.g. "ier"). */
+export interface InstituteConfig {
+  /** Stable slug; used for asset folders and diagnostics (e.g. "ier"). */
   id: string;
-  /** Hostnames (lowercase, no port) that resolve to this tenant. */
-  hosts: string[];
-  brand: TenantBrand;
-  sources: TenantSources;
-  organization: TenantOrganization;
-  /** Seed roster. Phase 1 may switch to a dynamic SICRIS pull by `sources.sicrisOrgId`. */
+  brand: InstituteBrand;
+  sources: InstituteSources;
+  organization: InstituteOrganization;
+  /** Seed roster. A future build may switch to a dynamic SICRIS pull by `sources.sicrisOrgId`. */
   roster: RosterEntry[];
-  /** Which rulebook this tenant scores against. */
+  /** Which rulebook this institute scores against. */
   ruleset: RulesetId;
   locales: string[];
   defaultLocale: string;

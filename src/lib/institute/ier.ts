@@ -1,16 +1,18 @@
-// Tenant #1 — Inštitut za ekonomska raziskovanja (IER).
+// IER build — Inštitut za ekonomska raziskovanja.
 //
-// This is the original NazivIER deployment, now expressed as the first tenant of
-// the white-label platform. Its brand colours mirror the legacy globals.css
-// defaults exactly, and its roster + organisation reuse the existing seed, so
-// extracting IER into a tenant is behaviour-preserving.
+// This is the original NazivIER deployment, expressed as a white-label institute
+// config. Brand colours mirror the legacy globals.css defaults exactly, and the
+// roster + organisation reuse the existing seed, so it is behaviour-preserving.
+//
+// Template for a new institute: copy this file, change every value, drop the
+// institute's logos under /public/brand/<id>/, then point INSTITUTE in ./index.ts
+// at the new config.
 
 import { IER_ORGANIZATION, IER_ROSTER_SEED } from '@/lib/sicris/roster';
-import type { TenantConfig } from '@/lib/tenancy/types';
+import type { InstituteConfig } from '@/lib/institute/types';
 
-export const IER_TENANT: TenantConfig = {
+export const IER_INSTITUTE: InstituteConfig = {
   id: 'ier',
-  hosts: ['nazivier.vercel.app', 'naziv.ier.si', 'localhost', '127.0.0.1'],
   brand: {
     productName: 'NazivIER',
     instituteNameSl: 'Inštitut za ekonomska raziskovanja',

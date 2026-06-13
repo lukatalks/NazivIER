@@ -1,49 +1,81 @@
 # White-label architecture
 
-This app serves multiple research institutes from a single deployment. The
-scoring engine is shared; everything institute-specific is configuration,
-resolved per request from the incoming `Host` header.
+This app is white-labelled **per institute as its own deployment** — not a single
+multi-tenant app. Each institute gets its own repository (created from this
+template), its own Vercel project, its own domain, and its own data store. The
+scoring engine and all UI are shared via the template; everything
+institute-specific lives in one config file.
 
-## How it works
+## Why per-deployment (not multi-tenant)
 
-```
-request → Host header → resolveTenantFromHost() → TenantConfig
-                                                      ├─ brand (name, logos, colours)
-                                                      ├─ sources (SICRIS / OpenAlex / projects IDs)
-                                                      ├─ organization + roster
-                                                      └─ ruleset reference
-```
+- Each institute runs a different internal pravilnik, so customisation is the norm
+  — a shared codebase would fight that.
+- Data isolation is structural: separate deployment = separate Redis, no shared
+  keyspace, nothing to leak across institutes.
+- Access control is per-institute (their SSO or a simple password gate), with no
+  central identity system to build.
+- A bug or deploy for one institute cannot affect another.
 
-- **`src/lib/tenancy/types.ts`** — the `TenantConfig` shape.
-- **`src/lib/tenancy/tenants/*.ts`** — one file per institute.
-- **`src/lib/tenancy/registry.ts`** — the list of tenants + the default fallback.
-- **`src/lib/tenancy/resolve.ts`** — pure `Host → TenantConfig` resolution (exact
-  host match, then leading-subdomain label, then default).
-- **`src/lib/tenancy/server.ts`** — `getTenant()` for Server Components and
-  `generateMetadata` (reads the Host header; renders the route dynamically).
-- **`src/lib/tenancy/theme.ts`** — emits the per-tenant CSS-variable override the
+The trade-off is maintenance fan-out: a core fix must reach every institute. That
+is handled by the template + merge workflow below, which keeps each institute's
+changes confined to a single config file so upstream merges rarely conflict.
+
+## The customisation surface
+
+Everything institute-specific is `src/lib/institute/`:
+
+- **`types.ts`** — the `InstituteConfig` shape (brand, colours, data-source IDs,
+  organisation, roster, ruleset).
+- **`ier.ts`** — the IER config. **Copy this file to create a new institute.**
+- **`ruleset.ts`** — the rulebook-as-data abstraction. An institute whose pravilnik
+  diverges from the baseline references a different `Ruleset` here.
+- **`theme.ts`** — turns the config's colour set into the CSS-variable overrides the
   layout injects, so brand colours come from config, not hardcoded CSS.
-- **`src/lib/tenancy/ruleset.ts`** — the rulebook-as-data abstraction. Each tenant
-  references a ruleset by id; all tenants currently share the IER/ARIS baseline.
+- **`index.ts`** — exports `INSTITUTE`, the single active config for this build.
 
-## Adding a tenant
+Everything else (`engine`, `components`, `app`, the rest of `lib`) is shared and
+should be edited only in the template.
 
-1. Create `src/lib/tenancy/tenants/<id>.ts` exporting a `TenantConfig`
-   (copy `ier.ts` as a template). Set `id`, `hosts`, `brand`, `sources`,
-   `organization`, `roster`, and `ruleset`.
-2. Add it to `TENANTS` in `src/lib/tenancy/registry.ts`.
-3. Point the institute's domain (e.g. `naziv.<institute>.si`) at this
-   deployment and attach it in Vercel.
-4. Deploy. The new host resolves to the new tenant automatically — branding,
-   roster, colours and data-source IDs all follow from the config file.
+## Creating a build for a new institute
 
-Per-tenant manual inputs are isolated in storage: the default tenant keeps the
-original keyspace; every other tenant is namespaced under its `id`, so no
-institute can read or overwrite another's data.
+1. Create a **private** repository from this template (GitHub → "Use this
+   template", or fork). Private because it will hold a roster + (later) an internal
+   rulebook behind a password.
+2. Add `upstream` so core fixes can flow in:
+   `git remote add upstream https://github.com/lukatalks/NazivIER.git`
+3. Copy `src/lib/institute/ier.ts` → `<id>.ts`, change every value (brand,
+   colours, `sources` IDs, organisation, roster, ruleset), and point `INSTITUTE`
+   in `src/lib/institute/index.ts` at the new config.
+4. Drop the institute's logos under `public/brand/<id>/` and reference them from
+   the config's `logoLight` / `logoDark`.
+5. If the institute's pravilnik diverges, add a `Ruleset` in `ruleset.ts` and set
+   the config's `ruleset` to it. Otherwise it stays on the shared baseline.
+6. Create a Vercel project from the repo, attach the institute's domain
+   (e.g. `naziv.<institute>.si`), set the env vars (Upstash Redis, `NEXT_PUBLIC_SITE_URL`).
+7. Deploy.
 
-## Custom rulebook (per tenant)
+## Keeping a build in sync with the template
 
-If an institute's internal pravilnik diverges from the baseline thresholds or
-weights, add a new `Ruleset` in `ruleset.ts` and reference it from the tenant.
-The abstraction exists today; threading a tenant's ruleset all the way through
-the evaluator is the next engine step (see in-file notes in `ruleset.ts`).
+Core engine / UI / security fixes land in the template (`upstream/main`). To pull
+them into an institute build:
+
+```
+git fetch upstream
+git merge upstream/main
+```
+
+Because each build's edits are confined to `src/lib/institute/<id>.ts`,
+`public/brand/<id>/` and a few env vars, these merges almost never conflict.
+
+## Access protection (per build, not yet implemented)
+
+Pick one per institute when going live:
+
+- **Vercel deployment password** — simplest; one shared password on the project.
+- **Middleware password gate** — a small middleware check against a shared
+  password or a per-employee allow-list (hashed) stored in env / KV.
+- **Institute SSO** — proxy/redirect to the institute's own OIDC/SAML if they have
+  one.
+
+Until one is added, a build is open to anyone with the URL — fine for a private
+demo, not for production data.

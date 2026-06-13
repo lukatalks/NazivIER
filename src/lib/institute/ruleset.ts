@@ -1,22 +1,21 @@
-// Rulebook abstraction for white-label multi-tenancy.
+// Rulebook abstraction for white-label builds.
 //
-// The scoring engine itself is national in spirit (it applies the Cobiss
-// typology weights + the per-title Pogoj thresholds), but each Slovenian
-// research organisation runs the criteria through its OWN internal pravilnik,
-// which can diverge at the margins (thresholds, education levels, quartile
-// weight tiers). To support that without forking the engine, a `Ruleset`
-// captures the tunable parts as DATA. Every tenant references a ruleset by id.
+// Each institute runs the same Cobiss typology weights + per-title Pogoj
+// thresholds through its OWN internal pravilnik, which can diverge at the margins
+// (thresholds, education levels, quartile weight tiers). To support that without
+// touching the engine, a `Ruleset` captures the tunable parts as DATA. Each
+// institute config references a ruleset by id.
 //
-// v1 strategy (agreed 2026-06-13): build the abstraction, but ship every tenant
-// on the shared IER/national baseline. A custom per-institute ruleset is then a
-// drop-in registry entry + a professional-services encoding step, not a code
-// change to the engine.
+// v1 strategy: build the abstraction, but ship every institute on the shared
+// IER/ARIS baseline. A custom per-institute ruleset is then a new registry entry
+// + a professional-services encoding step, not a code change to the engine.
 //
-// Phase 0 note: the engine (evaluate.ts / weights.ts) still imports the baseline
-// constants directly. Phase 1 threads `ruleset.criteria` and
-// `ruleset.quartileWeights` through the evaluator so a tenant's ruleset actually
-// drives the math. Until then this module is the contract + the single source of
-// the baseline numbers. No scoring behaviour changes by introducing it.
+// Note: the engine (evaluate.ts / weights.ts) still imports the baseline
+// constants directly. Threading `ruleset.criteria` and `ruleset.quartileWeights`
+// through the evaluator (so a divergent institute ruleset actually drives the
+// math) is the next engine step. Until then this module is the contract + the
+// single source of the baseline numbers. No scoring behaviour changes by
+// introducing it.
 
 import { TITLE_CRITERIA, type TitleCriteria } from '@/lib/scoring/criteria';
 
