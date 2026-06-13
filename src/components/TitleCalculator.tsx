@@ -29,6 +29,7 @@ import {
   getEditorName,
   pushServerInputs,
 } from '@/lib/persistence/serverInputsClient';
+import { INSTITUTE, getRuleset } from '@/lib/institute';
 import { evaluateAll, type TitleEvaluation } from '@/lib/scoring/evaluate';
 import { computeLiveOpenScience } from '@/lib/scoring/openScience';
 import type {
@@ -221,7 +222,7 @@ export function TitleCalculator({ locale }: Props) {
   }
 
   const evaluations = useMemo<TitleEvaluation[]>(
-    () => (researcher ? evaluateAll(researcher) : []),
+    () => (researcher ? evaluateAll(researcher, getRuleset(INSTITUTE.ruleset)) : []),
     [researcher],
   );
 

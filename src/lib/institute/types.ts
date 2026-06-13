@@ -83,12 +83,22 @@ export interface InstituteOrganization {
   programmeGroups: { code: string; name: string; lead?: string }[];
 }
 
+/** Per-build access control. */
+export interface InstituteAccess {
+  /** 'open' = no gate (the public IER demo). 'password' = HTTP Basic gate in the
+   *  middleware, validated against the HABILIS_ACCESS_PASSWORDS env var
+   *  (comma-separated allow-list, one entry per employee or one shared value). */
+  mode: 'open' | 'password';
+}
+
 export interface InstituteConfig {
   /** Stable slug; used for asset folders and diagnostics (e.g. "ier"). */
   id: string;
   brand: InstituteBrand;
   sources: InstituteSources;
   organization: InstituteOrganization;
+  /** Access control for this build. */
+  access: InstituteAccess;
   /** Seed roster. A future build may switch to a dynamic SICRIS pull by `sources.sicrisOrgId`. */
   roster: RosterEntry[];
   /** Which rulebook this institute scores against. */

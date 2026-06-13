@@ -47,6 +47,9 @@ export const IER_INSTITUTE: InstituteConfig = {
     staffPage: IER_ORGANIZATION.staffPage,
   },
   organization: IER_ORGANIZATION,
+  // IER is the public demo — no gate. A sold build sets mode 'password' and
+  // provides HABILIS_ACCESS_PASSWORDS in its Vercel env.
+  access: { mode: 'open' },
   roster: IER_ROSTER_SEED,
   ruleset: 'aris-baseline-v2.2',
   locales: ['sl', 'en'],

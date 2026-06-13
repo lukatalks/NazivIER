@@ -18,16 +18,11 @@
 // introducing it.
 
 import { TITLE_CRITERIA, type TitleCriteria } from '@/lib/scoring/criteria';
+import { DEFAULT_QUARTILE_WEIGHTS, type QuartileWeightTiers } from '@/lib/scoring/weights';
 
 export type RulesetId = 'aris-baseline-v2.2';
 
-/** Weight tiers for the quartile-conditional typologies (1.01 / 1.02). */
-export interface QuartileWeightTiers {
-  q1: number;
-  q2: number;
-  /** Q3, Q4, not-indexed, unknown. */
-  other: number;
-}
+export type { QuartileWeightTiers };
 
 export interface Ruleset {
   id: RulesetId;
@@ -46,7 +41,7 @@ const ARIS_BASELINE_V2_2: Ruleset = {
   label: 'IER / ARIS baseline (pravilnik v2.2, 05.06.2026)',
   pravilnikVersion: '2026-06-09-v2.2-final',
   criteria: TITLE_CRITERIA,
-  quartileWeights: { q1: 1.5, q2: 1.0, other: 0.7 },
+  quartileWeights: DEFAULT_QUARTILE_WEIGHTS,
 };
 
 const RULESETS: Record<RulesetId, Ruleset> = {

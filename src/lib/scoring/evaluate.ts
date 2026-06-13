@@ -3,10 +3,11 @@
 // Methodology mirrors Pravilnik IER, Priloga 3.
 
 import { authorshipFactor, authorshipLabel } from './authorship';
-import { TITLE_CRITERIA, criteriaFor, type TitleCriteria } from './criteria';
+import { TITLE_CRITERIA, type TitleCriteria } from './criteria';
 import { computeLiveOpenScience } from './openScience';
-import { weightFor } from './weights';
+import { DEFAULT_QUARTILE_WEIGHTS, weightFor, type QuartileWeightTiers } from './weights';
 
+import type { Ruleset } from '@/lib/institute/ruleset';
 import type { Publication, Researcher, Title } from '@/lib/types';
 
 /** Demo-mode flag for the Open-Science check.
@@ -100,7 +101,10 @@ function fmt(n: number, decimals = 2): string {
  *  count at the bucket weight × 0.7 authorship factor (co-author/co-editor
  *  baseline) and are not listed in the `contributions` table (they have no
  *  publication record). They are added to the total only. */
-export function computeEquivalents(r: Researcher): {
+export function computeEquivalents(
+  r: Researcher,
+  quartileWeights: QuartileWeightTiers = DEFAULT_QUARTILE_WEIGHTS,
+): {
   total: number;
   contributions: EquivalentContribution[];
   extra: { weight10: number; weight05: number; weight03: number; subtotal: number };
@@ -108,7 +112,7 @@ export function computeEquivalents(r: Researcher): {
   const contributions: EquivalentContribution[] = [];
   let total = 0;
   for (const pub of r.publications) {
-    const w = weightFor(pub);
+    const w = weightFor(pub, quartileWeights);
     if (w === 0) continue;
     const f = authorshipFactor(pub.authorshipRole);
     const eq = w * f;
@@ -185,12 +189,20 @@ function fmtEur(n: number): string {
 }
 
 /** Evaluate the researcher against a single title. */
-export function evaluateForTitle(researcher: Researcher, title: Title): TitleEvaluation {
-  const rawCriteria = criteriaFor(title);
+export function evaluateForTitle(
+  researcher: Researcher,
+  title: Title,
+  ruleset?: Ruleset,
+): TitleEvaluation {
+  const criteria = ruleset?.criteria ?? TITLE_CRITERIA;
+  const rawCriteria = criteria.find((c) => c.title === title);
   if (!rawCriteria) throw new Error(`Unknown title: ${title}`);
   const c = researcher.isReelection ? applyReelection(rawCriteria) : rawCriteria;
 
-  const { total: totalEquivalents, contributions, extra } = computeEquivalents(researcher);
+  const { total: totalEquivalents, contributions, extra } = computeEquivalents(
+    researcher,
+    ruleset?.quartileWeights ?? DEFAULT_QUARTILE_WEIGHTS,
+  );
   const cit = pickCitations(researcher);
 
   // Pogoj 1: Objavljeni dosežki
@@ -469,9 +481,12 @@ export function evaluateForTitle(researcher: Researcher, title: Title): TitleEva
   };
 }
 
-/** Evaluate the researcher against every title and return the list. */
-export function evaluateAll(researcher: Researcher): TitleEvaluation[] {
-  return TITLE_CRITERIA.map((c) => evaluateForTitle(researcher, c.title));
+/** Evaluate the researcher against every title and return the list. The ruleset
+ *  (criteria thresholds + quartile weight tiers) defaults to the national
+ *  baseline; an institute passes its own to score against a divergent pravilnik. */
+export function evaluateAll(researcher: Researcher, ruleset?: Ruleset): TitleEvaluation[] {
+  const criteria = ruleset?.criteria ?? TITLE_CRITERIA;
+  return criteria.map((c) => evaluateForTitle(researcher, c.title, ruleset));
 }
 
 /** Highest title the researcher is eligible for, per group. */

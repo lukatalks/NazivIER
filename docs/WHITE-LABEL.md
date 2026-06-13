@@ -67,15 +67,22 @@ git merge upstream/main
 Because each build's edits are confined to `src/lib/institute/<id>.ts`,
 `public/brand/<id>/` and a few env vars, these merges almost never conflict.
 
-## Access protection (per build, not yet implemented)
+## Access protection (per build)
 
-Pick one per institute when going live:
+Set `access.mode` in the institute config. IER is `'open'` (the public demo);
+the middleware gate is then a pure pass-through.
 
-- **Vercel deployment password** — simplest; one shared password on the project.
-- **Middleware password gate** — a small middleware check against a shared
-  password or a per-employee allow-list (hashed) stored in env / KV.
-- **Institute SSO** — proxy/redirect to the institute's own OIDC/SAML if they have
-  one.
+- **Middleware password gate (built in)** — set `access: { mode: 'password' }`
+  and provide `HABILIS_ACCESS_PASSWORDS` in the build's Vercel env: a
+  comma-separated allow-list (one entry per employee, or a single shared value).
+  The middleware then requires HTTP Basic auth on every page; any listed password
+  is accepted. Note: the matcher excludes `/api/*`, so API routes are not yet
+  gated — protecting them is a follow-up (add the same check to the route
+  handlers) for institutes that need it.
+- **Vercel deployment password** — simplest; one shared password set on the
+  Vercel project, no code at all.
+- **Institute SSO** — proxy/redirect to the institute's own OIDC/SAML. Not built;
+  needs the institute's IdP details.
 
-Until one is added, a build is open to anyone with the URL — fine for a private
-demo, not for production data.
+With `mode: 'open'` a build is reachable by anyone with the URL — fine for a
+public demo, not for production data.

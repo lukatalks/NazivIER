@@ -77,20 +77,34 @@ const STATIC_WEIGHTS: Record<TypologyCode, number> = {
   '3.25': 0.1, // Druga izvedena dela
 };
 
+/** Weight tiers for the quartile-conditional typologies (1.01 / 1.02). An
+ *  institute whose pravilnik diverges from the national baseline overrides these
+ *  via its ruleset (see lib/institute/ruleset.ts). */
+export interface QuartileWeightTiers {
+  q1: number;
+  q2: number;
+  /** Q3, Q4, not-indexed, unknown. */
+  other: number;
+}
+
+/** Baseline tiers (ARIS / IER pravilnik v2.2): Q1 1.5 / Q2 1.0 / else 0.7. */
+export const DEFAULT_QUARTILE_WEIGHTS: QuartileWeightTiers = { q1: 1.5, q2: 1.0, other: 0.7 };
+
 /**
  * Resolve the weight for a single publication.
  * Returns 0 for typology codes not covered by Annex 3 (they don't count).
  *
- * For 1.01 / 1.02:
- *   * Q1 → 1.5
- *   * Q2 → 1.0
- *   * other (Q3, Q4, not-indexed, unknown) → 0.7
+ * For 1.01 / 1.02 the weight depends on the journal quartile, using the supplied
+ * tiers (defaults to the national baseline 1.5 / 1.0 / 0.7).
  */
-export function weightFor(p: Pick<Publication, 'typology' | 'journalRank'>): number {
+export function weightFor(
+  p: Pick<Publication, 'typology' | 'journalRank'>,
+  quartile: QuartileWeightTiers = DEFAULT_QUARTILE_WEIGHTS,
+): number {
   if (p.typology === '1.01' || p.typology === '1.02') {
-    if (p.journalRank === 'Q1') return 1.5;
-    if (p.journalRank === 'Q2') return 1.0;
-    return 0.7;
+    if (p.journalRank === 'Q1') return quartile.q1;
+    if (p.journalRank === 'Q2') return quartile.q2;
+    return quartile.other;
   }
   return STATIC_WEIGHTS[p.typology] ?? 0;
 }
